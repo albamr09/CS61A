@@ -6,20 +6,30 @@ Repository for the labs assignments, and projects for the [`MIT` course](https:/
 
 https://inst.eecs.berkeley.edu/~cs61as/sp13/
 
+## Steps
+
+Be sure to follow the former link, where the course's structure is laid out.
+
+1. Reading (usually book or webpage)
+2. Reading exercises (if there are any)
+2. Lecture
+3. Labs
+4. Homework
+
 ## Notes
 
 For the labs, we follow the naming convention given by:
 
 ```
-W{week_number}_L{lab_number}_E{exercise_number}.scm
+L{lab_number}_E{exercise_number}.scm
 ```
 
 Some course resources (labs, projects, class notes) can be accessed from:
 
-- [**Homework**](https://inst.eecs.berkeley.edu/%7Ecs61a/reader/nodate-hw.pdf)
+- [**Homework exercises**](https://inst.eecs.berkeley.edu/%7Ecs61a/reader/nodate-hw.pdf)
 - [**Projects**](https://people.eecs.berkeley.edu/~bh/61a-pages/Volume1/CS%2061A%20Course%20Reader,%20Volume%201.html)
-- [**Notes**](https://people.eecs.berkeley.edu/~bh/61a-pages/Volume2/notes.pdf)
-- [**Labs**](https://inst.eecs.berkeley.edu/%7Ecs61a/reader/nodate-labs.pdf)
+- [**Lecutre Notes**](https://people.eecs.berkeley.edu/~bh/61a-pages/Volume2/notes.pdf)
+- [**Labs exercises**](https://inst.eecs.berkeley.edu/%7Ecs61a/reader/nodate-labs.pdf)
 
 ### Library
 
