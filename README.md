@@ -24,6 +24,12 @@ For the labs, we follow the naming convention given by:
 L{lab_number}_E{exercise_number}.scm
 ```
 
+For the `SS` book exercises we follow the convention given by:
+
+```
+Ch{chapter_number}/E{exercise_number}.scm
+```
+
 Some course resources (labs, projects, class notes) can be accessed from:
 
 - [**Homework exercises**](https://inst.eecs.berkeley.edu/%7Ecs61a/reader/nodate-hw.pdf)
@@ -38,6 +44,22 @@ You'll need some external libraries that contain some utility functions, so you 
 ```console
 $ scheme --load $WORKDIR/lib/simply.scm
 ```
+
+### Overlap between SimpleScheme and Labs
+
+Some of the labs exercices are the same as the `SS` book exercices:
+
+#### Lab 02
+
+| Lab excercise | `SS` excercise |
+| ------------- | -------------- |
+| Lab 02: 1 | Ch3: 9 |
+| Lab 02: 2 | Ch5: 15-16 |
+| Lab 02: 3 | Ch6: 6 |
+| Lab 02: 4 | Ch6: 8 |
+| Lab 02: 5 | Ch5: 19 |
+| Lab 02: 6 | Ch5: 21 |
+| Lab 02: 7 | Ch6: 5 |
 
 ## Instructions
 
@@ -60,4 +82,10 @@ $ scheme --quiet < file.scm
 
 ```console
 $ scheme --quiet --load file.scm
+```
+
+To execute load a library and execute a file:
+
+```console
+$ scheme --load ../../lib/simply.scm < E01.scm
 ```
