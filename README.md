@@ -49,8 +49,6 @@ $ scheme --load $WORKDIR/lib/simply.scm
 
 Some of the labs exercices are the same as the `SS` book exercices:
 
-#### Lab 02
-
 | Lab excercise | `SS` excercise |
 | ------------- | -------------- |
 | Lab 02: 1 | Ch3: 9 |
@@ -60,6 +58,18 @@ Some of the labs exercices are the same as the `SS` book exercices:
 | Lab 02: 5 | Ch5: 19 |
 | Lab 02: 6 | Ch5: 21 |
 | Lab 02: 7 | Ch6: 5 |
+| Lab 03: 1 | Ch11: 6 |
+| Lab 03: 2 | Ch12: 8 |
+| Lab 03: 3 | Ch12: 13 |
+| Lab 03: 5 | Ch14: 1 |
+| Lab 03: 6 | Ch14: 7 |
+| Lab 03: 7 | Ch14: 9 |
+| Lab 03: 8 | Ch11: 5 |
+| Lab 03: 9 | Ch11: 7 |
+| Lab 03: 10 | Ch12: 6 |
+| Lab 03: 11 | Ch14: 8 |
+| Lab 03: 12 | Ch14: 14 |
+
 
 ## Instructions
 
