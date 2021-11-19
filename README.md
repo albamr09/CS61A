@@ -21,13 +21,19 @@ Be sure to follow the former link, where the course's structure is laid out.
 For the labs, we follow the naming convention given by:
 
 ```
-L{lab_number}_E{exercise_number}.scm
+./Labs/T{unit_number}/L{lab_number}_E{exercise_number}.scm
 ```
 
 For the `SS` book exercises we follow the convention given by:
 
 ```
-Ch{chapter_number}/E{exercise_number}.scm
+./SimpleScheme/Ch{chapter_number}/E{exercise_number}.scm
+```
+
+For problems layed out on the book, the following convention is used:
+
+```
+./BProblems/T{unit_number}/P{section_number}_{subsection_number}.scm
 ```
 
 Some course resources (labs, projects, class notes) can be accessed from:
