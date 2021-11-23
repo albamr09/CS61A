@@ -15,3 +15,24 @@
     (- 1 y)
   )
 )
+
+(f 1 2)
+; 4
+
+; Usage of let
+(define (f x y)
+  (let 
+    ; List of binded local variables
+    (
+      (a (+ 1 (* x y)))
+      (b (- 1 y))
+    )
+    ; Body of let
+    (+ (* x (square a))
+    (* y b)
+    (* a b))
+  )
+)
+
+(f 1 2)
+; 4
