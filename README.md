@@ -21,7 +21,7 @@ Be sure to follow the former link, where the course's structure is laid out.
 For the labs, we follow the naming convention given by:
 
 ```
-./Labs/T{unit_number}/L{lab_number}_E{exercise_number}.scm
+./Labs/T{unit_number}/L{lab_number}/E{exercise_number}.scm
 ```
 
 For the `SS` book exercises we follow the convention given by:

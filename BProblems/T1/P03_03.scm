@@ -98,6 +98,7 @@
 ; 1.2587315962971173
 
 ; Use the fixed point method to define a custom sqrt function
+; y^2 = x, so y = x / y. But this does not converge so we average y and x/y
 (define (sqrt x)
   (fixed-point (lambda (y) (average y (/ x y))) 1.0)
 )
