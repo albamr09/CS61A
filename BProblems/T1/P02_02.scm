@@ -1,10 +1,22 @@
-(define (count-change amount) (cc amount 5))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Number of ways to make change given an amount and n kinds of coins
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (count-change amount) 
+  (cc 
+    amount 
+    ; Kinds of coins we have left to try
+    5
+  )
+)
 
 (define (cc amount kinds-of-coins)
   (cond 
     ; If the total amount is zero there is one way of change
     ((= amount 0) 1)
-    ; If the amount is negative or there are 0 kinds of coint there are no way of change
+    ; If the amount is negative or 
+    ; there are 0 kinds of coins left to try
+    ; there are no way of change
     ((or (< amount 0) (= kinds-of-coins 0)) 0)
     (else 
       ; Sum 
