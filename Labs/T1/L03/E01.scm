@@ -63,16 +63,16 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Second way: reverse the way kinds-of-coins is updated
-; - set the kind-of-coins variable to zero
+; - set the kind-of-coins variable to one
 ; - increase the kind-of-coins variable each time
-; - Finish if kind-of-coins = 5 (the max value)
+; - Finish if kind-of-coins = 6 (the max value)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (count-change amount) 
   (cc 
     amount 
-    ; Kinds of coins we have tried
-    0
+    ; Kinds of coins we start with (still have not tried any)
+    1
   )
 )
 
@@ -81,9 +81,9 @@
     ; If the total amount is zero there is one way of change
     ((= amount 0) 1)
     ; If the amount is negative or 
-    ; we have reached the type of coin number five 
-    ; there are no way of change
-    ((or (< amount 0) (= kinds-of-coins 5)) 0)
+    ; we have reached past the type of coin number five 
+    ; there is no way of change
+    ((or (< amount 0) (= kinds-of-coins 6)) 0)
     (else 
       ; Sum 
       (+ 
