@@ -1,6 +1,10 @@
 ; Design a procedure that evolves an iterative exponentiation process 
 ; that uses successive squaring and uses a logarithmic number of steps, as does fast-expt.
 
+; b: base
+; n: exponent
+; product: accumulated product
+
 (define (fast-expt-even b n product)
   (if (= n 0) 
     product
@@ -17,27 +21,22 @@
 
 ; b: base
 ; n: exponent
-; product: accumulated product
-(define (fast-expt-iter b n product)
+(define (fast-expt-iter b n)
   (if (even? n) 
     ; If even use helper method to compute when exponent is even
-    (fast-expt-even b n product)
-    ; If odd compute b * product up to now
+    (fast-expt-even b n 1)
+    ; If odd update n and b in order to use even method
     (fast-expt-even 
       b 
       ; Substract one to n, so now n is even
       (- n 1) 
-      ; Update the accumulated product
-      (* b product)
+      ; Set accumulated product to b
+      b
     )
   )
 )
 
-(define (fast-expt b n)
-  (fast-expt-iter b n 1)
-)
+(trace fast-expt-iter)
 
-(trace fast-expt)
-
-(fast-expt 2 5)
+(fast-expt-iter 2 5)
 ; 32
