@@ -79,7 +79,7 @@
   (cont-frac-iter-helper n d k 0.0)
 )
 
-; Approximate inverse of golden ration
+; Approximate inverse of golden ratio
 (cont-frac-rec 
   (lambda (i) 1.0)
   (lambda (i) 1.0)
