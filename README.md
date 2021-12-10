@@ -36,6 +36,12 @@ For problems layed out on the book, the following convention is used:
 ./BProblems/T{unit_number}/P{section_number}_{subsection_number}.scm
 ```
 
+For projects, the following convention is used:
+
+```
+./Projects/{unit_number}/
+```
+
 Some course resources (labs, projects, class notes) can be accessed from:
 
 - [**Homework exercises**](https://inst.eecs.berkeley.edu/%7Ecs61a/reader/nodate-hw.pdf)
