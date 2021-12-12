@@ -6,9 +6,13 @@
 )
 
 (define (value-card card)
-  (if (number? (first card))
-    (first card)
-    10
+  (cond
+    ; If it is a number return the number
+    ((number? (first card)) (first card)) 
+    ; If it is an ace return the ace
+    ((equal? (first card) 'A) 11)
+    ; The K, Q, J are worth 10
+    (else 10)
   )
 )
 
@@ -101,6 +105,30 @@
   )
 )
 
+(define (get-aces hand)
+  (cond
+    ((empty? hand) '())
+    ((is-ace? (first hand))
+      (se (first hand) (get-aces (bf hand)))
+    )
+    (else
+      (get-aces (bf hand))
+    )
+  )
+)
+
+(define (remove-aces hand aces)
+  (cond
+    ((empty? hand) '())
+    ((member (first hand) aces)
+      (remove-aces (bf hand) aces)
+    )
+    (else
+      (se (first hand) (remove-aces (bf hand) aces))
+    )
+  )
+)
+
 (define (best-total hand)
   ; Start the search with n = 1 and best = 0
   (best-total-helper hand 1 0)
@@ -109,3 +137,5 @@
 (best-total '(ad as 9h)) ; here one counts as 11 and the other as 1
 ; 21
 
+(get-aces '(ad as 9h)) 
+(remove-aces '(ad as 9h) (get-aces '(ad as 9h))) 
