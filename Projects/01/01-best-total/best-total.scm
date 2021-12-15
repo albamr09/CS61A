@@ -89,7 +89,6 @@
   )
 )
 
-; - n 
 (define (best-total-helper hand n best)
   (if (< (count hand) n)
     ; If all the sizes have been tried return the best sum less or equal to 21
