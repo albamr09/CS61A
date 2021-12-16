@@ -2,7 +2,7 @@
 ; 21, if possible
 
 ; Load functions to obtain the best score overall
-(load "./aces.scm")
+(load "./01-aces.scm")
 
 (define (best-total hand)
   ; Start the search with i = 1, best = 0, and ace-hand empty

@@ -2,6 +2,9 @@
 ; the number of games that the customer won minus the number that 
 ; s/he lost.  
 
+; Load twenty-one procedure
+(load "./twenty-one.scm")
+
 ; The procedure plays n games and return the number of 
 ; times the customer won minus the number of times the 
 ; customer lost
@@ -16,7 +19,7 @@
     ; Else keep playing
     (play-n-helper 
       strategy 
-      (- 1 n)
+      (- n 1)
       ; + 1 if the customer wins
       ; -1 if the customer looses
       ; 0 if it is a tie
@@ -29,3 +32,4 @@
 (define (play-n strategy n)
   (play-n-helper strategy n 0)
 )
+

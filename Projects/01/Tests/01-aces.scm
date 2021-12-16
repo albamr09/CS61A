@@ -1,5 +1,5 @@
 ; Load function to obtain best score of a hand
-(load "./best-total.scm")
+(load "./01-best-total.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Generate all of the possible ace combinations, as an ace can be 
@@ -28,7 +28,7 @@
 ; Replaces a value on a concrete index in the list lst
 (define (replace lst index value)
   (se
-    (sublist lst 1 index)
+    (sublist lst 0 (- index 1))
     value
     (sublist lst index (count lst))
   )
@@ -87,9 +87,17 @@
   (cond
     ; If no 11 is found (all of them have been replaced)
     ; Return best overall score
-    ((<= i 0) best)
+    ((<= i 0) 
+      ; If best = 0, then there was no best 
+      ; score less than 21, return 22 so the player looses
+      (if (= best 0) 
+        22
+       ; else return best
+        best
+      )
+    )
     ; Swap 11 cards for 1 cards
-    ((= (bl (item i hand)) 11)
+    ((equal? (bl (item i hand)) 11)
       ; Once we swap the cards we update the best score if needed
       (get-best-score 
         ; Swap cards to update the hand

@@ -1,3 +1,5 @@
+(load "./01-main-best-total.scm")
+
 (define (twenty-one strategy)
   (define (play-dealer customer-hand dealer-hand-so-far rest-of-deck)
     (cond 
@@ -135,19 +137,3 @@
     52
   ) 
 )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-;                                      32

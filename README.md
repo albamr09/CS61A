@@ -23,24 +23,52 @@ For the labs, we follow the naming convention given by:
 ```
 ./Labs/T{unit_number}/L{lab_number}/E{exercise_number}.scm
 ```
+---
 
 For the `SS` book exercises we follow the convention given by:
 
 ```
 ./SimpleScheme/Ch{chapter_number}/E{exercise_number}.scm
 ```
+---
 
 For problems layed out on the book, the following convention is used:
 
 ```
 ./BProblems/T{unit_number}/P{section_number}_{subsection_number}.scm
 ```
+---
 
 For projects, the following convention is used:
 
 ```
 ./Projects/{unit_number}/
 ```
+
+The stand alone exercises are in:
+
+```
+./Projects/{unit_number}/Exercices
+```
+
+The test all together are in:
+
+```
+./Projects/{unit_number}/Tests
+```
+
+And you run then by executing:
+
+```bash
+$ scheme --load ../../../lib/simply.scm < tests.scm
+```
+
+And some discarded procedures are in:
+
+```
+./Projects/{unit_number}/._mytests
+```
+---
 
 Some course resources (labs, projects, class notes) can be accessed from:
 
