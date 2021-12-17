@@ -45,19 +45,7 @@ For projects, the following convention is used:
 ./Projects/{unit_number}/
 ```
 
-The stand alone exercises are in:
-
-```
-./Projects/{unit_number}/Exercices
-```
-
-The test all together are in:
-
-```
-./Projects/{unit_number}/Tests
-```
-
-And you run then by executing:
+Run the tests by executing:
 
 ```bash
 $ scheme --load ../../../lib/simply.scm < tests.scm
