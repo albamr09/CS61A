@@ -26,46 +26,83 @@
   )
 )
 
+; Replaces a value on a concrete index in the list lst
+(define (replace lst index value)
+  (se
+    (sublist lst 0 (- index 1))
+    value
+    (sublist lst index (count lst))
+  )
+)
 
-(define (generate-combinations hand comb-hand i number start-number)
+(define (generate-combinations-backwards hand comb-hand i)
   (cond
-    (
-      (and 
-        (= (count hand) (count comb-hand)) 
-        (= numer 12)
+    ; We have reached the start of the hand so the index is zero
+    ((= i 0) 'done)
+    ; If not all values for this joker's index were generated
+    ((and (is-joker? (item i comb-hand)) (< (first (item i comb-hand) 11)))
+      ; We start generating combinations for the next number 
+      (generate-combinations-forwards
+        hand
+        (se
+          (sublist comb-hand 0 (- i 1))
+          (replace-all-jokers 
+            ; List that is analyzed
+            (sublist comb-hand i (count comb-hand)) 
+            ; List that contains values modified
+            '() 
+            ; Starting index
+            1 
+            ; Value to replace with
+            (+ 1 (first (item i)))
+          )
+        )
+        i
       )
     )
-    ((= number 12) (se (generate-combinations hand i 1 (+ start-number 1))))
-    (else )
+    ; If all values for this joker's index were generated or the card is not a joker
+    (else 
+      (generate-combinations-backwards hand comb-hand (- i 1))
+    )
+  )
+)
+
+(define (generate-combinations-forwards hand comb-hand i)
+  (let
+    ((last-index i))
   )
 )
 
 
-(define (replace-all-jokers hand comb-hand i)
+
+(define (replace-all-jokers hand comb-hand i value)
   (cond
-    ((= (count hand) (count ace-hand))
-    )
+    ((= (count hand) (count comb-hand)) comb-hand)
     ; On the first pass all aces are swapped for 1
     ((is-joker? (item i hand))
-      (generate-all-hands
+      (replace-all-jokers
         hand
         (se
-          ace-hand
+          comb-hand
           ; Append 1, J (for joker) and the suit of the card: 'h', 's', etc.
-          (word 1 J (last (item i hand)))
+          (word value 'J (last (item i hand)))
         )
         ; Update index
         (+ i 1)
+        ; Value to use for replacing
+        value
       )
     )
     (else
       ; Keep going forwards through the hand
-      (generate-all-hands
+      (replace-all-jokers
         hand
         ; Append the item i of hand to ace-hand
-        (se ace-hand (item i hand))
+        (se comb-hand (item i hand))
         ; Update index
         (+ i 1)
+        ; Value to use for replacing
+        value
       )
     )
   )
@@ -118,3 +155,4 @@
   )
 )
 
+(replace-all-jokers '(J1 J1) '() 1 2)
