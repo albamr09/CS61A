@@ -3,7 +3,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Generate all of the possible joker combinations, as an joker can be 
-; worth from 1 to 11. Remember the order of the values, 
+; worth from 1 to 11. Remember the order of the values do not matter,
 ; only the number of them
 ; i.e. we do not calculate (1J 2J) and (2J 1J), only one of them
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -20,7 +20,7 @@
 ; 5. (2J 3J)
 ;--
 ; 6. (3J 3J)
-; And each time a combination is generated, we calculated its score
+; And each time a combination is generated, we calculate its score
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
