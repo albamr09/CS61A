@@ -90,7 +90,7 @@
     (make-suit 'D) 
     (make-suit 'C)
     ; Add two jokers
-    ('J1 'J2')
+    '(J J)
   ) 
 )
 
