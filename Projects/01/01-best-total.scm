@@ -255,7 +255,7 @@
 ; This method tries all of the combinations of size from n (usually 1)
 ; to the lenght of the hand and returns the best score obtained
 ; - hand: list to generate combinations from
-; - i: current index
+; - n: current size of combination
 ; - best: best score up until now
 
 (define (best-total-helper hand n best)
