@@ -13,7 +13,7 @@ option.
 5. Each player is dealt **two cards**, with **one of the dealer’s cards face up**.
 6. The **dealer** always takes **another card** (“hits”) if he has **16 or less**, and always stops (“stands”) with 17 or more. 
 7. The customer can play however s/he chooses,
-but must play before the dealer. If the **customer exceeds 21, s/he immediately loses** (and the dealer doesn’t bother to take any cards). 
+but must play before the dealer. If the **customer exceeds 21, s/he immediately loses** (and the dealer doesn't bother to take any cards). 
 8. In case of a **tie**, **neither** player **wins**.
 
 ---

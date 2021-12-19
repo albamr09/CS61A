@@ -1,4 +1,4 @@
-; The procesdure plays n games with a given strategy and returns 
+; The procedure plays n games with a given strategy and returns 
 ; the number of games that the customer won minus the number that 
 ; s/he lost.  
 

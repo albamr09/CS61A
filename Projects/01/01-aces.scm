@@ -34,7 +34,7 @@
   )
 )
 
-; Obtains the score of hand and if contiues going 
+; Obtains the score of hand and it continues going 
 ; backwards through the hand
 ; - hand: most up to date hand
 ; - seen-hand: cards we have already seen

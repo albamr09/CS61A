@@ -150,7 +150,7 @@
       ; before searching backwards
       (check-any-ace hand best exists-ace)
     )
-    ; Swap aces of the form 'A'suit for 11
+    ; Swap aces of the form "Asuit" for 11
     ((is-ace? (item i hand))
       (generate-all-hands 
         ; Update hand by swapping the A for 11

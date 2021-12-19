@@ -12,7 +12,7 @@ We are going to change the rules by adding two jokers to the deck.
 
 ## File structure
 
-Some files/procdures were explained in [Twenty one](../README.md). Those that were not explained are 
+Some files/procedures were explained in [Twenty one](../README.md). Those that were not explained are 
 the following:
 
 - `twenty-one.scm`: the **functionality** of this file remains the **same**, however we **added two jokers to the deck**, on the function that creates the deck (`make-ordered-deck`)

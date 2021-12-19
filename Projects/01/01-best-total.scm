@@ -52,7 +52,7 @@
 ; limit is actually 3.
 ; Thus we define our upper limit with (k - 1) + n. And so 
 ; if we want to generate the combinations for a given k, and (k - 1) + n > size
-; of list, this would mean that the upper limit exeeds the upper limit of the list
+; of list, this would mean that the upper limit exceeds the upper limit of the list
 ; or that our sliding window overflows the list. Hence we finished generating
 ; all of the  combinations for a concrete n.
 
@@ -253,13 +253,13 @@
 )
 
 ; This method tries all of the combinations of size from n (usually 1)
-; to the lenght of the hand and returns the best score obtained
+; to the length of the hand and returns the best score obtained
 ; - hand: list to generate combinations from
 ; - n: current size of combination
 ; - best: best score up until now
 
 (define (best-total-helper hand n best)
-  ; Go from n to lenght of hand
+  ; Go from n to length of hand
   (if (< (count hand) n)
     ; If all the sizes have been tried return the 
     ; best sum less or equal to 21

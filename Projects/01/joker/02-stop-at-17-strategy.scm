@@ -1,4 +1,4 @@
-; Strategy where the customes takes a
+; Strategy where the customer takes a
 ; card if and only if the total so far is less than 17.
 
 ; Load function to obtain best score

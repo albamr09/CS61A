@@ -3,7 +3,7 @@
 ; by consulting the three argument strategies, and going with the majority
 
 (define (is-true? strategy customer-hand-so-far dealer-up-card)
-  ; Return 1 if the stategy return true, and 0 otherwise
+  ; Return 1 if the strategy return true, and 0 otherwise
   (if (strategy customer-hand-so-far dealer-up-card)
     1
     0

@@ -31,9 +31,9 @@ Some course resources (labs, projects, class notes) can be accessed from:
 
 ## Overlap between SimpleScheme and Labs
 
-Some of the labs exercices are the same as the `SS` book exercices:
+Some of the labs exercises are the same as the `SS` book exercises:
 
-| Lab excercise | `SS` excercise |
+| Lab exercise | `SS` exercise |
 | ------------- | -------------- |
 | Lab 02: 1 | Ch3: 9 |
 | Lab 02: 2 | Ch5: 15-16 |

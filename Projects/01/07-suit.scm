@@ -1,5 +1,5 @@
 ; Function suit-strategy that takes three arguments: a suit (h, s, d, or c), 
-; a strategy to be used if your hand doesn’t include that suit, and a strategy 
+; a strategy to be used if your hand doesn't include that suit, and a strategy 
 ; to be used if your hand does include that suit. It should return a strategy
 ; that behaves accordingly
 
@@ -9,7 +9,7 @@
     ((empty? hand) #f)
     ; If the current card is of the suit return true
     ((equal? (last (first hand)) suit) #t)
-    ; Keep analysin the hand by deleting the first card
+    ; Keep analyzing the hand by deleting the first card
     (else (has-suit (bf hand) suit))
   )
 )
