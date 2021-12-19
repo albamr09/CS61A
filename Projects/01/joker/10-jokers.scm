@@ -123,9 +123,16 @@
   )
 )
 
-(define (update-best hand i best)
+; This method updates the best score if the new score calculated (total)
+; with the hand given as argument (hand) is greater than the best 
+; score up until now.
+; - hand: most up to date hand
+; - i: current index
+; - best: best score up until now
+
+(define (update-best-joker hand i best)
   (let
-    ; Start the search with 
+    ; Calculate best score  with
     ; n = total number of cards 
     ; to get the best score with any number of cards set n = 1
     ; and best = 0
@@ -175,12 +182,12 @@
           ; Because a new hand is generated every time
           ; we have to always check if we need to update
           ; the score
-          (update-best hand i best)
+          (update-best-joker hand i best)
         )
         ; else find joker, update the best if necessary
         ; if the joker's value is 11, we have to
         ; check if best needs updating here
-        (find-joker hand (- i 1) (update-best hand i best))
+        (find-joker hand (- i 1) (update-best-joker hand i best))
       )
     )
     ; If it is not a joker continue going backwards

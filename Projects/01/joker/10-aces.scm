@@ -181,17 +181,3 @@
     )
   )
 )
-
-;(trace replace-all-jokers)
-;(trace generate-all-hands)
-;(trace generate-combinations-backwards)
-; Should return 19
-;(generate-all-hands '(8s j) 1 0 #f)
-;; Should return 21
-;(generate-all-hands '(as j) 1 0 #f)
-;; Should return 16
-(generate-all-hands '(qh 6d) 1 0 #f)
-;; Should return 21, because is the best combination
-;(generate-all-hands '(J as 19s) 1 0 #f)
-;; Should return 22 because there is no combination than returns less than 21
-;(generate-all-hands '(J as 20s) 1 0 #f)
