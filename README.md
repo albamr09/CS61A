@@ -84,5 +84,3 @@ To execute load a library and execute a file:
 ```console
 $ scheme --load ../../lib/simply.scm < E01.scm
 ```
-- [**Labs exercises**](https://inst.eecs.berkeley.edu/%7Ecs61a/reader/nodate-labs.pdf)
-
