@@ -4,7 +4,8 @@ Repository for the labs assignments, and projects for the [`MIT` course](https:/
 
 ## Projects
 
-- [Twenty One](./Projects/01)
+- [Twenty One](./Projects/01/Scheme)
+- [Twenty One | GUI](./Projects/01/GUI) (working on it)
 
 ## Notes
 
