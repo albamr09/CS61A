@@ -4,6 +4,10 @@
 
 https://inst.eecs.berkeley.edu/~cs61as/sp13/
 
+## Github resources
+
+https://github.com/tmaetzold/cs61as
+
 ---
 
 ## Steps
