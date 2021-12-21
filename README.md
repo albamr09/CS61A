@@ -2,12 +2,23 @@
 
 Repository for the labs assignments, and projects for the [Computer Science 61A (CS61A) Course of Berkeley](https://archive.org/details/ucberkeley-webcast-PL3E89002AA9B9879E?sort=titleSorter), based on the book [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book.html) that uses Scheme.
 
+## Set up
+
+- Using the [`Scheme Compiler (MIT/GNU)`](./docs/MIT.md)
+- Using the [`Racket Compiler`](./docs/RACKET.md)
+
 ## Projects
 
 - [Twenty One](./Projects/01/Scheme)
 - [Twenty One | GUI](./Projects/01/GUI) (working on it)
 
 ## Notes
+
+First of all, at the start of the course the the [`Scheme Compiler (MIT/GNU)`](http://www.gnu.org/software/mit-scheme/) was used. So in some sections there are two folders:
+
+- `MIT`: where the programs where made using the `MIT/GNU` compiler.
+- `Racket`: where the `Racket` compiler was used.
+
 
 For the labs, we follow the naming convention given by:
 
@@ -36,52 +47,9 @@ For projects, the following convention is used:
 ./Projects/{unit_number}/
 ```
 
-Run the tests by executing:
-
-```bash
-$ scheme --load ../../../lib/simply.scm < tests.scm
-```
-
 And some discarded procedures are in:
 
 ```
 ./Projects/{unit_number}/._mytests
 ```
 ---
-
-## Instructions
-
-### Library
-
-You'll need some external libraries that contain some utility functions, so you need to run:
-
-```console
-$ scheme --load $WORKDIR/lib/simply.scm
-```
-
-How to run scheme programs locally on an machine running `Arch Linux` (install the [`Scheme Compiler (MIT/GNU)`](https://wiki.archlinux.org/title/Scheme))
-
-###  Run the interpreter:
-
-```console
-$ scheme -interactive
-```
-
-## Run a file
-
-```console
-$ scheme < file.scm
-$ scheme --quiet < file.scm
-```
-
-### Load a file and run the interpreter:
-
-```console
-$ scheme --quiet --load file.scm
-```
-
-To execute load a library and execute a file:
-
-```console
-$ scheme --load ../../lib/simply.scm < E01.scm
-```
