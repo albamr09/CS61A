@@ -9,7 +9,7 @@ Repository for the labs assignments, and projects for the [Computer Science 61A 
 
 ## Projects
 
-- [Twenty One](./Projects/01/Scheme)
+- [Twenty One](./Projects/01)
 - [Twenty One | GUI](./Projects/01/GUI) (working on it)
 
 ## Notes
