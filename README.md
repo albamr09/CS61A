@@ -1,6 +1,6 @@
 # Structure and Interpretation of Computer Programs
 
-Repository for the labs assignments, and projects for the [`MIT` course](https://archive.org/details/ucberkeley-webcast-PL3E89002AA9B9879E?sort=titleSorter), based on the book [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book.html) that uses Scheme.
+Repository for the labs assignments, and projects for the [Computer Science 61A (CS61A) Course of Berkeley](https://archive.org/details/ucberkeley-webcast-PL3E89002AA9B9879E?sort=titleSorter), based on the book [Structure and Interpretation of Computer Programs](https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book.html) that uses Scheme.
 
 ## Projects
 
