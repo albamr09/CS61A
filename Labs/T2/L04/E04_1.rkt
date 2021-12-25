@@ -83,11 +83,11 @@
 
 ;;; TEST
 
-(define p1 (make-point 1 2))
-(define p2 (make-point 5 2))
-(print-point p1)
-; (1, 2)
-
-(define s (make-segment p1 p2))
-(print-point (midpoint-segment s))
-; (3, 2)
+;(define p1 (make-point 1 2))
+;(define p2 (make-point 5 2))
+;(print-point p1)
+;; (1, 2)
+;
+;(define s (make-segment p1 p2))
+;(print-point (midpoint-segment s))
+;; (3, 2)
