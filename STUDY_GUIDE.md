@@ -2,10 +2,12 @@
 
 ## Structure
 
+https://berkeley-cs61as.github.io/textbook
 https://inst.eecs.berkeley.edu/~cs61as/sp13/
 
 ## Github resources
 
+https://github.com/nickyfoto/61as
 https://github.com/tmaetzold/cs61as
 
 ---
