@@ -44,3 +44,6 @@
 )
 
 (fib-n-iter 5)
+
+; Exports
+(provide fib)
