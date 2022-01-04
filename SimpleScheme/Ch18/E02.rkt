@@ -4,69 +4,92 @@
 ; Suppose we change the definition of the tree constructor so that it uses
 ; instead of cons:
 
-(define (make-node datum children)
-  (list datum children)
+(define (make-tree-node datum children)
+  (cond
+    ((or (null? datum) (empty? datum)) null)
+    ((or (null? children) (empty? children)) (list datum))
+    (else
+      (append (list datum) children)
+    )
+  )
 )
 
 ; How do we have to change the selectors so that everything still works?
 
-(define (datum node)
+(define (datum-tree node)
   ; First element of the list
-  (list-ref node 0)
+  (car node)
 )
-(define (children node)
+(define (children-tree node)
   ; Second element of the list
-  (list-ref node 1)
+  (cdr node)
+)
+
+; Other operators
+
+(define (leaf? node)
+  ; Return true if the node
+  ; has an empty list as children
+  ; or the list is null
+  (or 
+    (null? (children-tree node)) 
+    (empty? (children-tree node))
+  )
 )
 
 
 ; TEST
 
 (define world-tree
-  (make-node 'world
+  (make-tree-node 'world
     (list 
-      (make-node 'italy
+      (make-tree-node 'italy
         '(venezia riomaggiore firenze roma)
       )
-      (make-node '(united states)
+      (make-tree-node '(united states)
         (list 
-          (make-node 'california
+          (make-tree-node 'california
             '(berkeley (san francisco) gilroy)
           )
-          (make-node 'massachusetts
+          (make-tree-node 'massachusetts
             '(cambridge amherst sudbury)
           )
-          (make-node 'ohio '(kent))
+          (make-tree-node 'ohio '(kent))
         )
       )
-      (make-node 'zimbabwe '(harare hwange))
-      (make-node 'china
+      (make-tree-node 'zimbabwe '(harare hwange))
+      (make-tree-node 'china
         '(beijing shanghai guangzhou suzhou)
       )
-      (make-node
+      (make-tree-node
         '(great britain)
         (list
-          (make-node 'england '(liverpool))
-          (make-node 'scotland
+          (make-tree-node 'england '(liverpool))
+          (make-tree-node 'scotland
             '(edinburgh glasgow (gretna green))
           )
-          (make-node 'wales '(abergavenny))
+          (make-tree-node 'wales '(abergavenny))
         )
       )
-      (make-node
+      (make-tree-node
         'australia
         (list
-          (make-node 'victoria '(melbourne))
-          (make-node '(new south wales) '(sydney))
-          (make-node 'queensland
+          (make-tree-node 'victoria '(melbourne))
+          (make-tree-node '(new south wales) '(sydney))
+          (make-tree-node 'queensland
             '(cairns (port douglas))
           )
         )
       )
-      (make-node 'honduras '(tegucigalpa))
+      (make-tree-node 'honduras '(tegucigalpa))
     )
   )
 )
 
-; (car (children world-tree))
+; (car (children-tree world-tree))
 ; (ITALY (VENEZIA) (RIOMAGGIORE) (FIRENZE) (ROMA))
+
+; exports
+(provide make-tree-node datum-tree children-tree leaf?)
+(trace leaf?)
+(trace make-tree-node)
