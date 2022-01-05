@@ -39,6 +39,14 @@ For problems layed out on the book, the following convention is used:
 ```
 ./BProblems/T{unit_number}/P{section_number}_{subsection_number}.scm
 ```
+
+Also inside the books problems, there will be some programs written on the notes, that follow the following format:
+
+
+```
+./BProblems/T{unit_number}/Notes/W{week_number}.scm
+```
+
 ---
 
 For projects, the following convention is used:
