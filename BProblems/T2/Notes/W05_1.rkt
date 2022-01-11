@@ -4,7 +4,7 @@
 ; REPL: read-eval-print-loop
 (define (calc)
   (display "calc: ")
-  ; (flush)
+  (flush-output)
   ; read: Scheme primitive to read from std input
   (print (calc-eval (read)))
   (newline)
@@ -81,5 +81,5 @@
   )
 )
 
-; (calc)
+(calc)
 
