@@ -91,5 +91,5 @@
 
 ; exports
 (provide make-tree-node datum-tree children-tree leaf?)
-(trace leaf?)
-(trace make-tree-node)
+; (trace leaf?)
+; (trace make-tree-node)

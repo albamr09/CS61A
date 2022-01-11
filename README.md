@@ -14,7 +14,9 @@ Repository for the labs assignments, and projects for the [Computer Science 61A 
 
 ## Notes
 
-First of all, at the start of the course the the [`Scheme Compiler (MIT/GNU)`](http://www.gnu.org/software/mit-scheme/) was used. So in some sections there are two folders:
+### Compiler
+
+First of all, at the start of the course the [`Scheme Compiler (MIT/GNU)`](http://www.gnu.org/software/mit-scheme/) was used. So in some sections there are two folders:
 
 - `MIT`: where the programs where made using the `MIT/GNU` compiler.
 - `Racket`: where the `Racket` compiler was used.
@@ -27,6 +29,10 @@ For the labs, we follow the naming convention given by:
 ```
 ---
 
+### Structure
+
+#### SimpleScheme
+
 For the `SS` book exercises we follow the convention given by:
 
 ```
@@ -34,7 +40,9 @@ For the `SS` book exercises we follow the convention given by:
 ```
 ---
 
-For problems layed out on the book, the following convention is used:
+#### Book/Note Problems
+
+For problems laid out on the book, the following convention is used:
 
 ```
 ./BProblems/T{unit_number}/P{section_number}_{subsection_number}.scm
@@ -47,7 +55,19 @@ Also inside the books problems, there will be some programs written on the notes
 ./BProblems/T{unit_number}/Notes/W{week_number}.scm
 ```
 
+#### Custom Interpreters
+
+Throughout the course we will create an interpreter, that will be built little by little. So we'll manage four versions:
+
+1. `./BProblems/T2/Notes/racket1.rkt` (mind you, this is made to work with racket, not the MIT compiler)
+  - The tests are in `./BProblems/T2/Notes/W05_7.rkt`. Execute `racket W05_7.rkt` to run the interpreter.
+2. -
+3. -
+4. -
+
 ---
+
+#### Projects
 
 For projects, the following convention is used:
 

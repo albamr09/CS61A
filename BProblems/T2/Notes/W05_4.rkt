@@ -60,39 +60,39 @@
 ;; TEST
 ;;;;;;;;;
 
-(define test-tree
-  (make-my-tree
-    'c
-    (list
-      (make-my-tree
-        'c1
-        (list
-          (make-my-tree
-            'c11
-            null
-          )
-          (make-my-tree
-            'c12
-            null
-          )
-        )
-      )
-      (make-my-tree
-        'c2
-        (list
-          (make-my-tree
-            'c21
-            null
-          )
-          (make-my-tree
-            'c22
-            null
-          )
-        )
-      )
-    )
-  )
-)
+;(define test-tree
+;  (make-my-tree
+;    'c
+;    (list
+;      (make-my-tree
+;        'c1
+;        (list
+;          (make-my-tree
+;            'c11
+;            null
+;          )
+;          (make-my-tree
+;            'c12
+;            null
+;          )
+;        )
+;      )
+;      (make-my-tree
+;        'c2
+;        (list
+;          (make-my-tree
+;            'c21
+;            null
+;          )
+;          (make-my-tree
+;            'c22
+;            null
+;          )
+;        )
+;      )
+;    )
+;  )
+;)
 
 ; (depth-first-search test-tree)
-(breadth-first-search test-tree)
+; (breadth-first-search test-tree)
