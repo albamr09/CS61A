@@ -1,6 +1,26 @@
 #lang racket
 (require berkeley)
 
+; Extend calc.rkt to include words as data, providing the operations first, butfirst, last, butlast, 
+; and word. Unlike Racket, your calculator should treat words as self-evaluating expressions except 
+; when seen as the operator of a compound expression. That is, it should work like these examples:
+
+; calc: foo
+; foo
+; calc: (first foo)
+; f
+; calc: (first (butfirst hello))
+; e
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Orignial calc.rkt
+; (require "../../../BProblems/T2/Notes/W05_1.rkt")
+; (calc)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Extended calc.rkt
+
 ; REPL: read-eval-print-loop
 (define (calc)
   (display "calc: ")
@@ -18,6 +38,8 @@
   (cond 
     ; If it is a number, then return the number
     ((number? exp) exp)
+    ; If it is a word, then return the word
+    ((word? exp) exp)
     ; If it is a list, apply the operator on
     ; the operands
     ((list? exp) 
@@ -36,6 +58,9 @@
 
 (define (calc-apply fn args)
   (cond 
+    ;;;;;;;;;;;;;;;;
+    ;; ARITHMETIC OPERATIONS
+    ;;;;;;;;;;;;;;;;
     ; Apply + to all of the arguments
     ; because + is associative
     ((eq? fn '+) (accumulate + 0 args))
@@ -76,13 +101,40 @@
         )
       )
     )
-    ; If the operation is not +, -, * or /, throw an error
+    ;;;;;;;;;;;;;;;;
+    ;; OPERATION ON WORDS
+    ;;;;;;;;;;;;;;;;
+    ((eq? fn 'first) 
+     ; Car because args is a list
+     (first (car args))
+    )
+    ((or (eq? fn 'butfirst) (eq? fn 'bf)) 
+     ; Car because args is a list
+     (bf (car args))
+    )
+    ((eq? fn 'last) 
+     ; Car because args is a list
+     (last (car args))
+    )
+    ((or (eq? fn 'butlast) (eq? fn 'bl)) 
+     ; Car because args is a list
+     (bl (car args))
+    )
+    ((eq? fn 'word) 
+     ; Apply word two every two elements of arg
+     (accumulate word "" args)
+    )
+    ;;;;;;;;;;;;;;;;
+    ;; GENERAL PURPOSE OPERATIONS
+    ;;;;;;;;;;;;;;;;
+    ((eq? fn 'exit) (exit))
+    ; If the operation is not defined, throw an error
     (else (error "Calc: bad operator:" fn))
   )
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; EXECUTE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ; (calc)
-
-; Exports
-(provide calc)
-
