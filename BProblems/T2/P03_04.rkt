@@ -142,7 +142,7 @@
 )
 
 ; Obtain the total weight (frequency) of the tree
-; (all the weights of the leafs in the tree)
+; (all the weights of the leafs in the tree), stored in node
 (define (weight tree)
   ; If the tree is a leaf
   (if (leaf? tree)
@@ -236,4 +236,4 @@
 
 
 ; Exports 
-(provide make-leaf make-code-tree decode left-branch right-branch leaf? symbol-leaf symbols)
+(provide make-leaf make-code-tree decode left-branch right-branch leaf? symbol-leaf symbols weight)
