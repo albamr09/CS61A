@@ -59,47 +59,41 @@
   (successive-merge (make-leaf-set pairs))
 )
 
-(define (merge-pair p1 p2)
-  (list
-    (list
-      'leaf
-      (append (symbols p1) (symbols p2))
-      (+ (weight p1) (weight p2))
-    )
-  )
-)
-
-(define (successive-merge pairs)
-  (if (= (count pairs) 1) 
-      (car pairs)
-      (successive-merge 
-        (append 
-          (merge-pair (car pairs) (cadr pairs)) 
-          (cddr pairs)
+(define (successive-merge leaf-set) 
+   ; inserts tree into tree-set such that the result remains 
+   ; ordered with respect to the weights  
+  (define (insert tree tree-set) 
+    (cond 
+      ((null? tree-set) (list tree)) 
+      ; If the tree's weight is less than the first element
+      ; of the tree-set, set tree as the first element
+      ((< (weight tree) (weight (car tree-set))) 
+       (cons tree tree-set)
+      ) 
+      (else 
+        ; Else compare with the next element of the set
+        (cons 
+          (car tree-set) 
+          (insert tree (cdr tree-set))
         )
       )
+    )
+  ) 
+
+  (cond
+
+    ((null? (cdr leaf-set)) (car leaf-set)) 
+    (else 
+      (successive-merge 
+        (insert 
+          (make-code-tree (car leaf-set) (cadr leaf-set)) 
+          (cddr leaf-set)
+        )
+      )
+    )
   )
 )
 
-(define (get-leaves tree)
-  (cond
-    ((null? tree) '())
-    ((leaf? tree) 
-      ; List of pair, so append does not combine
-      ; the pairs all together (i.e. ((A 1) (B 2)) -> (A 1 B 2))
-      (list 
-        ; Pair of symbol and weight
-        (list (symbol-leaf tree) (weight tree))
-      )
-    )
-    (else
-      (append
-        (get-leaves (left-branch tree)) 
-        (get-leaves (right-branch tree))
-      )
-    )
-  )
-)
 
 
 ;;; TEST
@@ -117,6 +111,5 @@
   )
 )
 
-; (make-leaf-set (list '(A 4) '(B 2) '(C 1) '(D 1)))
 sample-tree
-(generate-huffman-tree (get-leaves sample-tree))
+(generate-huffman-tree (list '(A 8) '(B 3) '(C 1) '(D 1) '(E 1) '(F 1) '(G 1) '(H 1)))
