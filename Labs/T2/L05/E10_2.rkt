@@ -42,6 +42,9 @@
   )
 )
 
+; Exports
+(provide encode)
+
 
 ;;;;;;;;;;;;;;;
 ;;;; TEST
