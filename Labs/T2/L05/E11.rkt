@@ -114,6 +114,7 @@
 ;,(regroup-main '((1 3 ...) (2 4 ...)) '(1 2 3 4 7 8))
 ;,(regroup-main '(2 1 4 3 ...) '(the rain in spain stays mainly on the plain))
 ;,(regroup-main '((1 2) (3 4) ...) '(the rain in spain stays mainly on the plain))
+(trace update-pattern)
 (define pairup (regroup '((1 2 ...) (2 3 ...) ...)))
 (pairup '(the rain in spain stays mainly on the plain))
 ; ((the rain) (in spain) (stays mainly) (on the))
