@@ -1,9 +1,10 @@
-
 #lang racket
 (require berkeley)
 
 ; Programming by example: In some programming systems, instead of writing an algorithm, you give 
 ; examples of how you'd like the program to behave, and the language figures out the algorithm itself
+
+; Fore more details reference "./regroup.problem"
 
 (define (regroup pattern)
   (lambda
