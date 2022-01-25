@@ -46,7 +46,7 @@
   ;;;
   ; Put is not yet defined
   ;;;
-  ; Put is not yet defined
+
   ; (put ⟨op⟩ ⟨type⟩ ⟨item⟩) 
   ; installs the ⟨item⟩ in the table, indexed
   ; by the ⟨op⟩ and the ⟨type⟩.
