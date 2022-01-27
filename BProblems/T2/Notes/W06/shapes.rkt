@@ -71,13 +71,13 @@
 
 ;; TEST
 
-(define square5 (make-square 5))
-square5
-(area square5)
-; 25
-(perimeter square5)
-; 20
-(define circle3 (make-circle 3))
-circle3
-(area circle3)
-(perimeter circle3)
+;(define square5 (make-square 5))
+;
+;(area square5)
+;; 25
+;(perimeter square5)
+;; 20
+;(define circle3 (make-circle 3))
+;
+;(area circle3)
+;(perimeter circle3)
