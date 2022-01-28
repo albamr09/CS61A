@@ -3,6 +3,10 @@
 
 ; Import tag system
 (require "../P04_01/tags.rkt")
+; Import table
+(require "./table.rkt")
+; Import apply
+(require "./apply.rkt")
 ; Import packages
 (require "./rectangular-pkg.rkt")
 (require "./polar-pkg.rkt")
@@ -10,29 +14,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Complex number TAD
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-; Apply the procedure associated with an op (operation name)
-; and the type of the arguments (rectangular or polar)
-(define (apply-generic op . args)
-  (let 
-    ; Obtain the representation type 
-    ; from the arguments
-    ((type-tags (map type-tag args)))
-    (let 
-      ; Obtain the procedure definition
-      ; from the representation type tag
-      ; and the operation name
-      ((proc (get op type-tags)))
-      (if proc
-        (apply proc (map contents args))
-        (error 
-          "No method for these types: APPLY-GENERIC"
-          (list op type-tags)
-        )
-      )
-    )
-  )
-)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Generic constructors
@@ -65,3 +46,35 @@
 (define (imag-part z) (apply-generic 'imag-part z))
 (define (magnitude z) (apply-generic 'magnitude z))
 (define (angle z) (apply-generic 'angle z))
+
+
+;;;;;;;;;;;;;;;;;;;;
+;;;; TEST
+
+;(install-rectangular-package)
+;(install-polar-package)
+;
+;; Complex number, rectangular representation
+;(define c1 (make-from-real-imag 1 3))
+;
+;(real-part c1)
+;; 1
+;(imag-part c1)
+;; 3
+;(magnitude c1)
+;; 3.16277
+;(angle c1)
+;; 71 (degrees) 1.24904571695 (rad)
+;;
+;; Complex number, polar representation
+;(define c2 (make-from-mag-ang 3.16277 1.24904571695))
+;;
+;(real-part c2)
+;; 1
+;(imag-part c2)
+;; 3
+;(magnitude c2)
+;; 3.16277
+;(angle c2)
+;; 71 (degrees) 1.24904571695 (rad)
+

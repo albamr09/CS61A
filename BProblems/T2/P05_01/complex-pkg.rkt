@@ -1,8 +1,13 @@
 #lang racket
 (require berkeley)
 
-; Import complex package
-(require "../P04_02/complex.rkt")
+; Import tag system
+(require "../P04_01/tags.rkt")
+; Import table
+(require "../P04_02/table.rkt")
+; Import rectangular and polar representation
+(require "../P04_02/rectangular-pkg.rkt")
+(require "../P04_02/polar-pkg.rkt")
 
 (define (install-complex-package)
 
@@ -10,6 +15,8 @@
   ;; Imported procedures from rectangular and polar packages
   ;; (see ../P04_02/polar-pkg.rkt and ../P04_02/rectangular-pkg.rkt)
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (install-rectangular-package)
+  (install-polar-package)
 
   ;;;;;;;;;;;;;;;
   ;; Constructors
@@ -116,12 +123,5 @@
   'done
 )
 
-; Create tagged complex data object (rectangular representation)
-(define (make-complex-from-real-imag x y)
-  ((get 'make-from-real-imag 'complex) x y)
-)
 
-; Create tagged complex data object (polar representation)
-(define (make-complex-from-mag-ang r a)
-  ((get 'make-from-mag-ang 'complex) r a)
-)
+(provide install-complex-package)

@@ -3,6 +3,8 @@
 
 ; Import tag system
 (require "../P04_01/tags.rkt")
+; Import table
+(require "./table.rkt")
 
 (define (install-polar-package)
 

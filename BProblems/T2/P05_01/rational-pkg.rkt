@@ -1,6 +1,10 @@
 #lang racket
 (require berkeley)
 
+; Import tag system
+(require "../P04_01/tags.rkt")
+; Import table
+(require "../P04_02/table.rkt")
 
 (define (install-rational-package)
 
@@ -129,7 +133,5 @@
   'done
 )
 
-; Create tagged rational data object
-(define (make-rational n d)
-  ((get 'make 'rational) n d)
-)
+
+(provide install-rational-package)

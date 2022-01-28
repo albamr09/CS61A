@@ -1,6 +1,11 @@
 #lang racket
 (require berkeley)
 
+; Import tag system
+(require "../P04_01/tags.rkt")
+; Import table
+(require "../P04_02/table.rkt")
+
 ; We do not define internal procedures, given we are using primitive
 ; expressions as +, -, etc.
 
@@ -61,7 +66,6 @@
   'done
 )
 
-; Create a tagged number
-(define (make-scheme-number n)
-  ((get 'make 'scheme-number) n)
-)
+
+; Exports
+(provide install-scheme-number-package)
