@@ -1,6 +1,4 @@
-
 #lang racket
-
 (require berkeley)
 
 ; Two dimensional data to store the relation between two data types and the procedure to transform
