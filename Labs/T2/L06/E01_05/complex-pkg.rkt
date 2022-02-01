@@ -2,14 +2,14 @@
 (require berkeley)
 
 ; Import tag system
-(require "../P04_01/tags.rkt")
+(require "../../../../BProblems/T2/P04_01/tags.rkt")
 ; Import table
-(require "../P04_02/table.rkt")
+(require "../../../../BProblems/T2/P04_02/table.rkt")
 ; Apply generic
-(require "../P04_02/apply.rkt")
+(require "../../../../BProblems/T2/P04_02/apply.rkt")
 ; Import rectangular and polar representation
-(require "../P04_02/rectangular-pkg.rkt")
-(require "../P04_02/polar-pkg.rkt")
+(require "../../../../BProblems/T2/P04_02/rectangular-pkg.rkt")
+(require "../../../../BProblems/T2/P04_02/polar-pkg.rkt")
 
 (define (install-complex-package)
 
@@ -91,6 +91,23 @@
     )
   )
 
+  ;;;;;;;;;;;;;;;
+  ;; Generic procedures
+  ;;;;;;;;;;;;;;;
+
+  (define (equ? z1 z2)
+    (and
+      (=
+        (real-part z1)
+        (real-part z2)
+      )
+      (=
+        (imag-part z1)
+        (imag-part z2)
+      )
+    )
+  )
+
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Interface to rest of the system
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -140,6 +157,14 @@
 
   (put 'div '(complex complex)
     (lambda (z1 z2) (tag (div-complex z1 z2)))
+  )
+
+  ;;;;;;;;;;;;;;;
+  ;; Generic procedures
+  ;;;;;;;;;;;;;;;
+
+  (put 'equ? '(complex complex)
+    (lambda (z1 z2) (equ? z1 z2))
   )
 
   ; Finish installing

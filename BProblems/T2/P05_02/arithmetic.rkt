@@ -51,24 +51,39 @@
 (define (div x y) (apply-generic 'div x y))
 
 
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; TEST
 
-(install-arithmetic-pkg)
-
-(define complex-num-ma (make-complex-from-mag-ang 1 3))
-(define complex-num-rm (make-complex-from-real-imag 1 3))
-(define rational-num-a (make-rational 3 5))
-(define rational-num-b (make-rational 1 8))
-(define scheme-num-a (make-scheme-number 3))
-(define scheme-num-b (make-scheme-number 9))
-
-(add scheme-num-a scheme-num-b)
-; (scheme-number 12)
-(sub scheme-num-a scheme-num-b)
-; (scheme-number -6)
-(mul scheme-num-a scheme-num-b)
-; (scheme-number 27)
-(div scheme-num-a scheme-num-b)
-; (scheme-number 1/3)
-
+; (install-arithmetic-pkg)
+; 
+; (define complex-num-ma (make-complex-from-mag-ang 1 3))
+; (define complex-num-rm (make-complex-from-real-imag 1 3))
+; (define rational-num-a (make-rational 3 5))
+; (define rational-num-b (make-rational 1 8))
+; (define scheme-num-a (make-scheme-number 3))
+; (define scheme-num-b (make-scheme-number 9))
+; 
+; (add scheme-num-a scheme-num-b)
+; ; (scheme-number 12)
+; (sub scheme-num-a scheme-num-b)
+; ; (scheme-number -6)
+; (mul scheme-num-a scheme-num-b)
+; ; (scheme-number 27)
+; (div scheme-num-a scheme-num-b)
+; ; (scheme-number 1/3)
+; 
+; (add rational-num-a rational-num-b)
+; ; (rational-num 29/40)
+; (sub rational-num-a rational-num-b)
+; ; (rational-num 19/40)
+; (mul rational-num-a rational-num-b)
+; ; (rational-num 3/40)
+; (div rational-num-a rational-num-b)
+; ; (rational-num 24/5)
+; 
+; (add complex-num-rm complex-num-ma)
+; (sub complex-num-rm complex-num-ma)
+; (mul complex-num-rm complex-num-ma)
+; (div complex-num-rm complex-num-ma)

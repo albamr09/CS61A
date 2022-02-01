@@ -1,16 +1,11 @@
 #lang racket
 (require berkeley)
 
-; Coercion
-; Transform a ordinary number to a complex number
-(define (scheme-number->complex n)
-  (make-complex-from-real-imag 
-    ; Strip n of the tag, get the value
-    (contents n) 
-    ; Imaginary part is zero
-    0
-  )
-)
+; Import tag system
+(require "../P04_01/tags.rkt")
+; Import tables
+(require "../P04_02/table.rkt")
+(require "./table-coercion.rkt")
 
 ; Apply generic using coercion
 (define (apply-generic op . args)
@@ -78,3 +73,6 @@
     )
   )
 )
+
+; Exports
+(provide apply-generic)

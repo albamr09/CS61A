@@ -12,4 +12,4 @@
 (define (get key1 key2) (hash-ref *the-table* (list key1 key2) #f))
 
 ; Exports
-(provide put get *the-table*)
+(provide put get)
