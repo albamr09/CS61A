@@ -21,7 +21,7 @@
   ((get 'make 'scheme-number) n)
 )
 
-; Ration number
+; Rational number
 (define (make-rational n d)
   ((get 'make 'rational) n d)
 )
@@ -51,33 +51,33 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; TEST
 
-(install-arithmetic-pkg)
-
-(define complex-num-ma-a (make-complex-from-mag-ang 0 0))
-(define complex-num-ma-b (make-complex-from-mag-ang 1 3))
-(define complex-num-rm-a (make-complex-from-real-imag 0 0))
-(define complex-num-rm-b (make-complex-from-real-imag 1 3))
-(define rational-num-a (make-rational 0 1))
-(define rational-num-b (make-rational 1 8))
-(define scheme-num-a (make-scheme-number 0))
-(define scheme-num-b (make-scheme-number 9))
-
-(=zero? scheme-num-a)
-; t
-(=zero? scheme-num-b)
-; f
-
-(=zero? rational-num-a)
-; t
-(=zero? rational-num-b)
-; f
-
-(=zero? complex-num-rm-a)
-; t
-(=zero? complex-num-rm-b)
-; f
-
-(=zero? complex-num-ma-a)
-; t
-(=zero? complex-num-ma-b)
-; f
+; (install-arithmetic-pkg)
+; 
+; (define complex-num-ma-a (make-complex-from-mag-ang 0 0))
+; (define complex-num-ma-b (make-complex-from-mag-ang 1 3))
+; (define complex-num-rm-a (make-complex-from-real-imag 0 0))
+; (define complex-num-rm-b (make-complex-from-real-imag 1 3))
+; (define rational-num-a (make-rational 0 1))
+; (define rational-num-b (make-rational 1 8))
+; (define scheme-num-a (make-scheme-number 0))
+; (define scheme-num-b (make-scheme-number 9))
+; 
+; (=zero? scheme-num-a)
+; ; t
+; (=zero? scheme-num-b)
+; ; f
+; 
+; (=zero? rational-num-a)
+; ; t
+; (=zero? rational-num-b)
+; ; f
+; 
+; (=zero? complex-num-rm-a)
+; ; t
+; (=zero? complex-num-rm-b)
+; ; f
+; 
+; (=zero? complex-num-ma-a)
+; ; t
+; (=zero? complex-num-ma-b)
+; ; f

@@ -36,6 +36,10 @@
     )
   )
 
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; Interface to rest of the system
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
   (put-coercion 
     ; Convert from
     'scheme-number 
@@ -48,8 +52,28 @@
   'done
 )
 
-; (install-coercion-package)
 
 ; Exports
 (provide install-coercion-package)
 
+;;;;;;;;;;;;;;;;;;;;;
+;;; TEST 
+;;;;;;;;;;;;;;;;;;;;;
+
+; (install-coercion-package)
+
+; ; Get procedure to convert
+; (define (scheme-number->complex n)
+;   ((get-coercion 'scheme-number 'complex) n) 
+; )
+; 
+; ; Procedure to create scheme number
+; (define (make-scheme-number n)
+;   ((get 'make 'scheme-number) n)
+; )
+; 
+; ; Define scheme number n
+; (define n (make-scheme-number 3))
+; 
+; ; Convert n to complex
+; (scheme-number->complex n)
