@@ -58,7 +58,7 @@
   ; Transform real number to a complex number
   (define (real->complex n)
     ; Obtain procedure from operation table
-    ((get 'make 'complex) 
+    ((get 'make-from-real-imag 'complex) 
       ; Strip n of the tag, get the value
       (contents n) 
       ; Imaginary part is zero
@@ -72,18 +72,24 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-  (put-coercion 
-    'scheme-number 'rational 
+  (put 
+    ; Operation
+    'raise
+    ; From
+    '(scheme-number)
+    ; To rational
     scheme-number->rational
   )
 
-  (put-coercion 
-    'rational 'real 
+  (put 
+    'raise
+    '(rational)
     rational->real
   )
 
-  (put-coercion 
-    'real 'complex 
+  (put 
+    'raise
+    '(real) 
     real->complex
   )
 
@@ -92,8 +98,3 @@
 
 ; Exports
 (provide install-tower-hierarchy-package)
-
-;;;;;;;;;;;;;;;;;;;;;;;;
-;; TEST
-
-(install-tower-hierarchy-package)

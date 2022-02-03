@@ -80,7 +80,9 @@
   (cond 
     ((constant? exp) exp)
     ; If it is an and expression
-    ((and-exp? exp) exp)
+    ((and-exp? exp) 
+      (eval-and exp)
+    )
     ; ns, namespace is needed to initialize the current namespace
     ; else if this is not called while in interactive mode it will fail
     ; symbol: keywords of scheme
@@ -115,7 +117,6 @@
     (else (error "bad expr: " exp))
   )
 )
-
 
 ;; Comments on APPLY-1:
 
@@ -177,9 +178,6 @@
         )
       )
     )
-    ((and-exp? proc) 
-      (eval-and args)
-    )
     (else (error "bad proc: " proc))
   )
 )
@@ -208,8 +206,10 @@
 
 (define quote-exp? (exp-checker 'quote))
 (define if-exp? (exp-checker 'if))
-(define (and-exp? x) (equal? x 'and))
+(define and-exp? (exp-checker 'and))
 (define lambda-exp? (exp-checker 'lambda))
+(define map-exp? (exp-checker 'map-1))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;; Special evaluation rules:
@@ -217,24 +217,57 @@
 
 ; Special evaluation for the and special form
 
-(define (eval-and args)
-  (if (null? args)
-    ; If every argument was tru
-    ; return true
-    #t
-    ; Evaluate the current argument
-    (if (eval-1 (car args))
-      ; Else keep evaluating
-      (eval-and (cdr args))
-      ; If the evaluation gives false
-      ; return false
-      #f
+(define (eval-and exp)
+  (cond
+    ; If the expression has one element '(and)
+    ; return true, all the evaluations returned true
+    ((= (count exp) 1) #t)
+    ; Else evaluate the first argument of the and expression
+    ((eval-1 (cadr exp))
+      ; If it is true continue evaluating the rest
+      ; of the arguments in the and
+      (eval-1 
+        ; Append operation name to rest of arguments
+        (cons 
+          ; operation name: and
+          (car exp)
+          ; all but first argument, already evaluated
+          (cddr exp)
+        )
+      )
     )
+    ; If the evaluation if false, then the and is false
+    (else #f)
+  )
+)
+
+; Special evaluation for the map special form
+
+(define (eval-map exp)
+  (cond
+    ; If the expression has one element '(and)
+    ; return true, all the evaluations returned true
+    ((= (count exp) 1) #t)
+    ; Else evaluate the first argument of the and expression
+    ((eval-1 (cadr exp))
+      ; If it is true continue evaluating the rest
+      ; of the arguments in the and
+      (eval-1 
+        ; Append operation name to rest of arguments
+        (cons 
+          ; operation name: and
+          (car exp)
+          ; all but first argument, already evaluated
+          (cddr exp)
+        )
+      )
+    )
+    ; If the evaluation if false, then the and is false
+    (else #f)
   )
 )
 
 
-;(trace eval-1 apply-1 constant? and-exp? quote-exp? if-exp? eval-and)
 
 ;; SUBSTITUTE substitutes actual arguments for *free* references to the
 ;; corresponding formal parameters.  For example, given the expression
