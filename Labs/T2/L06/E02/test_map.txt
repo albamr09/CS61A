@@ -1,0 +1,20 @@
+(map-1
+  first 
+  '(hola me llamo)
+)
+
+(map-1
+  (lambda
+    (x)
+    (first x)
+  ) 
+  '(hola me llamo)
+)
+
+(map-1
+  (lambda
+    (x)
+    (* x 2)
+  )
+  '(1 2 3 4)
+)

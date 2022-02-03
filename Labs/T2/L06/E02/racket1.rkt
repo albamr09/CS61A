@@ -83,6 +83,10 @@
     ((and-exp? exp) 
       (eval-and exp)
     )
+    ; If it is an and expression
+    ((map-exp? exp) 
+      (eval-map exp)
+    )
     ; ns, namespace is needed to initialize the current namespace
     ; else if this is not called while in interactive mode it will fail
     ; symbol: keywords of scheme
@@ -241,32 +245,51 @@
   )
 )
 
-; Special evaluation for the map special form
-
 (define (eval-map exp)
-  (cond
-    ; If the expression has one element '(and)
-    ; return true, all the evaluations returned true
-    ((= (count exp) 1) #t)
-    ; Else evaluate the first argument of the and expression
-    ((eval-1 (cadr exp))
-      ; If it is true continue evaluating the rest
-      ; of the arguments in the and
-      (eval-1 
-        ; Append operation name to rest of arguments
-        (cons 
-          ; operation name: and
-          (car exp)
-          ; all but first argument, already evaluated
-          (cddr exp)
+  ; Explanation for (cdr (caddr exp))
+  ; Given exp = (map-1 first '(1 2 3))
+  ; (cdr exp) = '(first '(1 2 3))
+  ; (cddr exp) = '('(1 2 3))
+  ; (caddr exp) = ''(1 2 3)
+  ; (cdr (caddr exp)) = '((1 2 3))
+  ; args = (cadr (caddr exp)) = '(1 2 3)
+  (let
+    ((args
+      (cadr (caddr exp))
+    ))
+    (if (null? args)
+      ; Stop when there are no more 
+      ; elements in the list
+      '()
+      (cons
+        ; Evaluate the application of the 
+        ; procedure over the fist element of 
+        ; the list
+        (eval-1
+          (list
+            ; Prcedure
+            (cadr exp)
+            ; First element of the list, we 
+            ; use maybe-quote, because if we are working
+            ; with constants we need them double quoted to
+            ; work in racket-1
+            (maybe-quote (car args))
+          )
+        )
+        (eval-map
+          (list
+            
+            (car exp)
+            ; Procedure
+            (cadr exp)
+            ; Rest of the elements (note the double quoting)
+            (maybe-quote (cdr args))
+          )
         )
       )
     )
-    ; If the evaluation if false, then the and is false
-    (else #f)
   )
 )
-
 
 
 ;; SUBSTITUTE substitutes actual arguments for *free* references to the
