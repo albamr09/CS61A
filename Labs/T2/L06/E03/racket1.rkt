@@ -83,7 +83,7 @@
     ((and-exp? exp) 
       (eval-and exp)
     )
-    ; If it is an and expression
+    ; If it is map expression
     ((map-exp? exp) 
       (eval-map exp)
     )
@@ -309,19 +309,23 @@
   ;   (a (+ 1 1))
   ;   (b (+ 1 1))
   ; )
+  ; Where we call (a (+ 1 1)) a let-variable.
   ; We have:
-  ; (caar exp) = a
-  ; (cadr exp) = (+ 1 1) -> we evaluate this with eval-1
-  ; (cdr exp) = ((b (+ 1 1)))
+  ; (car exp) = '(a (+ 1 1))
+  ; (caar exp) = a                -> formal parameter of current let-variable
+  ; (cdr (car exp)) = ((+ 1 1)) 
+  ; (cadr (car exp)) = (+ 1 1)    -> real argument of current let-variable,
+  ;                                  we evaluate this with eval-1
+  ; (cdr exp) = ((b (+ 1 1)))     -> rest of let-variables
   ; ----
   (cond
-    ; If there are no more arguments, return a list with two sublists
+    ; If there are no more let-variables, return a list with two sublists
     ; - formal parameters (i.e. a, b)
     ; - corresponding real arguments (i.e. 2)
     ((null? exp) (list parameters args))
     (else
       (eval-let-helper
-        ; Update expression, remove the first argument 
+        ; Update expression, remove the first let-variable 
         ; to evaluate the next
         (cdr exp)
         ; Update the list of formal parameters
