@@ -279,3 +279,6 @@
 )
 
 ; (adjoint-set-tree 4 tree)
+
+; Exports
+(provide entry left-branch right-branch make-tree adjoint-set-tree)
