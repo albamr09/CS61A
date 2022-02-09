@@ -19,7 +19,93 @@
 ; You should assume for this problem that the body of the procedure to be examined does not contain any 
 ; occurrences of if or cond, although it may contain arbitrarily nested and quoted expressions. (A more 
 ; ambitious inference procedure both would examine a more comprehensive set of procedures and could infer 
-; conditions like "nonempty list".) Here's an example of what your inference procedure should return.
+; conditions like "nonempty list".) 
+
+; If you're really ambitious, you could maintain a database of inferred argument types and use it when 
+; a procedure you've seen is invoked by another procedure you're examining!
+
+(define (mark-as-type args type)
+  (if (pair? (car args))
+    (cond
+      ((list-exp? (caar args)) (mark-as-type (cadr args) 'list))
+      (else
+        'unk
+      )
+    )
+    (cons
+      (list (car args) type)
+      (mark-as-type (cdr args) type)
+    )
+  )
+)
+
+(trace mark-as-type)
+
+(define (inferred-types proc)
+  (let
+    (
+      (params (cdr (cadr proc)))
+      (body (caddr proc))
+    )
+    (if (pair? (car body))
+      'pair
+      (if (member? (car body) params)
+        (cond
+          ((proc-exp? (car body)) 
+            (mark-as-type (cdr body) '?)
+          )
+        )
+        'non-member
+      )
+    )
+    ;(map
+    ;  (lambda
+    ;    (element)
+    ;    (if (pair? element)
+    ;      (inferred-types
+    ;        (list
+    ;          'define 
+    ;          (append 
+    ;            (list (caadr proc))
+    ;            params
+    ;          )
+    ;          element
+    ;        )
+    ;      )
+    ;      ; If it is not a pair
+    ;      (if (member? element params)
+    ;        (cond
+    ;          ((proc-exp? element) 'p)
+    ;          (else
+    ;            #f
+    ;          )
+    ;        )
+    ;        (cond
+    ;          ((list-exp? element) 'l)
+    ;        )
+    ;      )
+    ;    )
+    ;  )
+    ;  body
+    ;)
+  )
+)
+
+(define (proc-exp? exp)
+  (symbol? exp)
+)
+
+(define (list-exp? exp)
+  (or
+    (equal? exp 'append)
+    (equal? exp 'member)
+    (equal? exp 'map)
+  )
+)
+
+(trace proc-exp? inferred-types list-exp?)
+
+; Here's an example of what your inference procedure should return.
 
 (inferred-types
     '(define (foo a b c d e f)
@@ -42,5 +128,3 @@
 ;   (f x)
 ; )
 
-; If you're really ambitious, you could maintain a database of inferred argument types and use it when 
-; a procedure you've seen is invoked by another procedure you're examining!
