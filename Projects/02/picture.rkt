@@ -238,38 +238,88 @@
 
 (define (identity x) x)
 
+; Will be used to shift and scale images to fit the frame. The map transforms the unit square 
+; into the frame by mapping the vector v = (x, y) to the vector sum 
+; Origin(frame) + x · Edge1(frame) + y · Edge2(frame)
 (define (frame-coord-map frame)
   (lambda (v)
     (add-vect
-     (origin-frame frame)
-     (add-vect (scale-vect (xcor-vect v)
-         (edge1-frame frame))
-         (scale-vect (ycor-vect v)
-         (edge2-frame frame))))))
+      ; Origin(frame) 
+      (origin-frame frame)
+      (add-vect 
+        ; x · Edge1(frame)
+        (scale-vect 
+          (xcor-vect v)
+          (edge1-frame frame)
+        )
+        ; y · Edge2(frame)
+        (scale-vect 
+          (ycor-vect v)
+          (edge2-frame frame)
+        )
+      )
+    )
+  )
+)
 
 (define (segments->painter segment-list)
   (lambda (frame)
     (for-each
-     (lambda (segment)
-       (draw-line
-  ((frame-coord-map frame) (start-segment segment))
-  ((frame-coord-map frame) (end-segment segment))))
-     segment-list)))
+      ; For every segment in the list
+      (lambda (segment)
+        ; Draws a line between two specified points
+        (draw-line
+          ; Fit the starting point into frame
+          ((frame-coord-map frame) (start-segment segment))
+          ; Fit the ending point into frame
+          ((frame-coord-map frame) (end-segment segment))
+        )
+      )
+      segment-list
+    )
+  )
+)
+
+; Takes as arguments a painter and information on how to transform a frame and produces a new painter. The transformed painter,
+; when called on a frame, transforms the frame and calls the original painter on the transformed 
+; frame. e arguments to transform-painter are points (represented as vectors) that specify the corners 
+; of the new frame: When mapped into the frame, the first point specifies the new frame’s origin and the other 
+; two specify the ends of its edge vectors. Thus, arguments within the unit square specify a frame contained within 
+; the original frame.
 
 (define (transform-painter painter origin corner1 corner2)
   (lambda (frame)
-    (let ((m (frame-coord-map frame)))
-      (let ((new-origin (m origin)))
-  (painter
-   (make-frame new-origin
-         (sub-vect (m corner1) new-origin)
-         (sub-vect (m corner2) new-origin)))))))
+    (let 
+      ; Mapper for the frame
+      ((m (frame-coord-map frame)))
+      (let 
+        ; Map the new origin (absolute new origin) to the frame
+        ; to obtain the coordinates of the new origin (relarive to the frame)
+        ((new-origin (m origin)))
+        (painter
+          (make-frame 
+            new-origin
+            ; Obtain the new edge coordinates relative to the frame
+            (sub-vect (m corner1) new-origin)
+            ; Obtain the new edge coordinates relative to the frame
+            (sub-vect (m corner2) new-origin)
+          )
+        )
+      )
+    )
+  )
+)
+
+; Transformations 
 
 (define (flip-vert painter)
-  (transform-painter painter
-         (make-vect 0.0 1.0)
-         (make-vect 1.0 1.0)
-         (make-vect 0.0 0.0)))
+  (transform-painter 
+    painter
+    (make-vect 0.0 1.0) ; New origin
+    (make-vect 1.0 1.0) ; New end of edge 1
+    (make-vect 0.0 0.0) ; New end of edge 2
+  )
+)
 
 (define (shrink-to-upper-right painter)
   (transform-painter painter
@@ -364,79 +414,206 @@
 ; (define up-split (split below beside))
 
 ;; Exercise 3
+; A two-dimensional vector v running from the origin to a point can be represented as a pair consisting
+; of an x-coordinate and a y-coordinate. Implement a data abstraction for vectors by giving a constructor make-vect
+; and corresponding selectors xcor-vect and ycor-vect. In terms of your selectors and constructor, implement 
+; procedures add-vect, sub-vect, and scale-vect that perform the operations vector addition, vector 
+; subtraction, and multiplying a vector by a scalar
 
 (define (make-vect major minor)
-  (void "not yet implemented"))
+  (cons major minor)
+)
 
-(define xcor-vect
-  "not yet implemented")
+(define xcor-vect car)
 
-(define ycor-vect
-  "not yet implemented")
+(define ycor-vect cdr)
 
 (define (add-vect v1 v2)
-  (error "not yet implemented"))
+  (make-vect
+    (+
+      (xcor-vect v1)
+      (xcor-vect v2)
+    )
+    (+
+      (ycor-vect v1)
+      (ycor-vect v2)
+    )
+  )
+)
 
 (define (sub-vect v1 v2)
-  (error "not yet implemented"))
+  (make-vect
+    (-
+      (xcor-vect v1)
+      (xcor-vect v2)
+    )
+    (-
+      (ycor-vect v1)
+      (ycor-vect v2)
+    )
+  )
+)
 
 (define (scale-vect s v)
-  (error "not yet implemented"))
+  (make-vect
+    (* s (xcor-vect v))
+    (* s (ycor-vect v))
+  )
+)
+
+; (define vect (make-vect 1 3))
+; (define vect2 (make-vect 3 8))
+; (xcor-vect vect)
+; ; 1
+; (ycor-vect vect)
+; ; 3
+; (add-vect vect vect2)
+; ; (4 11)
+; (sub-vect vect vect2)
+; ; (-2 -5)
+; (scale-vect 2 vect)
+; ; (2 6)
 
 ;; Execise 4
+; For each constructor supply the appropriate selectors to produce an implementation 
+; for frames.
 
 ; First definition of make-frame
 
 (define (make-frame origin edge1 edge2)
   (list origin edge1 edge2))
 
-(define origin-frame
-  "not yet implemented")
+(define origin-frame car)
 
-(define edge1-frame
-  "not yet implemented")
+(define edge1-frame cadr)
 
-(define edge2-frame
-  "not yet implemented")
+(define edge2-frame caddr)
 
 ; Second definition of make-frame
 
 (define (make-frame-2 origin edge1 edge2)
-  (cons origin (cons edge1 edge2)))
+  (cons origin (cons edge1 edge2))
+)
 
-(define origin-frame-2
-  "not yet implemented")
+(define origin-frame-2 car)
 
-(define edge1-frame-2
-  "not yet implemented")
+(define edge1-frame-2 cadr)
 
-(define edge2-frame-2
-  "not yet implemented")
+(define edge2-frame-2 cddr)
+
+; (define o (make-vect 1 1))
+; (define e1 (make-vect 1 3))
+; (define e2 (make-vect 2 5))
+; (define f1 (make-frame o e1 e2))
+; (define f2 (make-frame-2 o e1 e2))
+; 
+; (origin-frame f1)
+; ; (1 1)
+; (edge1-frame f1)
+; ; (1 3)
+; (edge2-frame f1)
+; ; (2 5)
+; 
+; (origin-frame-2 f2)
+; ; (1 1)
+; (edge1-frame-2 f2)
+; ; (1 3)
+; (edge2-frame-2 f2)
+; ; (2 5)
 
 ;; Exercise 5
+; A directed line segment in the plane can be represented as a pair of vectors—the vector running from
+; the origin to the start-point of the segment, and the vector running from the origin to the end-point of the segment.
+; Use your vector representation from Exercise 2.46 to define a representation for segments with a constructor 
+; make-segment and selectors start-segment and end-segment
 
-(define make-segment
-  "not yet implemented")
+(define make-segment cons)
 
-(define start-segment
-  "not yet implemented")
+(define start-segment car)
 
-(define end-segment
-  "not yet implemented")
+(define end-segment cdr)
+
+; (define i (make-vect 1 1))
+; (define o (make-vect 2 5))
+; (define s (make-segment i o))
+; 
+; (start-segment s)
+; ; (1 1)
+; (end-segment s)
+; ; (2 5)
 
 ;; Exercise 6
+; Use segments->painter to define the following primitive painters:
 
-(define outline-painter
-  "not yet implemented")
+; a. The painter that draws the outline of the designated frame.
+; b. The painter that draws an “X” by connecting opposite corners of the frame.
+; c. The painter that draws a diamond shape by connecting the midpoints of the sides of the frame.
+; d. The wave painter.
+
+
+(define outline-painter 
+  (segments->painter
+    (list
+      (make-segment (make-vect 0 0) (make-vect 0 1))
+      (make-segment (make-vect 0 1) (make-vect 1 1))
+      (make-segment (make-vect 1 1) (make-vect 0 1))
+      (make-segment (make-vect 0 1) (make-vect 0 0))
+    )
+  )
+)
 
 (define x-painter
-  "not yet implemented")
+  (segments->painter
+    (list
+      (make-segment (make-vect 0 0) (make-vect 1 1))
+      (make-segment (make-vect 0 1) (make-vect 1 0))
+    )
+  )
+)
 
 (define diamond-painter
-  "not yet implemented")
+  (segments->painter
+    (list
+      (make-segment (make-vect 0.5 0) (make-vect 0.5 0.5))
+      (make-segment (make-vect 0.5 0.5) (make-vect 0.5 1))
+      (make-segment (make-vect 0.5 1) (make-vect 0 0.5))
+      (make-segment (make-vect 0 0.5) (make-vect 0.5 0))
+    )
+  )
+)
 
 (define wave-painter
-  "not yet implemented")
+  (segments->painter
+   (list 
+      (make-segment (make-vect 0 0.7) (make-vect 0.2 0.5))
+      (make-segment (make-vect 0 0.5) (make-vect 0.2 0.3))
+      (make-segment (make-vect 0.2 0.5) (make-vect 0.3 0.6))
+      (make-segment (make-vect 0.3 0.6) (make-vect 0.4 0.6))
+      (make-segment (make-vect 0.4 0.6) (make-vect 0.3 0.8))
+      (make-segment (make-vect 0.3 0.8) (make-vect 0.4 1))
+      (make-segment (make-vect 0.2 0.3) (make-vect 0.3 0.5))
+      (make-segment (make-vect 0.3 0.5) (make-vect 0.4 0.4))
+      (make-segment (make-vect 0.4 0.4) (make-vect 0.2 0))
+      (make-segment (make-vect 0.5 0.3) (make-vect 0.4 0))
+      (make-segment (make-vect 0.5 0.3) (make-vect 0.6 0))
+      (make-segment (make-vect 0.6 1) (make-vect 0.7 0.8))
+      (make-segment (make-vect 0.6 0.6) (make-vect 0.7 0.8))
+      (make-segment (make-vect 0.6 0.6) (make-vect 0.7 0.6))
+      (make-segment (make-vect 1 0.4) (make-vect 0.7 0.6))
+      (make-segment (make-vect 0.7 0.4) (make-vect 1 0.3))
+      (make-segment (make-vect 0.7 0.4) (make-vect 0.8 0))
+    )
+  )
+)
+
+; (define o (make-vect 0 0))
+; (define e1 (make-vect 2 0))
+; (define e2 (make-vect 0 2))
+; (define f1 (make-frame o e1 e2))
+; (outline-painter f1)
+; (x-painter f1)
+; (diamond-painter f1)
+; (wave-painter f1)
 
 ;; Exercise 7
 
