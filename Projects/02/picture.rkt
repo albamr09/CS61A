@@ -150,7 +150,7 @@
   )
 )
 
-; Abstraccion de flipped-pairs y square-limit: ambas colocan cuatro copiar
+; Abstraccion de flipped-pairs y square-limit: ambas colocan cuatro copias
 ; de la imagen del pintor en un patrón cuadrado. La única diferencia es 
 ; cómo se orientan las copias.
 
@@ -189,7 +189,7 @@
   )
 )
 
-; Now we can defien flipped-pairs and square-limit as:
+; Now we can define flipped-pairs and square-limit as:
 
 ; (define (flipped-pairs painter)
 ;   (let 
@@ -300,7 +300,13 @@
           (make-frame 
             new-origin
             ; Obtain the new edge coordinates relative to the frame
-            (sub-vect (m corner1) new-origin)
+            (sub-vect 
+              ; Transform the corner to fit the frame
+              (m corner1) 
+              ; Obtain the vector that connects the new origin
+              ; and the mapped corner1
+              new-origin
+            )
             ; Obtain the new edge coordinates relative to the frame
             (sub-vect (m corner2) new-origin)
           )
@@ -313,47 +319,121 @@
 ; Transformations 
 
 (define (flip-vert painter)
+  ; From:
+  ; e2
+  ; |
+  ; o__e1
+  ; To:
+  ; o--e1
+  ; |
+  ; e2
   (transform-painter 
     painter
-    (make-vect 0.0 1.0) ; New origin
-    (make-vect 1.0 1.0) ; New end of edge 1
-    (make-vect 0.0 0.0) ; New end of edge 2
+    (make-vect 0.0 1.0) ; New origin: (0 0) -> (0 1)
+    (make-vect 1.0 1.0) ; New end of edge 1: (1 0) -> (1 1)
+    (make-vect 0.0 0.0) ; New end of edge 2: (0 1) -> (0 0) 
   )
 )
 
+; Define a painter that shrinks its image to the upperright quarter 
+; of the frame it is given
+
 (define (shrink-to-upper-right painter)
-  (transform-painter painter
-        (make-vect 0.5 0.5)
-        (make-vect 1.0 0.5)
-        (make-vect 0.5 1.0)))
+  ; From:
+  ; e2
+  ; |
+  ; |
+  ; o_____e1
+  ; To:
+  ;    e2
+  ;    |
+  ; ---o---e1
+  ;    |
+  (transform-painter 
+    painter
+    (make-vect 0.5 0.5) ; New origin
+    (make-vect 1.0 0.5) ; New end of edge 1
+    (make-vect 0.5 1.0) ; New end of edge 2
+  )
+)
+
+; Rotate images counterclockwise by 90 degrees
 
 (define (rotate90 painter)
-  (transform-painter painter
-         (make-vect 1.0 0.0)
-         (make-vect 1.0 1.0)
-         (make-vect 0.0 0.0)))
+  ; From:
+  ; e2
+  ; |
+  ; o___e1
+  ; To:
+  ;      e1
+  ;      |
+  ; e2___o
+  (transform-painter 
+    painter
+    (make-vect 1.0 0.0)
+    (make-vect 1.0 1.0)
+    (make-vect 0.0 0.0)
+  )
+)
+
+; Squash images towards the center of the frame
 
 (define (squash-inwards painter)
-  (transform-painter painter
-         (make-vect 0.0 0.0)
-         (make-vect 0.65 0.35)
-         (make-vect 0.35 0.65)))
+  (transform-painter 
+    painter
+    (make-vect 0.0 0.0)
+    (make-vect 0.65 0.35)
+    (make-vect 0.35 0.65)
+  )
+)
+
+; Takes two painters, transforms them to paint in the left and right halves of an
+; argument frame respectively, and produces a new, compound painter
 
 (define (beside painter1 painter2)
-  (let ((split-point (make-vect 0.5 0.0)))
-    (let ((paint-left
-     (transform-painter painter1
-            (make-vect 0.0 0.0)
-            split-point
-            (make-vect 0.0 1.0)))
-    (paint-right
-     (transform-painter painter2
-            split-point
-            (make-vect 1.0 0.0)
-            (make-vect 0.5 1.0))))
+  ; From: 
+  ; e2
+  ; |
+  ; o---e1
+  ; To:
+  ; painter1|painter2
+  ; e2      |e2
+  ; |       ||
+  ; o_____e1|o_____e1
+  (let 
+    ((split-point (make-vect 0.5 0.0)))
+    (let 
+      (
+        (paint-left
+          ; Get new painter from transformed frame
+          (transform-painter 
+            painter1
+            ; Transform the frame
+            (make-vect 0.0 0.0) ; Normal Origin
+            split-point         ; Edge1 until split
+            (make-vect 0.0 1.0) ; Normal Edge2
+          )
+        )
+        (paint-right
+          ; Get new painter from transformed frame
+          (transform-painter 
+            painter2
+            ; Transform the frame
+            split-point         ; Offset origin 0.5 on the x
+            (make-vect 1.0 0.0) ; Normal edge1
+            (make-vect 0.5 1.0) ; Offset edge2 0.5 on the x
+          )
+        )
+      )
+      ; Call the painters with the frame
+      ; given as argument
       (lambda (frame)
-  (paint-left frame)
-  (paint-right frame)))))
+        (paint-left frame)
+        (paint-right frame)
+      )
+    )
+  )
+)
 
 ;; End of picture language code
 
@@ -616,50 +696,203 @@
 ; (wave-painter f1)
 
 ;; Exercise 7
+; Define the transformation flip-horiz, which
+; flips painters horizontally, and transformations that rotate
+; painters counterclockwise by 180 degrees and 270 degrees.
 
 (define (flip-horiz painter)
-  (error "not yet implemented"))
+  ; From:
+  ; e2
+  ; |
+  ; o__e1
+  ; To:
+  ;     e2
+  ;     |
+  ; e1--o
+  (transform-painter
+    painter
+    (make-vect 1.0 0.0) ; Origin o
+    (make-vect 0.0 0.0) ; Edge1 e1
+    (make-vect 1.0 1.0) ; Edge2 e2
+  )
+)
 
 (define (rotate180 painter)
-  (error "not yet implemented"))
+  ; From:
+  ; e2
+  ; |
+  ; o__e1
+  ; To:
+  ; e1--o
+  ;     |
+  ;     e2
+  (transform-painter
+    painter
+    (make-vect 1.0 1.0)
+    (make-vect 0.0 1.0)
+    (make-vect 1.0 0.0)
+  )
+)
 
 (define (rotate270 painter)
-  (error "not yet implemented"))
+  ; From:
+  ; e2
+  ; |
+  ; o__e1
+  ; To:
+  ; o--e2
+  ; |
+  ; e1
+  (transform-painter
+    painter
+    (make-vect 0.0 1.0)
+    (make-vect 0.0 0.0)
+    (make-vect 1.0 1.0)
+  )
+)
 
 ;; Exercise 8
+; Define the below operation for painters. below takes two painters as arguments. The resulting 
+; painter, given a frame, draws with the first painter in the bottom of the frame and with the 
+; second painter in the top. Define below in two different ways—first by writing a procedure 
+; that is analogous to the beside procedure given above, and again in terms of beside and suitable 
+; rotation operations
 
 (define (below painter1 painter2)
-  (error "not yet implemented"))
+  ; From: 
+  ; e2
+  ; |
+  ; o---e1
+  ; To:
+  ; painter1
+  ; e2      
+  ; |       
+  ; o_____e1
+  ; painter2
+  ; e2        
+  ; |
+  ; o_____e1
+  
+  (let
+    ((split-point (make-vect 0.0 0.5)))
+    (let
+      (
+        (painter-up
+          (transform-painter
+            painter1
+            split-point         ; Offset origin by 0.5 on the y
+            (make-vect 1.0 0.5) ; Offset edge1 by 0.5 on the y
+            (make-vect 0.0 1.0) ; Normal edge2
+          )
+        )
+        (painter-down
+          (transform-painter
+            painter2
+            (make-vect 0.0 0.0) ; Normal origin
+            (make-vect 1.0 0.0) ; Normal edge1
+            split-point         ; Normal edge2, but only until 0.5 on the y
+          )
+        )
+      )
+      (lambda
+        (frame)
+        (painter-up frame)
+        (painter-down frame)
+      )
+    )
+  )
+)
 
 (define (below-2 painter1 painter2)
-  (error "not yet implemented"))
+  ; From: 
+  ; e2
+  ; |
+  ; o---e1
+  ; To (beside):
+  ; painter1|painter2
+  ; e2      |e2
+  ; |       ||
+  ; o_____e1|o_____e1
+  ; To (rotate):
+  ; painter1
+  ; e2      
+  ; |       
+  ; o_____e1
+  ; painter2
+  ; e2        
+  ; |         
+  ; o_____e1  
+  (rotate270 (beside painter1 painter2))
+)
 
 ;; Exercise 9
+; Make changes to the square limit of wave shown in Figure 2.9 by working at each of the 
+; levels described above. In particular:
 
+; a. Add some segments to the primitive wave painter of (to add a smile, for example)
 ; Modify wave-painter above (Exercise 6)
 
-; Modify me!
-(define (corner-split-2 painter n)
-  (if (= n 0)
-      painter
-      (let ((up (up-split painter (- n 1)))
-      (right (right-split painter (- n 1))))
-  (let ((top-left (beside up up))
-        (bottom-right (below right right))
-        (corner (corner-split-2 painter (- n 1))))
-    (beside (below painter top-left)
-      (below bottom-right corner))))))
+; b: Change the pattern constructed by corner-split (for example, by using only one copy of 
+; the up-split and right-split images instead of two)
 
-; Modify me!
+(define (corner-split-2 painter n)
+  ; If n = 0 make no more splits
+  (if (= n 0)
+    painter
+    (let 
+      (
+        ; Generate a top split
+        (up (up-split painter (- n 1)))
+        ; Generate a right split
+        (right (right-split painter (- n 1)))
+      )
+      (let 
+        (
+          ; Cotinue splitting the right corner
+          (corner (corner-split-2 painter (- n 1)))
+        )
+        ; Put it all together
+        (beside 
+          ; Put the original below the up image
+          (below painter up)
+          ; Put the right image below the top 
+          ; right corner (will recursively be splitted)
+          (below right corner)
+        )
+      )
+    )
+  )
+)
+
+; c. Modify the version of square-limit that uses squareof-four so as to assemble the 
+; corners in a different pattern. (For example, you might make the big Mr. Rogers look 
+; outward from each corner of the square.)
+
 (define (square-limit-2 painter n)
-  (let ((combine4 (square-of-four flip-horiz identity
-                                  rotate180 flip-vert)))
-    (combine4 (corner-split painter n))))
+  (let 
+    ((combine4 
+      (square-of-four 
+        ; Do not transform the top left copy
+        identity 
+        ; Flip horizontally the top right copy
+        flip-horiz 
+        ; Flip vertically the bottom left copy
+        flip-vert
+        ; Rotate 180 the bottom right copy
+        rotate180 
+      )
+    ))
+    (combine4 (corner-split painter n))
+  )
+)
 
 ;; End of project
 ;; Don't touch anything below this
 
 (define full-frame
-  (make-frame (make-vect 0.5 0.5)
-              (make-vect 1 0)
-              (make-vect 0 1)))
+  (make-frame 
+    (make-vect 0.5 0.5)
+    (make-vect 1 0)
+    (make-vect 0 1)
+  )
+)
