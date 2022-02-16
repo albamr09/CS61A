@@ -1,7 +1,11 @@
 #lang racket
 
+; (require graphics/turtles)
+
 (require (rename-in graphics/turtles
            (split turtle-split)))
+(turtles #t)
+
 
 (provide (all-defined-out))
 
@@ -896,3 +900,20 @@
     (make-vect 0 1)
   )
 )
+
+;;;;;;;;;;;
+;; TEST
+;;;;;;;;;;;
+
+; (outline-painter full-frame)
+; (x-painter full-frame)
+; (diamond-painter full-frame)
+; ((flip-horiz wave-painter) full-frame)
+; ((rotate180 wave-painter) full-frame)
+; ((rotate270 wave-painter) full-frame)
+; ((below wave-painter wave-painter) full-frame)
+; ((below-2 wave-painter wave-painter) full-frame)
+; ((corner-split-2 wave-painter 5) full-frame)
+; ((square-limit-2 wave-painter 5) full-frame)
+; ((square-limit wave-painter 5) full-frame)
+
