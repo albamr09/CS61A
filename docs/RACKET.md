@@ -23,6 +23,14 @@ $ raco pkg install berkeley
 $ raco pkg install sugar 
 ```
 
+## Local libraries
+
+In some instances we will use custom libraries given by berkeley:
+
+- `obj.rkt`: The OOP (Object Oriented Programming) library, that allows you to code using this programming style, given it is not natively implemented in scheme.
+    Note that it has been modified to work correctly, the original can be found in [`obj.rkt`](https://github.com/tmaetzold/cs61as/blob/master/lib/obj.rkt)
+    - Procedures modified: `get-instance-var-stuff` and `get-parent-stuff`
+
 ---
 
 ## Use the module

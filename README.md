@@ -27,6 +27,12 @@ For the labs, we follow the naming convention given by:
 ```
 ./Labs/T{unit_number}/L{lab_number}/E{exercise_number}.scm
 ```
+
+## Libs
+
+- For scheme libraries refer to [`Scheme Compiler (MIT/GNU)`](./docs/MIT.md)
+- For racket libraries refer to [`Racket Compiler`](./docs/RACKET.md)
+
 ---
 
 ### Structure
@@ -57,13 +63,16 @@ Also inside the books problems, there will be some programs written on the notes
 
 #### Custom Interpreters
 
-Throughout the course we will create an interpreter, that will be built little by little. So we'll manage four versions:
+Throughout the course we will create an interpreter, that will be built little by little. So we'll manage several versions:
 
 1. `./BProblems/T2/Notes/racket1.rkt` (mind you, this is made to work with racket, not the MIT compiler)
   - The tests are in `./BProblems/T2/Notes/W05_7.rkt`. Execute `racket W05_7.rkt` to run the interpreter.
-2. -
-3. -
-4. -
+2. In `./Labs/T2/L06/E02` and `./Labs/T2/L06/E03`, there are two different versions of the interpreter, each of which add new evaluation rules. 
+  - `./Labs/T2/L06/E02`: implements a rule to evaluate an `and` expression
+  - `./Labs/T2/L06/E03`: implements a rule to evaluate a `map` expression
+However the interpreter with the most functionality is in `./Labs/T2/L06/E03`.
+3. 
+4. 
 
 ---
 
