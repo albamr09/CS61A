@@ -6,6 +6,7 @@ Repository for the labs assignments, and projects for the [Computer Science 61A 
 
 - Using the [`Scheme Compiler (MIT/GNU)`](./docs/MIT.md)
 - Using the [`Racket Compiler`](./docs/RACKET.md)
+- Using the [`STklos Compiler`](./docs/STk.md)
 
 ## Projects
 
