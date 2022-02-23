@@ -62,7 +62,7 @@ stklos -l library.stk
 ### Run a program
 
 ```bash
-stklos -f program.stk
+stklos -i < program.stk
 ```
 
 The rest you can figure it out with `stklos -h`
