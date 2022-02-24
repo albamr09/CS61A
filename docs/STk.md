@@ -1,6 +1,6 @@
 # STk 
 
-For some reason, we are going to use yet another scheme implementation: `STklos`. It will be mainly used from OOP on (T3).
+For some reason, we are going to use yet another scheme interpreter: `STklos`. It will be mainly used in OOP (T3).
 
 ## Installation
 
@@ -16,7 +16,7 @@ cd stklos-${your_version}/
 ```
 3. Configure the installation with `configure`
 ```bash
-bash /configure
+bash ./configure
 ```
 4. Compile the interpreter
 ```bash
@@ -29,7 +29,7 @@ sudo make install
 
 ---
 
-Just is case we have not yet tried all flavours, you can look into the original [STk](http://kaolin.unice.fr/STk/Binary/), and try to install it.
+Just is case we have not tried all flavours, you can look into the original [STk](http://kaolin.unice.fr/STk/Binary/), and try to install it.
 
 ```bash
 tar -xvf STk-4.0.1.tar.gz
@@ -65,4 +65,10 @@ stklos -l library.stk
 stklos -i < program.stk
 ```
 
-The rest you can figure it out with `stklos -h`
+To load the `simply.scm` library:
+
+```bash
+stklos -l ../../../lib/simply.scm -i < E01.scm
+```
+
+The rest you can figure out with `stklos -h`

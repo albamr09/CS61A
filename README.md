@@ -5,13 +5,14 @@ Repository for the labs assignments, and projects for the [Computer Science 61A 
 ## Set up
 
 - Using the [`Scheme Compiler (MIT/GNU)`](./docs/MIT.md)
-- Using the [`Racket Compiler`](./docs/RACKET.md)
-- Using the [`STklos Compiler`](./docs/STk.md)
+- Using the [`Racket`](./docs/RACKET.md)
+- Using the [`STklos`](./docs/STk.md)
 
 ## Projects
 
 - [Twenty One](./Projects/01)
 - [Twenty One | GUI](./Projects/01/GUI) (working on it)
+- [Picture Language](./Projects/02)
 
 ## Notes
 
