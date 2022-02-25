@@ -30,12 +30,6 @@
 (define mike (instantiate double-talker 'mike))
 (ask mike 'say '(hello))
 
-; Given
-; > (ask mike 'say '(hello))
-; Returns
-; (hello)
-; (hello)
-
 ; -------------------
 
 (define-class (double-talker name)
@@ -48,27 +42,22 @@
 (define mike (instantiate double-talker 'mike))
 (ask mike 'say '(hello))
 
-; Given
-; > (ask mike 'say '(hello))
-; Returns
-; (hello hello)
-
 ; -------------------
+
+; This respects the hierarchy, calling the parent class
+; but with a different argument. The duplicated phrase in 
+; this case
 
 (define-class (double-talker name)
   (parent (person name))
   (method (say stuff) 
+    ; Call the parent's method
     (usual 'say (se stuff stuff))
   ) 
 )
 
 (define mike (instantiate double-talker 'mike))
 (ask mike 'say '(hello))
-
-; Given
-; > (ask mike 'say '(hello))
-; Returns
-; (hello hello)
 
 ; -------------------
 
