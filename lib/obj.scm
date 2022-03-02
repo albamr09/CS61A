@@ -25,10 +25,18 @@
 ; argument values.
 
 (define (ask object message . args)
-  (let ((method (object message)))
+  (let 
+    ; Obtain the procedure with message passing
+    ((method (object message)))
+    ; If the procedure exists
     (if (method? method)
-	(apply method args)
-	(error "No method " message " in class " (cadr method)))))
+      ; Apply the procedure on the arguments
+	    (apply method args)
+      ; Else throw error
+	    (error "No method " message " in class " (cadr method))
+    )
+  )
+)
 
 (define (no-method name)
   (list 'no-method name))
