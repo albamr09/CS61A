@@ -8,8 +8,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (make-account balance password)
-  ; Ask for password, and return #t of #f if the 
-  ; password is correct
+  ; Ask for password, and return #t or #f where the 
+  ; password is correct or incorrect
   (define (check-password)
     (display "Enter password: ")
     (let
@@ -56,7 +56,7 @@
   dispatch ; Value that represents the bank-account object
 )
 
-; Do it on the interpreter, to read from stinput the password
+; Do it on the interpreter, to read from stdinput the password
 ; (define acc (make-account 100 'secret-password))
 ; ((acc 'withdraw) 50)
 ; ((acc 'deposit) 150)
