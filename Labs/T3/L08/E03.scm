@@ -1,6 +1,4 @@
-#lang racket
-(require berkeley)
-(require "E02.scm")
+(load "E02.scm")
 ; Consider the bank account objects created by make-account, with the password modification described
 ; in Exercise 01. Suppose that our banking system requires the ability to make joint accounts. Define a 
 ; procedure make-joint that accomplishes this make-joint should take three arguments. 
@@ -22,19 +20,51 @@
 
 (define (make-joint account account-password joint-password)
   (define joint-account (make-account 0 joint-password))
+  ; Dispatch one of the methods given
+  ; the operation name: "m"
+  ; (define (dispatch m pass)
+  ;   ((joint-account 'joint pass)
+  ;     (account m account-password)
+  ;   )
+  ; )
   (define (dispatch m pass)
-    ; Call check-password with the joint account password
-    (account m account-password)
-    ; ((joint-account 'check-password pass)
-    ;   ; proc-true on E02, pass it the original account password
-    ; )
+    (let
+      ((result (joint-account 'check-pass pass)))
+      (cond
+        ((equal? (result '()) "Incorrect password")
+          result
+        )
+        ((equal? (result '()) "I called the cops")
+          result
+        )
+        (else
+          (account m account-password)
+        )
+      )
+    )
   )
-  ; Return the procedure dispatch
-  ; that handles the message passing
   dispatch
 ) 
 
-(define acc (make-account 100 '1234))
-(define joint-acc (make-joint acc '1234 '123))
-
-((joint-acc 'withdraw '123) 50)
+; (define acc (make-account 150 '1234))
+; (define joint-acc (make-joint acc '1234 '123))
+; 
+; ((joint-acc 'withdraw '12) 50)
+; ((joint-acc 'withdraw '12) 50)
+; ((joint-acc 'withdraw '12) 50)
+; ((joint-acc 'withdraw '12) 50)
+; ((joint-acc 'withdraw '12) 50)
+; ((joint-acc 'withdraw '12) 50)
+; ((joint-acc 'withdraw '12) 50)
+; ; I called the cops
+; (acc 'balance '1234)
+; ; 150
+; ((joint-acc 'withdraw '123) 50)
+; ; 100
+; (acc 'balance '1234)
+; ; 100
+; ((joint-acc 'withdraw '123) 50)
+; (joint-acc 'balance '123)
+; ; 50
+; (acc 'balance '1234)
+; ; 50
