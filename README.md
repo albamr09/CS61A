@@ -13,6 +13,7 @@ Repository for the labs assignments, and projects for the [Computer Science 61A 
 - [Twenty One](./Projects/01)
 - [Twenty One | GUI](./Projects/01/GUI) (working on it)
 - [Picture Language](./Projects/02)
+- [Adventure Game](./Projects/03)
 
 ## Notes
 
