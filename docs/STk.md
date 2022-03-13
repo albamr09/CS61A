@@ -148,7 +148,7 @@ We use EnvDraw to draw environment diagrams,
 1. We install envdraw:
 - We extract the file `envdraw.tar.xz` in the resources folder. You can also find it in [EnvDraw](https://inst.eecs.berkeley.edu/~cs3s/stk/site-scheme/envdraw/), but
     - the file `placement.stk` has been modified (we removed the last parenthesis) because of a syntax error.
-    - the executable `envdraw` has also been modified to use my libraries
+    - the executable `envdraw` has also been modified to use my libraries (it is advisable to check this executable, to see if all the environment variables are correct)
 
 ```bash 
 $ tar -xvf envdraw.tar.xz
@@ -171,4 +171,12 @@ STk> (view l)
 ```scheme
 STk> (envdraw)
 ```
+
+![EnvDraw](/docs/envdraw.png)
+
+```scheme
+STk> (define (f n) n)
+```
+
+![Define](/docs/define.png)
 
