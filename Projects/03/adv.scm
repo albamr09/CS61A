@@ -226,7 +226,10 @@
 	        (lambda 
             (name)
 	          (let 
-              ((self '()) (possessor 'no-one))
+              (
+                (self '()) 
+                (possessor 'no-one)
+              )
 	            (define (dispatch message)
 	              (cond
 	                ((eq? message 'initialize)

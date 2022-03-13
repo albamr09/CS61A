@@ -1,0 +1,20 @@
+# Tests E01
+
+-------------------------------------------------
+## STklos
+
+If no stdinput is required for the program 
+
+$ stklos -l ../../lib/simply.scm -i < E01.scm 
+
+Else
+
+$ stklos -l ../../lib/simply.scm
+STk > (load "E01.scm")
+
+-------------------------------------------------
+## STk
+
+$ stk -l ../../lib/simply.scm
+STk > (load "E01.scm")
+
