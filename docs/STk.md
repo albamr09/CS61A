@@ -172,11 +172,11 @@ STk> (view l)
 STk> (envdraw)
 ```
 
-![EnvDraw](/docs/envdraw.png)
+![EnvDraw](/docs/img/envdraw.png)
 
 ```scheme
 STk> (define (f n) n)
 ```
 
-![Define](/docs/define.png)
+![Define](/docs/img/define.png)
 
