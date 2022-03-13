@@ -68,8 +68,6 @@
     )
   )
 )
-    
-
 
 (ask s-h 'add-entry-procedure
  (lambda () (print "Miles and miles of students are waiting in line..."))

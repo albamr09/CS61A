@@ -70,10 +70,10 @@ Just is case we have not tried all flavours, you can look into the original [STk
 
 **Update**
 
-Well, I have installed it. Inside the `resources` folders there are two files for the binaries of the STk interpreter (two different versions).
+Well, I have installed it. Inside the `resources` folder, there is the `STk` folder, where the `.deb` package is (this was converted from `.rpm` to `.deb` with alien)
+The `.rpm` file is in [STk Berkeley](http://inst.eecs.berkeley.edu/~scheme/precompiled/Linux/STk-4.0.1-ucb1.3.6.i386.rpm)
 
 First of all, we need to convert the `.rmp` to a `.deb` file, and for that we need `alien`.
-I have also saved the `.deb` file in the `resources` folder, in case you did not want to go through all the trouble.
 So in ubuntu:
 
 ```bash
@@ -83,8 +83,8 @@ $ sudo apt-get install alien
 Now we convert it in a roundabout way, because obviously (basically it is because my sistem is 64 bits, and this package was built for 32 bit systems):
 
 ```bash
-$ sudo alien --scripts --to-tgz STk-4.0.1-1.i586.rpm
-$ sudo alien --scripts --to-deb STk-4.0.1.tgz
+$ sudo alien --scripts --to-tgz STk-4.0.1-ucb1.3.6.i386.rpm
+$ sudo alien --scripts --to-deb STk-4.0.1-ucb1.3.6.i386.tgz
 ```
 
 Finally we install `STk`:
@@ -145,28 +145,17 @@ STk> (load "program.stk")
 
 We use EnvDraw to draw environment diagrams, 
 
-1. We need to install the slib library, you can do that using a package manager 
+1. We install envdraw:
+- We extract the file `envdraw.tar.xz` in the resources folder. You can also find it in [EnvDraw](https://inst.eecs.berkeley.edu/~cs3s/stk/site-scheme/envdraw/), but
+    - the file `placement.stk` has been modified (we removed the last parenthesis) because of a syntax error.
+    - the executable `envdraw` has also been modified to use my libraries
 
-```bash
-$ sudo apt-get install slib
-```
-
-or by downloading the [Slib library](https://inst.eecs.berkeley.edu/~cs3s/stk/slib/). 
-
-```bash
-$ wget -r -np -nH --cut-dirs=3 -R index.html https://inst.eecs.berkeley.edu/\~cs3s/stk/slib/
-```
-
-Note that you must place it in `/usr/lib/slib/` (see the executable `./envdraw`)
-
-2. Now we install envdraw:
-- We extract the file `envdraw.tar.xz` in the resources folder. You can also find it in [EnvDraw](https://inst.eecs.berkeley.edu/~cs3s/stk/site-scheme/envdraw/), but the file `placement.stk` has been modified (we removed the last parenthesis) because of a syntax error.
 ```bash 
 $ tar -xvf envdraw.tar.xz
 ```
-- We copy the file to our preferred directory (for example our home directory).
 
-3. To start STk with envdraw, the first time we run it with sudo (permission problems on the stk lib directory: `/usr/local/lib/stk/4.0.1`). So, we head to the folder where the envdraw installation is, and then we go into `lib`. There we will find an executable (if no give execute permissions) `envdraw`, we run like so:
+2. To start STk with envdraw, the first time we run it with sudo (permission problems on the stk lib directory: `/usr/local/lib/stk/`). So, we head to the folder where the envdraw installation is, and then we go into `lib`. There we will find an executable (if no give execute permissions) `envdraw`, we run like so:
+
 ```bash
 $ sudo ./envdraw
 ```
