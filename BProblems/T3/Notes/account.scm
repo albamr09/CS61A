@@ -50,7 +50,7 @@
 ; 1000
 
 (define Hal-Account (instantiate checking-account 1000))
-(ask Hal-Account 'balance))
+(ask Hal-Account 'balance)
 ; 1000
 (ask Hal-Account 'deposit 100)
 ; 1100
