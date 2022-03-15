@@ -9,7 +9,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-class (place name)
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ; Instance variables
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (instance-vars
     (directions-and-neighbors '())
     (things '())
@@ -18,7 +21,10 @@
     (exit-procs '())
   )
 
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ; Methods
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
   (method (type) 'place)
   (method (neighbors) (map cdr directions-and-neighbors))
   (method (exits) (map car directions-and-neighbors))
@@ -41,11 +47,25 @@
     'appeared
   )
 
+  ; // E04_1: Send a notice to every person that is in the place
   (method (enter new-person)
+    ; Check if the person is already in the place
     (if (memq new-person people)
 	    (error "Person already in this place" (list name new-person))
     )
+    ; Before updating the list of people in the place
+    (for-each 
+      ; Send notice message to everyone in the place
+      (lambda 
+        (person) 
+        (ask person 'notice self)
+      )
+      ; List of people in the place
+      people
+    )
+    ; Update the list of people in the place
     (set! people (cons new-person people))
+    ; Call every enter procedure define for the place
     (for-each 
       (lambda (proc) (proc)) 
       entry-procs
@@ -86,6 +106,13 @@
     'connected
   )
 
+  ; // E04_2: may-enter?, always return true for a regular place
+  (method (may-enter? person)
+    #t
+  )
+
+  ; Methods for updating the list of procedures to call 
+  ; when a person enters/exits the place
   (method (add-entry-procedure proc)
     (set! entry-procs (cons proc entry-procs))
   )
@@ -103,6 +130,57 @@
     (set! entry-procs '())
     'cleared
   ) 
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; E04_2: LOCKED PLACE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define-class (locked-place name key-lock)
+
+  ; Define the place class as the parent
+  (parent (place name))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Instance variables
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (instance-vars
+    (unlocked #f)
+  )
+  (method (may-enter? person) unlocked)
+  (method (unlock key)
+    (cond
+      ; If the place is already unlocked
+      (unlocked
+        (print "Oh dear, just check the doorknob")
+      )
+      ; If the key is correct
+      ((equal? key key-lock)
+        (set! unlocked #t)
+        (print (word "You have unlocked " name))
+      )
+      ; If the key is not correct
+      (else
+        (error "You cannot seriouly suppose that is the key...")
+      )
+    )
+  )
+  (method (lock key)
+    (cond
+      ; If the place is already locked
+      ((not unlocked)
+        (print "What are you doing, the place is already locked my friend")
+      )
+      ; If the key is correct
+      ((equal? key key-lock)
+        (set! unlocked #f)
+        (print (word "You have locked " name))
+      )
+      ; If the key is not correct
+      (else
+        (error "I am sorry to disclose to you: that is not the key")
+      )
+    )
+  )
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -195,18 +273,30 @@
 	        (error "Can't go" direction)
         )
 	      (else
-	        (ask place 'exit self)
-	        (announce-move name place new-place)
-	        (for-each
-	          (lambda 
-              (p)
-		          (ask place 'gone p)
-		          (ask new-place 'appear p)
+          ; Check if the place we are going is locked
+          (if (ask new-place 'may-enter? self)
+            ; If the place is not locked
+            (begin
+              ; Leave the previous place
+	            (ask place 'exit self)
+	            (announce-move name place new-place)
+              ; Move the person's possessions to the old place to the
+              ; new place
+	            (for-each
+	              (lambda 
+                  (p)
+		              (ask place 'gone p)
+		              (ask new-place 'appear p)
+                )
+	              possessions
+              )
+              ; Update the place where the person is
+	            (set! place new-place)
+              ; Enter the place
+	            (ask new-place 'enter self)
             )
-	          possessions
+            (error "Where do you think you are going?!?! The place is locked!")
           )
-	        (set! place new-place)
-	        (ask new-place 'enter self)
         )
       )
     )
