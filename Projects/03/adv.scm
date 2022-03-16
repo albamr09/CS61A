@@ -1,4 +1,5 @@
 (load "../../lib/obj.scm")
+(load "./tables.scm")
 
 ;; ADV.SCM
 ;; This file contains the definitions for the objects in the adventure
@@ -184,6 +185,85 @@
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; E05: GARAGE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define-class (garage name)
+
+  ; Define the place class as the parent
+  (parent (place name))
+
+  ; Serial number for tickets
+  (class-vars (serial-num-counter 0))
+
+  ; Store the tickets in a table
+  (instance-vars
+    (ticket-table (make-table))
+  )
+
+  (method (park vehicle)
+    ; Get the owner of the vehicle
+    (define owner (ask vehicle 'possessor))
+    ; Check if it exists
+    (if (not (eq? owner 'no-one))
+      ; Check if the vehicle is in the garage
+      (if (memq vehicle (usual 'things))
+        (begin
+          ; Generate serial number for the ticket
+          (set! serial-num-counter (+ serial-num-counter 1))
+          ; Save the ticket for the vehicle in the table
+          ; - key: serial-num-counter
+          ; - value: vehicle
+          (insert! serial-num-counter vehicle ticket-table)
+          ; Leave the car in the park
+          (ask owner 'lose vehicle)
+          ; The owner takes the ticket
+          (let
+            ; Create ticket
+            ((parking-ticket
+              (instantiate ticket serial-num-counter)
+            ))
+            ; Put the ticket in the parking
+            (ask self 'appear parking-ticket)
+            ; Take the ticket
+            (ask owner 'take parking-ticket)
+          )
+        )
+        (error "I am sorry, but you cannot a park a car if it is not in the park")
+      )
+      (error "Wait a minute! This car has no owner!")
+    )
+  )
+  (method (unpark parking-ticket)
+    ; Check if the object is a ticket
+    (if (ticket? parking-ticket)
+      ; Search the ticket in the table
+      (let
+        ; Obtain the serial number of the ticket
+        ((ticket-number (ask parking-ticket 'number)))
+        ; If there is a car for the ticket
+        (if (lookup ticket-number ticket-table)
+          (let
+            ; Obtain the owner of the ticket
+            ((owner (ask parking-ticket 'possessor)))
+            ; Leave the ticket 
+            (ask owner 'lose parking-ticket)
+            ; Take the car
+            (ask owner 'take 
+              ; Car
+              (lookup ticket-number ticket-table)
+            )
+            ; Reset the value for the entry on the table (not unparking twice)
+            (insert! ticket-number #f ticket-table)
+          )
+          (error "Hmm, I cannot seem to find your car miss...")
+        )
+      )
+      (error "Oh dear! This is not a ticket, you can only unpark with a ticket")
+    )
+  )
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; PERSON
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -355,6 +435,55 @@
   )
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; E05: TICKET
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define ticket
+  (let 
+    ; Initialize the name to ticket
+    ((name 'ticket))
+    (lambda (class-message)
+      (cond
+        ; Instantiation
+        ((eq? class-message 'instantiate)
+	        (lambda 
+            ; Parameters of the class
+            (number)
+	          (let 
+              (
+                (self '()) 
+                ; Define the parent
+                (parent (instantiate thing name))
+              )
+              ; Dispatch
+	            (define (dispatch message)
+	              (cond
+                  ; Initialization of instance variables
+	                ((eq? message 'initialize)
+	        	        (lambda 
+                      (value-for-self)
+	        	          (set! self value-for-self)
+                    )
+                  )
+                  ; Number of ticket
+	                ((eq? message 'number) (lambda () number))
+                  ; Deletation to the parent
+	                (else (parent message))
+                )
+              )
+	            dispatch
+            )
+          )
+        )
+        (else 
+          (error "Bad message to class" class-message)
+        )
+      )
+    )
+  )
+)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Implementation of thieves for part two
@@ -498,3 +627,34 @@
     (eq? (ask obj 'type) 'thing)
   )
 )
+
+;; E05: Check if object is a ticket
+(define (ticket? obj)
+  (and 
+    (procedure? obj)
+    (eq? (ask obj 'name) 'ticket)
+  )
+)
+
+;;;;;;;;;;;
+;; E05: Get a ticket from the a persons posessions
+
+(define (get-ticket obj)
+  (if (person? obj)
+    ; Filter the person's possessions
+    (filter-ticket 
+      (ask obj 'possessions)
+    )
+  )
+)
+
+; Recursive process, stops when it finds a ticket
+(define (filter-ticket tickets)
+  (if (ticket? (car tickets))
+    ; Return the ticket
+    (car tickets)
+    ; Keep searching
+    (filter-ticket (cdr tickets))
+  )
+)
+;;;;;;;;;;;
