@@ -6,10 +6,44 @@
 ;; game and some utility procedures.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; B04_1 BASIC OBJECT
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define-class (basic-object)
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Instance variables
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (instance-vars
+    ; Save the properties of the class
+    (properties (make-table))
+  )
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Methods
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  ; Method to update the properties
+  (method (put key value)
+    (insert! key value properties)
+  )
+
+  ; Default method to get the properties
+  (default-method
+    (lookup message properties)
+  )
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; PLACE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-class (place name)
+
+  ; B04_1: Add basic object as parent
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Parent
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (parent (basic-object))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ; Instance variables
@@ -27,6 +61,10 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   (method (type) 'place)
+
+  ;; B04_2: Add type checking
+  (method (place?) #t)
+
   (method (neighbors) (map cdr directions-and-neighbors))
   (method (exits) (map car directions-and-neighbors))
 
@@ -48,7 +86,7 @@
     'appeared
   )
 
-  ; // E04_1: Send a notice to every person that is in the place
+  ; // A04_1: Send a notice to every person that is in the place
   (method (enter new-person)
     ; Check if the person is already in the place
     (if (memq new-person people)
@@ -107,7 +145,7 @@
     'connected
   )
 
-  ; // E04_2: may-enter?, always return true for a regular place
+  ; // A04_2: may-enter?, always return true for a regular place
   (method (may-enter? person)
     #t
   )
@@ -134,7 +172,7 @@
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; E04_2: LOCKED PLACE
+;; A04_2: LOCKED PLACE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define-class (locked-place name key-lock)
 
@@ -185,7 +223,7 @@
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; E05: GARAGE
+;; A05: GARAGE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define-class (garage name)
 
@@ -264,23 +302,96 @@
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; B05_1: HOTSPOT
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define-class (hotspot name password)
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Parent
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (parent (place name))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Instance variables
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (instance-vars
+    ; List of laptops connected
+    (connections '())
+  )
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Methods
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (method (connect laptop pass)
+    ; Check if laptop is already connected
+    (if (memq laptop connections)
+      (error "Oh... I do not understand, you are already connected")
+      ; Check if password is correct
+      (if (eq? pass password)
+        ; Check if laptop is in the place
+        (if (memq laptop (usual 'things))
+          (set! connections (cons laptop connections))
+          (error "The laptop you are trying to connect is out of range, as in, not in" name)
+        )
+        (error "It sure seems the password is not correct miss")
+      )
+    )
+  )
+
+  (method (gone laptop)
+    ; If this gives and error, the next statement
+    ; will not be executed
+    (usual 'gone laptop)
+    (set! connections (delete laptop connections)) 
+  )
+
+  (method (surf laptop url)
+    ; Check if the laptop is connected to the network
+    (if (memq laptop connections)
+      ; Open in firefox
+      (system (string-append "firefox " url " &"))
+      (error "You have to connect before you surf The Internet, hmm...")
+    )
+  )
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; PERSON
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-class (person name place)
+
+  ; B04_1: Add basic object as parent
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Parent
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (parent (basic-object))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ; Instance variables
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (instance-vars
     (possessions '())
     (saying "")
   )
 
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ; Instantiation variables
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (initialize
-   (ask place 'enter self)
+    (ask place 'enter self)
+    ; B04_1: initialize the strength of a person
+    ; on instantiation
+    (usual 'put 'strength 50)
   )
 
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ; Methods
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (method (type) 'person)
+
+  ;; B04_2: Add type checking
+  (method (person?) #t)
 
   (method (look-around)
     (map 
@@ -381,6 +492,26 @@
       )
     )
   ) 
+
+  ;;; B03: take-all, the person takes all the things in 
+  ;;; the current place, if not owned
+  (method (take-all)
+    (let
+      ; Get the list of things in a place
+      ((things (ask place 'things)))
+      (for-each
+        (lambda
+          (thing)
+          ; Check if they are not owned
+          (if (eq? (ask thing 'possessor) 'no-one)
+            ; Take the thing
+            (ask self 'take thing) 
+          )
+        )
+        things
+      )
+    )
+  )
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -398,6 +529,8 @@
 	          (let 
               (
                 (self '()) 
+                ; B04_1: Add basic object as parent
+                (parent (instantiate basic-object))
                 (possessor 'no-one)
               )
 	            (define (dispatch message)
@@ -409,18 +542,24 @@
                     )
                   )
 	                ((eq? message 'send-usual-to-parent)
-	        	        (error "Can't use USUAL without a parent." 'thing)
+	        	        ;(error "Can't use USUAL without a parent." 'thing)
+                    ; B04_1: call parent method
+                    (parent message)
                   )
 	                ((eq? message 'name) (lambda () name))
 	                ((eq? message 'possessor) (lambda () possessor))
 	                ((eq? message 'type) (lambda () 'thing))
+                  ;; B04_2: Add type checking
+	                ((eq? message 'thing?) (lambda () #t))
 	                ((eq? message 'change-possessor)
 	        	        (lambda 
                       (new-possessor)
 	        	          (set! possessor new-possessor)
                     )
                   )
-	                (else (no-method 'thing))
+	                ;(else (no-method 'thing))
+                  ;; B04_2: Add typechecking
+                  (else (lambda () #f))
                 )
               )
 	            dispatch
@@ -436,7 +575,7 @@
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; E05: TICKET
+;; A05: TICKET
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define ticket
@@ -617,18 +756,30 @@
 (define (person? obj)
   (and 
     (procedure? obj)
-    (member? (ask obj 'type) '(person police thief))
+    ;; B04_2: Change type checking to use the class' method
+    (ask obj 'person?)
+    ; (member? (ask obj 'type) '(person police thief))
   )
 )
 
 (define (thing? obj)
   (and 
     (procedure? obj)
-    (eq? (ask obj 'type) 'thing)
+    ;; B04_2: Change type checking to use the class' method
+    (ask obj 'thing?)
+    ; (eq? (ask obj 'type) 'thing)
   )
 )
 
-;; E05: Check if object is a ticket
+;; B04_2: Add type checking for place
+(define (place? obj)
+  (and 
+    (procedure? obj)
+    (ask obj 'place?)
+  )
+)
+
+;; A05: Check if object is a ticket
 (define (ticket? obj)
   (and 
     (procedure? obj)
@@ -637,7 +788,7 @@
 )
 
 ;;;;;;;;;;;
-;; E05: Get a ticket from the a persons posessions
+;; A05: Get a ticket from the a persons posessions
 
 (define (get-ticket obj)
   (if (person? obj)

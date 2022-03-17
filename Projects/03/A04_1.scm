@@ -1,7 +1,7 @@
 (load "adv-world.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; E04
+; A04
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Modify the enter method for places, so that in addition to what that 

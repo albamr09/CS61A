@@ -1,7 +1,7 @@
 (load "adv-world.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; E04_2
+; A04_2
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; 1. Invent a may-enter? message for places that takes a person as an argument and always returns #t.
