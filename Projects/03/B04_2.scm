@@ -8,6 +8,15 @@
 
 (load "adv-world.scm")
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CHANGES
+;; - Added method place? to the place class 
+;; - Added method person? to the person class 
+;; - Added method thing? to the thing class 
+;; - Create general procedures: place?, person? and thing? for 
+;    any object
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (print (person? Brian))
 ; #t
 (print (person? art-gallery))

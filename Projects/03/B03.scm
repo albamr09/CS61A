@@ -5,6 +5,11 @@
 ; Define a method take-all for people. If given that message, a person should take all 
 ; the things at the current location that are not already owned by someone
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CHANGES
+;; - We created the method take-all in the person class
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (load "adv-world.scm")
 
 (define rolex (instantiate thing 'Rolex))

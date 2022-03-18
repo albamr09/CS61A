@@ -65,6 +65,9 @@
   ;; B04_2: Add type checking
   (method (place?) #t)
 
+  ;; A06_2: Add control to leave
+  (method (has-exit?) #t)
+
   (method (neighbors) (map cdr directions-and-neighbors))
   (method (exits) (map car directions-and-neighbors))
 
@@ -353,6 +356,59 @@
       (error "You have to connect before you surf The Internet, hmm...")
     )
   )
+
+  ;; B05_2: Extend enter process to make user 
+  ;; connect their laptop
+  (method (enter user)
+    ; Call parents enter
+    (usual 'enter user)
+    ; Get user's possessions
+    (let
+      ((possessions (ask user 'possessions)))
+      (for-each
+        (lambda
+          (thing)
+          ; If it is a laptop
+          (if (eq? (ask thing 'type) 'laptop)
+            (begin
+              (print "Enter the passcode miss: ")
+              (let
+                ((pass (read)))
+                ; Connect laptop of user
+                (ask thing 'connect pass)
+              )
+            )
+          )
+        )
+        possessions
+      )
+    )
+    
+  )
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; A06_1: JAIL
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-class (jail name)
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Parent
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (parent (place name))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Methods
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Override exit method from place class
+  (method (exit person)
+    (error "Ohoho, one does not leave prison that easily")
+  )
+
+  ;; A06_2: Add control to leave
+  ; Override has-exit? method from place class
+  (method (has-exit?) #f)
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -464,30 +520,9 @@
 	        (error "Can't go" direction)
         )
 	      (else
-          ; Check if the place we are going is locked
-          (if (ask new-place 'may-enter? self)
-            ; If the place is not locked
-            (begin
-              ; Leave the previous place
-	            (ask place 'exit self)
-	            (announce-move name place new-place)
-              ; Move the person's possessions to the old place to the
-              ; new place
-	            (for-each
-	              (lambda 
-                  (p)
-		              (ask place 'gone p)
-		              (ask new-place 'appear p)
-                )
-	              possessions
-              )
-              ; Update the place where the person is
-	            (set! place new-place)
-              ; Enter the place
-	            (ask new-place 'enter self)
-            )
-            (error "Where do you think you are going?!?! The place is locked!")
-          )
+          ;; A06_1: Remove logic here, and move it to 
+          ;; go-directly-to
+          (ask self 'go-directly-to new-place)
         )
       )
     )
@@ -510,6 +545,35 @@
         )
         things
       )
+    )
+  )
+
+  ;;; A06_1: the person goes directly to a place (does not have)
+  ;;; to be adyacent
+  (method (go-directly-to new-place)
+    ; Check if the place we are going is locked
+    (if (ask new-place 'may-enter? self)
+      ; If the place is not locked
+      (begin
+        ; Leave the previous place
+	      (ask place 'exit self)
+	      (announce-move name place new-place)
+        ; Move the person's possessions to the old place to the
+        ; new place
+	      (for-each
+	        (lambda 
+            (p)
+		        (ask place 'gone p)
+		        (ask new-place 'appear p)
+          )
+	        possessions
+        )
+        ; Update the place where the person is
+	      (set! place new-place)
+        ; Enter the place
+	      (ask new-place 'enter self)
+      )
+      (error "Where do you think you are going?!?! The place is locked!")
     )
   )
 )
@@ -623,6 +687,44 @@
   )
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; B05_1: LAPTOP
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-class (laptop name)
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Parent
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (parent (thing name))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Methods
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (method (connect password) 
+    ; Obtain the person that owns it
+    (define owner (usual 'possessor))
+    ; If it is owned by somebody
+    (if (not(eq? owner 'no-one))
+      ; Send connect message to place where it is
+      (ask (ask owner 'place) 'connect self password)
+      (error "This is confusing, this laptop has no owner, how can it connect itself?")
+    )
+  )
+
+  (method (surf url)
+    ; Obtain the person that owns it
+    (define owner (usual 'possessor))
+    ; If it is owned by somebody
+    (if (not(eq? owner 'no-one))
+      ; Send surf message to the place where it is
+      (ask (ask owner 'place) 'surf self url)
+      (error "Hah? This laptop does not have an owner!")
+    )
+  )
+
+  (method (type) 'laptop)
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Implementation of thieves for part two
@@ -640,7 +742,8 @@
 
   ; Instance variables
   (instance-vars
-   (behavior 'steal)
+   ;(behavior 'steal)
+   (behavior 'run)
   )
 
   ; Methods
@@ -648,25 +751,30 @@
 
   (method (notice person)
     (if (eq? behavior 'run)
-	    (ask self 'go (pick-random (ask (usual 'place) 'exits)))
-	    (let 
-        ((food-things
-	        (filter 
-            (lambda (thing)
-	    		    (and 
-                (edible? thing)
-	    		      (not (eq? (ask thing 'possessor) self))
+      ;; A06_2: Check if the place can be left
+      (if (ask (usual 'place) 'has-exit?)
+        (begin 
+	        (ask self 'go (pick-random (ask (usual 'place) 'exits)))
+	        (let 
+            ((food-things
+	            (filter 
+                (lambda (thing)
+	        		    (and 
+                    (edible? thing)
+	        		      (not (eq? (ask thing 'possessor) self))
+                  )
+                )
+	        	    (ask (usual 'place) 'things)
               )
+            ))
+	          (if (not (null? food-things))
+	            (begin
+	              (ask self 'take (car food-things))
+	              (set! behavior 'run)
+	              (ask self 'notice person)
+              ) 
             )
-	    	    (ask (usual 'place) 'things)
           )
-        ))
-	      (if (not (null? food-things))
-	        (begin
-	          (ask self 'take (car food-things))
-	          (set! behavior 'run)
-	          (ask self 'notice person)
-          ) 
         )
       )
     )

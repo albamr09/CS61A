@@ -10,6 +10,13 @@
 ; 3. The basic-object should treat any message not otherwise recognized as a request for the attribute 
 ;     of that name, so 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CHANGES
+;; - We created the basic-object class
+;; - Add basic-object as parent of person, place and thing
+;; - We added a new attribute to the person class: strength
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (load "./adv-world.scm")
 
 (print (ask Brian 'strength))

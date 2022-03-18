@@ -14,6 +14,11 @@
 ; 7. If the laptop is connected to the network, then the surf method should
 ;     (system (string-append "lynx " url))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CHANGES
+;; - Created hotspot class
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (load "adv-world.scm")
 
 (define Tima (instantiate thing 'Tima))
