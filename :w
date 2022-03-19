@@ -413,62 +413,6 @@
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; A07_2: RESTAURANT 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define-class (restaurant name food-kind food-price)
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ; Parent
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (parent (place name))
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ; Instance variables
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (instance-vars
-    (food (instantiate food-kind))
-  )
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ; Methods
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (method (menu)
-    ; Return list of: food name, food price
-    (list (ask food 'name) food-price)
-  )
-
-  (method (sell person food-name)
-    ; Check if person is in restaurant
-    (if (memq person (usual 'people))
-      ; Check if restaurant sells this food
-      (if (eq? (ask food 'name) food-name)
-        ; Check if person has enough money
-        ; If so, the money is automatically updated in 
-        ; pay-money method
-        (if (ask person 'pay-money food-price)
-          ; Create instance of food using the class
-          ; passed as instace variable
-          (instantiate food-kind)
-          (begin
-            (print "Your card has been declined ma'am")
-            #f
-          )
-        )
-        (begin
-          (print "We do not sell this... thing you call " food-name)
-          #f
-        )
-      )
-      (begin
-        (print "Oh nonono, we do not do delivery in here!")
-        #f
-      )
-    )
-  )
-)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; PERSON
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -667,26 +611,6 @@
       )
     )
   )
-
-  ;;; A08: the person buys food
-  (method (buy food-name)
-    (let
-      ; Buy the food from the restaurant
-      ; If the place is not a restaurant, it does not have
-      ; sell method and resturns #f
-      ; If the thing is not a food, the resturant will no have
-      ; it, and will return #f
-      ((food 
-         ;; Ask the restaurant to sell it to you
-         (ask place 'sell self food-name)
-      ))
-      ; Check if the restaurant sold it with no problem
-      (if food
-        food
-        (error "Well, I guess you should try another restaurant")
-      )
-    )
-  )
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -734,9 +658,7 @@
                   )
 	                ;(else (no-method 'thing))
                   ;; B04_2: Add typechecking
-                  ;(else (lambda () #f))
-                  ;; B06_1: Delegate to parent
-                  (else (parent message))
+                  (else (lambda () #f))
                 )
               )
 	            dispatch
@@ -840,53 +762,13 @@
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; B06_1: FOOD
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define-class (food name num-calories)
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ; Parent
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (parent (thing name))
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ; Instance variables
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (instance-vars
-    (calories num-calories)
-  )
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ; Instantiation variables
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (initialize
-    (usual 'put 'edible? #t)
-  )
-)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; B06_2: PASTA
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define-class (pasta)
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ; Parent
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (parent (food 'pasta 150))
-)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Implementation of thieves for part two
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define *foods* '(pizza potstickers coffee))
 
 (define (edible? thing)
-  ;; B06_1: use food class to determine if thing is edible
-  ; (member? (ask thing 'name) *foods*)
-  (ask thing 'edible?)
+  (member? (ask thing 'name) *foods*)
 )
 
 (define-class (thief initial-name initial-place)
@@ -895,8 +777,8 @@
 
   ; Instance variables
   (instance-vars
-    (behavior 'steal)
-    ;(behavior 'run)
+   ;(behavior 'steal)
+   (behavior 'run)
   )
 
   ; Methods
@@ -905,7 +787,8 @@
   (method (notice person)
     (if (eq? behavior 'run)
       ;; A06_2: Check if the place can be left
-      (if (not (ask (usual 'place) 'no-exit?))
+      (print (ask (usual 'place) 'no-exit?))
+      (if (ask (usual 'place) 'no-exit?)
         (begin 
 	        (ask self 'go (pick-random (ask (usual 'place) 'exits)))
 	        (let 
@@ -997,7 +880,7 @@
 
 
 (define (pick-random set)
-  (list-ref set (random (length set)))
+  (nth (random (length set)) set)
 )
 
 (define (delete thing stuff)
