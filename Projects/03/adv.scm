@@ -92,18 +92,29 @@
     (if (memq new-person people)
 	    (error "Person already in this place" (list name new-person))
     )
-    ; Before updating the list of people in the place
+
+    ;; B07: update people before notice, so police can
+    ;; send thief to jail. If not, we send a person to jail
+    ;; that is nowhere, because in go-directly-to, the thief.
+    ;; 1. Leave the place we were before, remove thief from people list
+    ;; 2. Enter new place, list of people stil not updated
+    ;;    - Send notice to police
+    ;;    - Police sends thief to jail, but thief is nowhere
+
+    ; Update the list of people in the place
+    (set! people (cons new-person people))
+    ; Send notice message to everyone in the place
     (for-each 
-      ; Send notice message to everyone in the place
       (lambda 
         (person) 
-        (ask person 'notice self)
+        ; Do not send notice message to oneself
+        (if (not (eq? person new-person))
+          (ask person 'notice new-person)
+        )
       )
       ; List of people in the place
       people
     )
-    ; Update the list of people in the place
-    (set! people (cons new-person people))
     ; Call every enter procedure define for the place
     (for-each 
       (lambda (proc) (proc)) 
@@ -443,16 +454,24 @@
     (if (memq person (usual 'people))
       ; Check if restaurant sells this food
       (if (eq? (ask food 'name) food-name)
-        ; Check if person has enough money
-        ; If so, the money is automatically updated in 
-        ; pay-money method
-        (if (ask person 'pay-money food-price)
-          ; Create instance of food using the class
-          ; passed as instace variable
+        ;; E09: Check if the person is the police,
+        ;;      if so, do not charge any money
+        (if (eq? (ask person 'type) 'police)
           (instantiate food-kind)
+          ; If not, charge normally
           (begin
-            (print "Your card has been declined ma'am")
-            #f
+            ; Check if person has enough money
+            ; If so, the money is automatically updated in 
+            ; pay-money method
+            (if (ask person 'pay-money food-price)
+              ; Create instance of food using the class
+              ; passed as instace variable
+              (instantiate food-kind)
+              (begin
+                (print "Your card has been declined ma'am")
+                #f
+              )
+            )
           )
         )
         (begin
@@ -529,35 +548,42 @@
   )
 
   (method (take thing)
-    (cond 
-      ((not (thing? thing)) (error "Not a thing" thing))
-	    ((not (memq thing (ask place 'things)))
-	      (error 
-          "Thing taken not at this place"
-		      (list (ask place 'name) thing)
+    ; If you can take then thing, it returns itself
+    ; otherwhise it returns false
+    (set! thing (ask thing 'may-take? self))
+    ; If there is a thing to take
+    (if thing
+      (cond 
+        ((not (thing? thing)) (error "Not a thing" thing))
+	      ((not (memq thing (ask place 'things)))
+	        (error 
+            "Thing taken not at this place"
+		        (list (ask place 'name) thing)
+          )
         )
-      )
-	    ((memq thing possessions) (error "You already have it!"))
-	    (else
-	      (announce-take name thing)
-	      (set! possessions (cons thing possessions))
-	      ;; If somebody already has this object...
-	      (for-each
-	        (lambda 
-            (pers)
-	          (if (and (not (eq? pers self)) ; ignore myself
-		          (memq thing (ask pers 'possessions)))
-		          (begin
-		            (ask pers 'lose thing)
-		            (have-fit pers)
+	      ((memq thing possessions) (error "You already have it!"))
+	      (else
+	        (announce-take name thing)
+	        (set! possessions (cons thing possessions))
+	        ;; If somebody already has this object...
+	        (for-each
+	          (lambda 
+              (pers)
+	            (if (and (not (eq? pers self)) ; ignore myself
+		            (memq thing (ask pers 'possessions)))
+		            (begin
+		              (ask pers 'lose thing)
+		              (have-fit pers)
+                )
               )
             )
+	          (ask place 'people)
           )
-	        (ask place 'people)
+	        (ask thing 'change-possessor self)
+	        'taken
         )
-	      (ask thing 'change-possessor self)
-	      'taken
       )
+      (error "May the force be with you")
     )
   )
 
@@ -687,6 +713,40 @@
       )
     )
   )
+
+  ;;; B06_3: the person eats food
+  (method (eat)
+    (define total-calories 0)
+    ; Get the person's possesions
+    (for-each
+      (lambda
+        (thing)
+        ; If it is edible
+        (if (edible? thing)
+          (begin
+            ; Add calories of all things
+            (set! total-calories
+              (+ total-calories (ask thing 'calories))
+            )
+            ; Remove thing from possesions
+            (ask self 'lose thing)
+            ; Remove thing from place
+            (ask place 'gone thing)
+          )
+        )
+      )
+      possessions
+    )
+    ; Update strengh of person
+    (usual
+      'put
+      'strength
+      (+
+        (ask self 'strength)
+        total-calories
+      )
+    )
+  )
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -730,6 +790,31 @@
 	        	        (lambda 
                       (new-possessor)
 	        	          (set! possessor new-possessor)
+                    )
+                  )
+                  ;; B08: Compare strengh of owner and receiver
+                  ;;      to determine if the receiver gets the thing
+                  ;;      if so, return the thing itself
+	                ((eq? message 'may-take?) 
+                    (lambda 
+                      (receiver) 
+                      ; Check if thing has possessor
+                      (if (eq? possessor 'no-one)
+                        self
+                        (let
+                          (
+                            ; Obtain strenghts
+                            (owner-strengh (ask possessor 'strength))
+                            (receiver-strengh (ask receiver 'strength))
+                          )
+                          ; Compare strenghts
+                          (if (>= receiver-strengh owner-strengh)
+                            ; If the receiver is more or equally strong
+                            self
+                            #f
+                          )
+                        )                      
+                      )
                     )
                   )
 	                ;(else (no-method 'thing))
@@ -890,13 +975,26 @@
 )
 
 (define-class (thief initial-name initial-place)
-  ; Child of person class
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Parent
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (parent (person initial-name initial-place))
 
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ; Instance variables
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (instance-vars
     (behavior 'steal)
     ;(behavior 'run)
+  )
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Instantiation variables
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (initialize
+    ; Initialize strengh
+    (usual 'put 'strength 150)
   )
 
   ; Methods
@@ -934,7 +1032,61 @@
   )
 )
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; B07: POLICE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define-class (police initial-name initial-place)
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Parent
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (parent (person initial-name initial-place))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Class variables
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (class-vars 
+    (azkaban (instantiate jail 'Azkaban))
+  )
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Instantiation variables
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (initialize
+    ; Update talk value
+    (usual 'set-talk "Crime Does Not Pay")
+    ; Initialize strengh
+    (usual 'put 'strength 200)
+  )
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; Methods
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  ; Override person's type method
+  (method (type) 'police)
+
+  ; Override person's notice method 
+  (method (notice person) 
+    ; Check if it is a thief
+    (if (eq? (ask person 'type) 'thief)
+      (begin
+        ; The police talks
+        (usual 'notice person)
+        ; Take away the thief's possesions
+        (for-each
+          (lambda
+            (thing)
+            (ask self 'take thing)
+          )
+          (ask person 'possessions)
+        )
+        ; Ask thief to go to jail
+        (ask person 'go-directly-to azkaban)
+      )
+    )
+  )
 
 )
 
