@@ -2,13 +2,23 @@
 ;; QUEUE TAD
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; A queue is described by a front pointer and a 
+; rear pointer. 
+
+; Example: 
+; Given a queue q of the form (a, b, c)
+; q -> (. , .)--------------┑
+;       | #front-pointer    | #rear-pointer
+;       |                   |
+;      (a, .) -> (b, .) -> (c, .)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CONSTRUCTOR
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; A queue is described by a front pointer and a 
-; rear pointer. On creation both are inialitez to
+; On creation both pointers are initialized to
 ; null
+
 (define (make-queue) (cons '() '()))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
