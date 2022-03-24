@@ -1,4 +1,6 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; VECTOR PROGRAMMING
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Map version with vectors
 (define (vector-map fn v) 
@@ -124,3 +126,55 @@
   ; Start looping with index = length of vector
   (loop (vector-length vec))
 )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; MEMOIZATION
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Load table TAD
+(load "../../T3/P03_03/table.scm")
+
+; Definition of the computation of Fibonacci numbers
+; using memoization. It is more efficient because it "remembers"
+; values that were already computed (which is a common ocurrence
+; while calculating the value of a Fibonacci number.
+
+(define (fast-fib n)
+  (if (< n 2)
+    n ; base case unchanged
+    (let 
+      ; Search in the table for F(n)
+      ((old (get 'fib n)))
+      ; If it exists
+      (if (number? old) 
+        old
+        ; if not, compute and learn it
+        (begin         
+          ; Compute the value recursively
+          (put 
+            'fib 
+            ; F(n) = F(n-1) + F(n-2)
+            n 
+            (+ 
+              (fast-fib (- n 1))
+              (fast-fib (- n 2))
+            )
+          )
+          (get 'fib n)
+        )
+      )
+    )
+  )
+)
+
+; Normal version of fibonacci
+(define (fib n)
+  (if (< n 2)
+    n
+    (+ 
+      (fib (- n 1))
+      (fib (- n 2)) 
+    )
+  )
+)
+

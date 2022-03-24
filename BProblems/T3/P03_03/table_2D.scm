@@ -57,7 +57,7 @@
     (if subtable
       ; Search the record in the subtable by the second key
       (let ((record (assoc key-2 (cdr subtable))))
-        ; If the ir a record, udpate the value of the record
+        ; If there is a record, udpate the value of the record
         (if record
           (set-cdr! record value)
           ; Else, insert new record in table, after dummy record 
