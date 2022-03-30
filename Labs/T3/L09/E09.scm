@@ -6,8 +6,9 @@
 ; It should return the appropriate name for that function:
 
 (define (cxr-name f)
-  (print f)
+  (error "Not implemented yet!")
 )
 
 (cxr-name (lambda (x) (cadr (cddar (cadar x)))))
 ; CADDDAADAR
+
