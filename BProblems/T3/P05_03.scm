@@ -305,6 +305,13 @@
 
 ; S_i = C + sum(x_j*dt), from j=1 to i
 
+; So:
+; S_0 = C
+; S_1 = C + x_1*dt
+; S_2 = (C + x_1*dt) + x_2*dt = S1 + x_2*dt 
+; S_3 = (C + x_1*dt + x_2*dt) + x_3*dt = S2 + x_3*dt 
+; ...
+
 ; this returns the stream of values S=(S_i)
 
 ; - integrand = input stream x
@@ -313,15 +320,15 @@
 (define (integral integrand initial-value dt)
   ; Create the stream S
   (define int
-    ; Make stream, where the first value is C
+    ; Make stream, where the first element: S_0 = C
     (cons-stream 
       initial-value
-      ; Start summation between two streams A and B, where:
-      ; - A(=integrand): input stream x
-      ; - B: itself up until current element
+      ; Now for each i, with 1 <= i 
+      ; S_i = S_(i-1) + x_i*dt
       (add-streams 
-        ; multiply every element of the input stream x by dt
+        ; x_i*dt = multiply every element x_i of the input stream x by dt
         (scale-stream integrand dt)
+        ; S_(i-1)
         int
       )
     )

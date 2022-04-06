@@ -76,7 +76,7 @@
           (+ trials-passed 1)
         )
       )
-      ; If the experiment was no successfull
+      ; If the experiment was not successfull
       (else
         ; Continue
         (iter 
