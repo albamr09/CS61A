@@ -38,31 +38,31 @@
 (print (stream-ref y 7))
 (display-stream z)
 
-#| What is the value for 'sum'?
-
-We have:
-
-- index  1  2  3  4   5   6   7   8   9   10  11  12  13  14   15   16   17   18   19   20
-- seq = {1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78, 91, 105, 120, 136, 153, 171, 190, 210}
-
-So sum = 210
-
-|#
+; #| What is the value for 'sum'?
+; 
+; We have:
+; 
+; - index  1  2  3  4   5   6   7   8   9   10  11  12  13  14   15   16   17   18   19   20
+; - seq = {1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78, 91, 105, 120, 136, 153, 171, 190, 210}
+; 
+; So sum = 210
+; 
+; |#
 
 (newline)
 (print sum)
 
-#| What is the printed response to evaluating the stream-ref and display-stream?
-
-So y is made up of all the even numbers in seq
-
-y = {6, 10, 28, 36, 66, 78, 120, 136, 190, 210}
-
-Which means (stream-ref y 7) = 136
-
-Then z is made up of all the multiples of 5 in seq
-
-z = {10, 15, 45, 55, 105, 120, 190, 210}
-
-
-|#
+; #| What is the printed response to evaluating the stream-ref and display-stream?
+; 
+; So y is made up of all the even numbers in seq
+; 
+; y = {6, 10, 28, 36, 66, 78, 120, 136, 190, 210}
+; 
+; Which means (stream-ref y 7) = 136
+; 
+; Then z is made up of all the multiples of 5 in seq
+; 
+; z = {10, 15, 45, 55, 105, 120, 190, 210}
+; 
+; 
+; |#

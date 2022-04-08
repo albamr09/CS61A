@@ -66,8 +66,6 @@
 ; 
 ; >>> 3: call (cdr of (cdr of s)) = (cdr (add-streams s s))
 ; 
-; With t = (add-streams s s) = {2 , (delay ...)}
-; 
 ; If we call (cdr (add-streams s s)) we have to evaluate the delayed object specified above:
 ; 
 ; (delay
@@ -79,7 +77,7 @@
 ;   )
 ; )
 ; 
-; So if s = {1, 2, (delay ...)}, then s' = (stream-cdr s) = {2, (delay ...)}, we call:
+; So if s = {1, 2, (delay ...)}, and s' = (stream-cdr s) = {2, (delay ...)}, we call:
 ; 
 ; (stream-map
 ;   '(
