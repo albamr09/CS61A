@@ -66,7 +66,7 @@
 ; n: scalar the stream is multiplied by
 ; s: stream
 (define (scale-stream s n) 
-  (define sn (cost-stream 1 sn))
+  (define sn (cons-stream 1 sn))
   (stream-map 
     * 
     ; Stream of n
@@ -75,54 +75,55 @@
   )
 )
 
-;; PARTIAL SUMS IS MISSING
+; Load partial-sums 
+(load "../../Labs/T3/L10/E05_06.scm")
 
-; (define pi-stream
-;   ; Multiply pi by 4 (see series definition above)
-;   (scale-stream 
-;     ; Start creating stream of partial sums
-;     ; for n=1, sn = 1
-;     ; for n=2, sn = 1 - 1/3
-;     ; for n=3, sn = 1 - 1/3 - 1/5
-;     (partial-sums (pi-summands 1)) 
-;     4
-;   )
-; )
+(define pi-stream
+  ; Multiply pi by 4 (see series definition above)
+  (scale-stream 
+    ; Start creating stream of partial sums
+    ; for n=1, sn = 1
+    ; for n=2, sn = 1 - 1/3
+    ; for n=3, sn = 1 - 1/3 - 1/5
+    (partial-sums (pi-summands 1)) 
+    4
+  )
+)
 
+; Displays infinitely
 ; (display-stream pi-stream)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; APPROXIMATION OF PI WITH ACCELERATION SEQUENCES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; PI-STREAM IS MISSING
 
 ; S_n+1 - (S_n+1 - S_n)^2/(S_n-1 - 2Sn + S_n+1)
 
-; (define (euler-transform s)
-;   (let 
-;     (
-;       (s0 (stream-ref s 0)) ; Sn−1
-;       (s1 (stream-ref s 1)) ; Sn
-;       (s2 (stream-ref s 2)) ; Sn+1
-;     ) 
-;     (cons-stream 
-;       (- 
-;         ; S_n+1
-;         s2 
-;         (/ 
-;           ; (S_n+1 - S_n)^2
-;           (square (- s2 s1))
-;           ; (S_n-1 - 2Sn + S_n+1)
-;           (+ s0 (* -2 s1) s2)
-;         )
-;       )
-;       ; Keep applying
-;       (euler-transform (stream-cdr s))
-;     )
-;   )
-; )
-; 
-; (display-stream (euler-transform pi-stream))
+(define (euler-transform s)
+  (let 
+    (
+      (s0 (stream-ref s 0)) ; Sn−1
+      (s1 (stream-ref s 1)) ; Sn
+      (s2 (stream-ref s 2)) ; Sn+1
+    ) 
+    (cons-stream 
+      (- 
+        ; S_n+1
+        s2 
+        (/ 
+          ; (S_n+1 - S_n)^2
+          (square (- s2 s1))
+          ; (S_n-1 - 2Sn + S_n+1)
+          (+ s0 (* -2 s1) s2)
+        )
+      )
+      ; Keep applying
+      (euler-transform (stream-cdr s))
+    )
+  )
+)
+
+(display-stream (euler-transform pi-stream))
 ; 3.166666666666667
 ; 3.1333333333333337
 ; 3.1452380952380956
