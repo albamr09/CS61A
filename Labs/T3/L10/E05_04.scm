@@ -26,7 +26,7 @@ s = {
 
 >>> 2: call (cdr of s) = (add-streams s s)
 
-; Therefore we call add-stream
+Therefore we call add-stream
 (add-streams
   s
   s
@@ -37,13 +37,16 @@ s = {
   s
   s
 )
-; Because s and s are not emtpy (refer to stream-map in BProblems/T3/P05_01/streams.scm or Labs/T3/L10/E05_01.scm for the version with a list of streams as inputs):
-; - proc: +
-; - argstreams: '(s s)
+=
+
+Because s and s are not emtpy (refer to stream-map in BProblems/T3/P05_01/streams.scm or Labs/T3/L10/E05_01.scm for the version with a list of streams as inputs):
+- proc: +
+- argstreams: '(s s)
+
 =
 (cons-stream
   (+ (stream-car s) (stream-car s))
-  ; Keep doing the map on the rest of objects when asked
+  Keep doing the map on the rest of objects when asked
   (delay
     (stream-map
       (cons
@@ -89,7 +92,7 @@ And like we did above when calling stream-map:
 
 (cons-stream
   (+ (stream-car s') (stream-car s'))
-  ; Keep doing the map on the rest of objects when asked
+  Keep doing the map on the rest of objects when asked
   (delay
     (stream-map
       (cons
