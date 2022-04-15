@@ -1,22 +1,3 @@
-;;Lesson 10
-
-
-;;3.64
-(define (stream-limit stream tolerance)
-  (error "Not yet implemented"))
-
-;;3.66
-#| Explain
-
-
-|#
-
-;;3.68
-#| Explain
-
-
-
-|#
 
 
 ;;Exercise 6
