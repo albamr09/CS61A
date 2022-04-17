@@ -1,6 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DATA STRUCTURES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Load expressions
 
 ;; TESTING OF PREDICATES
 
@@ -38,7 +39,7 @@
 ; We represent an environment as a list of frames.
 
 ; The enclosing environment cdr of the list
-define (enclosing-environment env) (cdr env))
+(define (enclosing-environment env) (cdr env))
 ; The first frame is the car of the list 
 (define (first-frame env) (car env))
 ; The empty environment is an empty list

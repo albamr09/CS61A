@@ -2,6 +2,7 @@
 ;; EVAL DEFINITION
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
 (define (eval exp env)
   (cond 
     ; If it is a primitive self-evaluating expression (number), return itself
@@ -32,7 +33,7 @@
     ; If it is the application of a procedure
     ((application? exp)
       ; Apply the operator obtained to the list of operands
-      (apply 
+      (my-apply 
         ; Evaluate recursively the operator
         (eval (operator exp) env)
         ; Evaluate recursively the operands
@@ -48,7 +49,7 @@
 ;; APPLY DEFINITION
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (apply procedure arguments)
+(define (my-apply procedure arguments)
   ; There are two types of procedures
   (cond 
     ; Primitive procedures

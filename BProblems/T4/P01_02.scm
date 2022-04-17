@@ -23,7 +23,6 @@
 
 ; Use tagged-list? to check if the expression is quoted
 ; comparing the first element to the tag='quote
-(define (quoted? exp) (tagged-list? exp 'quote))
 
 (define (tagged-list? exp tag)
   ; First check if is a pair
@@ -34,6 +33,9 @@
     false
   )
 )
+
+(define (quoted? exp) (tagged-list? exp 'quote))
+
 
 ; Extract the text of a quoted expression
 (define (text-of-quotation exp) (cadr exp))
