@@ -18,7 +18,7 @@
 ;   - eval-definition
 ; 4: We override the interpreter execution definition (P01_04), so the method driver-loop uses dispatch-eval instead of eval
 
-(load "eval-pkg")
+(load "./interpreter/eval-pkg")
 
 ; Start evaluating
 (driver-loop)
@@ -26,13 +26,13 @@
 ;;;; TEST
 ;;; M-Eval input:
 
-; (define (append x y)
-; 
-; (if (null? x)
-; 
-; y (
-; 
-; cons (car x) (append (cdr x) y))))
+(define (append x y)
+
+(if (null? x)
+
+y (
+
+cons (car x) (append (cdr x) y))))
 ; 
 ; ;;; M-Eval value:
 ; 
@@ -40,8 +40,8 @@
 ; 
 ; ;;; M-Eval input:
 ; 
-; (append '(a b c) '(d e f))
-; 
-; ;;; M-Eval value:
-; 
-; (a b c d e f)
+(append '(a b c) '(d e f))
+
+;;; M-Eval value:
+
+(a b c d e f)

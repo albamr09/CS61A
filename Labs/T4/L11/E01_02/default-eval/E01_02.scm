@@ -38,14 +38,8 @@
 ;     to the table of expression types-evaluation rule
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Expression representation 
-(load "P01_02.scm")
-; Environment
-(load "P01_03.scm")
-; Load changed eval
-(load "P01_01.scm")
-; Load interpreter
-(load "P01_04.scm")
+; Data directed version
+(load "./interpreter/eval-pkg")
 
 ; Run interpreter
 (driver-loop)

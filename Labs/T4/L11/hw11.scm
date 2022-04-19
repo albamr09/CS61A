@@ -383,17 +383,6 @@
   (error "Not yet implemented")
 )
 
-; SICP 4.6
-; Write let->combination and install let in the original evaluator.
-; You can also implement it for dispatch-eval.
-
-
-
-; SICP 4.7 (*)
-; Write let*->nested-lets and install let* in the original evaluator.
-; You can also implement it for dispatch-eval.
-
-
 
 ; SICP 4.10 (*)
 ; Design and implement a new syntax for Scheme.

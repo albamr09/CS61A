@@ -39,13 +39,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Expression representation 
-(load "P01_02.scm")
+(load "./interpreter/P01_02.scm")
 ; Environment
-(load "P01_03.scm")
+(load "./interpreter/P01_03.scm")
 ; Load changed eval
-(load "P01_01.scm")
+(load "./interpreter/P01_01.scm")
 ; Load interpreter
-(load "P01_04.scm")
+(load "./interpreter/P01_04.scm")
 
 ; Run interpreter
 (driver-loop)
@@ -53,22 +53,22 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; TEST
 
-; ; Run this first
-; (define (append x y)
-; (if (null? x)
-; y (
-; cons (car x) (append (cdr x) y))))
-; 
-; ; Test this second
-; (let
-;   (
-;     (s1 (append '(a b c) '(d e f)))
-;   )
-;   (let
-;     (
-;       (s2 (append '(g h i) '(j k l)))
-;       (s3 (append '(m n o) '(p q r)))
-;     )
-;     (append (append s1 s2) s3)
-;   )
-; )
+; Run this first
+(define (append x y)
+(if (null? x)
+y (
+cons (car x) (append (cdr x) y))))
+
+; Test this second
+(let
+  (
+    (s1 (append '(a b c) '(d e f)))
+  )
+  (let
+    (
+      (s2 (append '(g h i) '(j k l)))
+      (s3 (append '(m n o) '(p q r)))
+    )
+    (append (append s1 s2) s3)
+  )
+)

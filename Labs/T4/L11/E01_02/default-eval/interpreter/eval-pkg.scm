@@ -1,15 +1,15 @@
 ; Load table
-(load "../../../../BProblems/T3/P03_03/table_1D.scm")
+(load "../../../../../BProblems/T3/P03_03/table_1D.scm")
 
 ; Load interpreter
 ; Expressions
-(load "../../../../BProblems/T4/P01_02.scm")
+(load "./interpreter/P01_02.scm")
 ; Environment
-(load "../../../../BProblems/T4/P01_03.scm")
+(load "./interpreter/P01_03.scm")
 ; Load changed eval
-(load "P01_01.scm")
+(load "./interpreter/P01_01.scm")
 ; Load interpreter
-(load "P01_04.scm")
+(load "./interpreter/P01_04.scm")
 
 ; Table that holds type expression - procedure object
 (define eval-table (make-table))
@@ -124,7 +124,30 @@
     ) 
     eval-table
   )
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ; E01_02: add expression type and its corresponding handler
+  ; for the let expresion
+  ;;;;;;;;;;;;;;;;;;;;;
+  ; let?
+  (insert!
+    'let
+    ; Anonymous function because we have introduce logic before 
+    ; calling the function that evaluates the let transformed
+    (lambda
+      (exp env)
+      ; Evaluate the lambda expression
+      (dispatch-eval
+        ; Transform let intro a evaluable lambda expression
+        (let->combination exp)
+        ; In the given environment
+        env
+      )
+    ) 
+    eval-table
+  )
   
+  ;;;;;;;;;;;;;;;;;;;;;
   ; application?
   (insert!
     'application

@@ -90,6 +90,7 @@
 (define input-prompt ";;; M-Eval input:")
 (define output-prompt ";;; M-Eval value:")
 
+; Override driver loop to use dispatch-eval instead of eval
 (define (driver-loop)
   ; Enter input
   (prompt-for-input input-prompt)
@@ -98,7 +99,7 @@
     ((input (read)))
     (let 
       ; Evaluate expression
-      ((output (eval input the-global-environment)))
+      ((output (dispatch-eval input the-global-environment)))
       ; Print output
       (announce-output output-prompt)
       (user-print output)

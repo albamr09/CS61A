@@ -1,54 +1,32 @@
+; Load type expression function
+(load "./interpreter/type-exp.scm")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; EVAL DEFINITION
+;; DISPATCH EVAL DEFINITION
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-(define (eval exp env)
-  (cond 
-    ; If it is a primitive self-evaluating expression (number), return itself
-    ((self-evaluating? exp) exp)
-    ; If it is a variable, search its value
-    ((variable? exp) (lookup-variable-value exp env))
-    ; If it is a quoted expression, return the expression that was quoted
-    ((quoted? exp) (text-of-quotation exp))
-    ; Call eval recursively to compute the value to be associated with the variable
-    ((assignment? exp) (eval-assignment exp env))
-    ((definition? exp) (eval-definition exp env))
-    ; Check if the predicate is true to decice which argument to evaluate (first or second)
-    ((if? exp) (eval-if exp env))
-    ; If it is a lambda expression pack the parameters and the body along with the environment 
-    ((lambda? exp) 
-      (make-procedure 
-        (lambda-parameters exp)
-        (lambda-body exp)
-        env
+(define (dispatch-eval exp env)
+  (let
+    ; Obtain the type of the expression
+    ((type (type-exp exp)))
+    (let
+      ; Look up the procedure to apply by the type of the expression
+      ((proc (lookup type eval-table)))
+      ; If it exists
+      (if proc
+        ;; With apply
+        ; ; Call it
+        ; (apply proc (list exp env))
+        ; ; Else treat it as an application procedure
+        ; (apply (lookup 'application eval-table) (list exp env))
+        ;;;;;;
+        ; Also without apply
+        ; Call it
+        (proc exp env)
+        ; Else treat it as an application procedure
+        ((lookup 'application eval-table) exp env)
       )
     )
-    ; If it is a let expression, transform it to a lambda expression and evaluate
-    ((let? exp) 
-      (eval
-        (let->combination exp)
-        env
-      )
-    )
-    ; If it is a begin expression, evaluate the sequence of expressions in order
-    ((begin? exp)
-      (eval-sequence (begin-actions exp) env)
-    )
-    ; If it is a cond expression convert it to a set of if expressions
-    ((cond? exp) (eval (cond->if exp) env))
-    ; If it is the application of a procedure
-    ((application? exp)
-      ; Apply the operator obtained to the list of operands
-      (my-apply 
-        ; Evaluate recursively the operator
-        (eval (operator exp) env)
-        ; Evaluate recursively the operands
-        (list-of-values (operands exp) env)
-      )
-    )
-    (else
-    (error "Unknown expression type: EVAL" exp))
   )
 )
 
@@ -97,7 +75,7 @@
     '()
     (cons 
       ; Evaluate first argument on the list
-      (eval (first-operand exps) env)
+      (dispatch-eval (first-operand exps) env)
       ; Keep extracting values from the list
       (list-of-values (rest-operands exps) env)
     )
@@ -110,11 +88,11 @@
 
 (define (eval-if exp env)
   ; Is the predicate true? in the given environment
-  (if (true? (eval (if-predicate exp) env))
+  (if (true? (dispatch-eval (if-predicate exp) env))
     ; If so evaluate the first argument
-    (eval (if-consequent exp) env)
+    (dispatch-eval (if-consequent exp) env)
     ; Else evaluate the second argument
-    (eval (if-alternative exp) env)
+    (dispatch-eval (if-alternative exp) env)
   )
 )
 
@@ -134,11 +112,11 @@
     ; If it is the last expression, do not call recursively to evaluate
     ; the next expression
     ((last-exp? exps)
-      (eval (first-exp exps) env)
+      (dispatch-eval (first-exp exps) env)
     )
     (else
       ; Evaluate the first expression
-      (eval (first-exp exps) env)
+      (dispatch-eval (first-exp exps) env)
       ; Keep evaluating expressions
       (eval-sequence (rest-exps exps) env)
     )
@@ -157,7 +135,7 @@
     ; Obtain variable
     (assignment-variable exp)
     ; Call eval to obtain the value
-    (eval (assignment-value exp) env)
+    (dispatch-eval (assignment-value exp) env)
     ; In given environment
     env
   )
@@ -172,7 +150,7 @@
     ; Obtain the variable
     (definition-variable exp)
     ; Call eval to obtain the value
-    (eval (definition-value exp) env)
+    (dispatch-eval (definition-value exp) env)
     ; In given environment
     env
   )

@@ -1,7 +1,5 @@
-; Load type expression function
-(load "type-exp.scm")
-; Load original evaluator
-(load "../../../../BProblems/T4/P01_01.scm")
+; Load type expression function (the load is with respect to "E01_03")
+(load "./interpreter/type-exp.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DISPATCH EVAL DEFINITION
@@ -32,9 +30,37 @@
   )
 )
 
-; See that it is being called
-; (trace dispatch-eval)
-; (trace type-exp)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; APPLY DEFINITION
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (my-apply procedure arguments)
+  ; There are two types of procedures
+  (cond 
+    ; Primitive procedures
+    ((primitive-procedure? procedure)
+      (apply-primitive-procedure procedure arguments)
+    )
+    ; Compount procedures
+    ((compound-procedure? procedure)
+      ; Evaluate sequentially the expressions that make up the body
+      (eval-sequence
+        ; Body of procedure
+        (procedure-body procedure)
+        ; Environment for the evaluation is the extension of the base environment
+        ; where each formal parameter is binded to the corresponding argument
+        (extend-environment
+          (procedure-parameters procedure)
+          arguments
+          (procedure-environment procedure)
+        )
+      )
+    )
+    (else
+      (error "Unknown procedure type: APPLY" procedure)
+    )
+  )
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; PROCEDURE ARGUMENTS
