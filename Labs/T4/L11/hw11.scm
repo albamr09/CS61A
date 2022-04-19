@@ -384,15 +384,6 @@
 )
 
 
-; SICP 4.10 (*)
-; Design and implement a new syntax for Scheme.
-; After you have tested your code, comment it out to prevent it from
-; interfering with the other questions.
-
-#|
-Your answer here (after you have tested it)
-|#
-
 ; SICP 4.11 (*)
 ; Represent a frame as a list of bindings.  It may help to remember
 ; assoc and related procedures.
