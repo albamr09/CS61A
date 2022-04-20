@@ -384,12 +384,6 @@
 )
 
 
-; SICP 4.11 (*)
-; Represent a frame as a list of bindings.  It may help to remember
-; assoc and related procedures.
-; Change the existing procedures (don't write new ones, apart from
-; helper functions, if you need them)
-
 ; SICP 4.13
 ; Complete the specification of make-unbound! and justify your choice
 ; (with examples of its use).  Implement make-unbound!.
