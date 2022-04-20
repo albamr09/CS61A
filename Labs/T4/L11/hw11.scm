@@ -384,12 +384,6 @@
 )
 
 
-; SICP 4.13
-; Complete the specification of make-unbound! and justify your choice
-; (with examples of its use).  Implement make-unbound!.
-
-
-
 ; SICP 4.14
 ; Explain why Louis's map fails even though Eva's works.
 #|
