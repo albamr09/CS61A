@@ -14,6 +14,7 @@ Repository for the labs assignments, and projects for the [Computer Science 61A 
 - [Twenty One | GUI](./Projects/01/GUI) (working on it)
 - [Picture Language](./Projects/02)
 - [Adventure Game](./Projects/03)
+- [Python Interpreter](./Projects/04/schython)
 
 ## Notes
 
@@ -40,7 +41,7 @@ For the labs, we follow the naming convention given by:
 
 ### Structure
 
-#### SimpleScheme
+#### Simple-Scheme
 
 For the `SS` book exercises we follow the convention given by:
 
@@ -74,8 +75,6 @@ Throughout the course we will create an interpreter, that will be built little b
   - `./Labs/T2/L06/E02`: implements a rule to evaluate an `and` expression
   - `./Labs/T2/L06/E03`: implements a rule to evaluate a `map` expression
 However the interpreter with the most functionality is in `./Labs/T2/L06/E03`.
-3. 
-4. 
 
 ---
 

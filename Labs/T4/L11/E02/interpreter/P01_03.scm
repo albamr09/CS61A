@@ -67,7 +67,6 @@
   )
 )
 
-(trace procedure-parameters)
 ; The body is the third element
 (define (procedure-body p) (caddr p))
 ; The environment is the fourth element
@@ -84,43 +83,50 @@
 ; The empty environment is an empty list
 (define the-empty-environment '())
 
-; Each frame of an environment is represented as a pair of lists: 
-; - a list of the variables bound in that frame 
-; - a list of the associated values
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; E01_05
+; Change the representation of the enviroment from a pair of lists 
+; where one are the variables and the other are the values binded
+; to a list of pairs of variables and valus
+
+; Each frame of an environment is represented as a list of pairs
+; of variables with its value
 
 (define (make-frame variables values)
-  ; Create a list of the list of variables and the list of values
-  (cons variables values)
+  ; Create a list of pairs variable-value
+  (map
+    (lambda
+      (variable value)
+      (cons variable value)
+    )
+    variables values
+  )
 )
 
-; The first element of the frame is the list of variables
-(define (frame-variables frame) (car frame))
-; The second element of the frame is the list of values
-(define (frame-values frame) (cdr frame))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; E01_05
+; The variables of the frame are the first element of each pair in the frame
+(define (frame-variables frame) (map car frame))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; E01_05
+; The variables of the frame are the second element of each pair in the frame
+(define (frame-values frame) (map cadr frame))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; E01_05
+; Now we only need to append a pair to the list of
+; pairs in the frame
 (define (add-binding-to-frame! var val frame)
-  ; Update the variable
-  (set-car! 
-    frame 
-    ; Add variable to front of list of variables
-    (cons 
-      var 
-      ; List of variables
-      (car frame)
-    )
-  )
-  ; Update the value
-  (set-cdr! 
-    frame 
-    ; Add value to front of list of values
-    (cons 
-      val 
-      ; List of values
+  ; Add a pair to the end of the list of pairs
+  (set-cdr!
+    frame
+    (cons
+      ; Add pair to the start of the cdr of the frame
+      (cons var val)
       (cdr frame)
     )
   )
 )
-
 
 ; To extend an environment by a new frame that associates variables with
 ; values, we make a frame consisting of the list of variables and the list
@@ -155,21 +161,6 @@
 
 (define (lookup-variable-value var env)
   (define (env-loop env)
-    (define (scan vars vals)
-      (cond 
-        ; If there are no more variables bound in the current environment
-        ((null? vars) 
-          ; Check in the enclosing-environment
-          (env-loop (enclosing-environment env))
-        )
-        ; If the variable we are searching for equals the current
-        ; variable we are scanning in the environment, return the 
-        ; value bounded
-        ((eq? var (car vars)) (car vals))
-        ; Else keep searching in the rest of the (variables, values) in the
-        ; current environment
-        (else (scan (cdr vars) (cdr vals))))
-    )
     ; If the environment is the empty environment, return error
     (if (eq? env the-empty-environment)
       (error "Unbound variable" var)
@@ -178,12 +169,16 @@
         ; Get the current frame
         ((frame (first-frame env)))
         ; Check if the variable is in the frame
-        (scan 
-          ; Variables bound in the current frame
-          (frame-variables frame)
-          ; Value bound in the current frame
-          (frame-values frame)
-        )
+        (let
+          ((bound-variable (assoc var frame)))
+          ; If the variable exists
+          (if bound-variable
+            ; Return the value
+            (cdr bound-variable)
+            ; Else keep searching in the next frame
+            (env-loop (enclosing-environment env))
+          )
+        ) 
       )
     )
   )
@@ -196,24 +191,6 @@
 
 (define (set-variable-value! var val env)
   (define (env-loop env)
-    (define (scan vars vals)
-      (cond 
-        ; If there are no more variables bound in the current environment
-        ((null? vars) 
-          ; Check in the enclosing-environment
-          (env-loop (enclosing-environment env))
-        )
-        ; If the variable we are searching for equals the current
-        ; variable we are scanning in the environment, change its value
-        ; to the new value val
-        ((eq? var (car vars)) 
-          (set-car! vals val)
-        )
-        ; Else keep searching in the rest of the (variables, values) in the
-        ; current environment
-        (else (scan (cdr vars) (cdr vals)))
-      )
-    )
     ; If the environment is the empty environment, return error
     (if (eq? env the-empty-environment)
       (error "Unbound variable: SET!" var)
@@ -222,12 +199,16 @@
         ; Get the current frame
         ((frame (first-frame env)))
         ; Check if the variable is in the frame
-        (scan 
-          ; Variables bound in the current frame
-          (frame-variables frame)
-          ; Values bound in the current frame
-          (frame-values frame)
-        )
+        (let
+          ((bound-variable (assoc var frame)))
+          ; If the variable exists
+          (if bound-variable
+            ; Update the value of the variable
+            (set-cdr! bound-variable val)
+            ; Else keep searching in the next frame
+            (env-loop (enclosing-environment env))
+          )
+        ) 
       )
     )
   )
@@ -241,19 +222,16 @@
 (define (define-variable! var val env)
   (let 
     ((frame (first-frame env)))
-    (define (scan vars vals)
-      (cond 
-        ; If there are no more variables bound in the current environment
-        ((null? vars)
-          ; Create a binding for that variable and value in the frame
-          (add-binding-to-frame! var val frame)
-        )
-        ; If the variable already exists in the frame, change its value
-        ((eq? var (car vars)) (set-car! vals val))
-        ; Else keep searching in the variables and values defined in the frame
-        (else (scan (cdr vars) (cdr vals))))
-    )
-    ; Start the scan through the variable and values of the frame=env
-    (scan (frame-variables frame) (frame-values frame))
+    (let
+      ; Check if the variable exists in the frame
+      ((bound-variable (assoc var frame)))
+      ; If the variable exists
+      (if bound-variable
+        ; Update the value of the variable
+        (set-cdr! bound-variable val)
+        ; Create a binding for that variable and value in the frame
+        (add-binding-to-frame! var val frame)
+      )
+    ) 
   )
 )
