@@ -27,47 +27,8 @@
   (tagged-list? p 'procedure)
 )
 
-;;; E02: Now the formal parameters can be a list 
-;;; with the predicate the parameter has to satisfy
-;;; or a single element
-;;; example 
-;;; (define (foo (number? x) (number? y)) x)
-;;; the parameters are ((number? x) (number? y))
-
-; The parameters are the second element 
-; map to obtain only the parameters (second element), not the
-; predicate
-(define (procedure-parameters p) 
-  (map  
-    (lambda
-      (parameter)
-      (if (pair? parameter)
-        (cadr parameter)
-        parameter
-      )
-    )
-    (cadr p)
-  )
-)
 ; The parameters are the second element
-; map to obtain only the predicate (first element), not the
-; parameters
-(define (procedure-predicates p) 
-  (map  
-    (lambda
-      (parameter)
-      (if (pair? parameter)
-        ; Obtain the predicate
-        (car parameter)
-        ; Return nothing
-        '()
-      )
-    )
-    (cadr p)
-  )
-)
-
-(trace procedure-parameters)
+(define (procedure-parameters p) (cadr p))
 ; The body is the third element
 (define (procedure-body p) (caddr p))
 ; The environment is the fourth element
