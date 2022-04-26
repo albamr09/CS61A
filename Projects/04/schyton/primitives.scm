@@ -1,3 +1,6 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; CLASS DEFINITIONS 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; PYTHON BASE OBJECT
@@ -213,14 +216,23 @@
     )
   )
 
+  ; Create iterator for the string
+  ; var-name: name for the substring created by the iterator
+  ; block: sequence of expression executed when we initialize iterator
   (method (__iter__ var-name block env)
     (define (iter i)
+      ; If the index i is bigger than the number of characteres in val
       (if (>= i (string-length val))
+        ; Return null
 	      *NONE*
+        ; Else
 	      (let 
           ((result 
              (eval-sequence
+                ; Block we evaluate for every iteration
 		    	      block
+                ; Define the substring in the 
+                ; environment
 		    	      (begin 
                   (define-variable!
 		    	    	    var-name
@@ -232,266 +244,803 @@
               )
           ))
 	        (cond 
+            ; If the result is a break
             ((eq? result '*BREAK*) '*BREAK*)
-		        ((and (pair? result) (eq? (car result) '*RETURN*)) result)
+            ; If the result is return something
+		        ((and 
+                (pair? result) 
+                (eq? (car result) '*RETURN*)
+              ) 
+             ; return result obtained
+              result
+            )
+            ; Else keep iterating
 		        (else (iter (1+ i)))
           )
         )
       )
     )
     (let 
+      ; First iteration
       ((result (iter 0)))
+      ; If the result is return something
       (if (and 
             (pair? result) 
             (eq? (car result) '*RETURN*)
           )
+        ; return result
 	      result
+        ; else return nothing or null
 	      *NONE*
       )
     )
   )
 
+  ; Capitalize string method
   (method (capitalize)
     (make-py-primitve
-     'capitalize
-     (lambda ()
-       (make-py-string (append-string (string (char-upcase (string-ref val 0)))
-				      (substring val 1 (string-length val)))))))
+      'capitalize
+      (lambda 
+        ()
+        (make-py-string 
+          ; Append the result
+          (append-string 
+            ; First letter capitalized
+            (string (char-upcase (string-ref val 0)))
+            ; Rest of string 
+				    (substring val 1 (string-length val))
+          )
+        )
+      )
+    )
+  )
+
+  ; Method to check if strings are equal
   (method (__eq__)
     (make-py-primitive
-     '==
-     (lambda (other) (make-py-bool (string=? val (ask other 'val))))))
+      ; Primitive operator sign
+      '==
+      (lambda 
+        ; "other" = other string
+        (other) 
+        (make-py-bool 
+          ; Check if "val" of this string equals "val" of the other string
+          (string=? val (ask other 'val))
+        )
+      )
+    )
+  )
+
+  ; Method to check if strings are not equal
   (method (__ne__)
     (make-py-primitive
-     '!=
-     (lambda (other) (make-py-bool (not (string=? val (ask other 'val)))))))
+      ; Primitive operator sign
+      '!=
+      (lambda 
+        ; "other" = other string
+        (other) 
+        (make-py-bool 
+          ; Check if "val" of this string does not equal "val" of the other string
+          (not (string=? val (ask other 'val)))
+        )
+      )
+    )
+  )
+
+  ; Check if one string is "less" than the other
   (method (__lt__)
     (make-py-primitive
-     '<
-     (lambda (other) (make-py-bool (string<? val (ask other 'val))))))
+      ; Primitive operator sign
+      '<
+      (lambda 
+        ; "other" = other string
+        (other) 
+        (make-py-bool 
+          ; Check if "val" of this string is less than "val" of the other string
+          (string<? val (ask other 'val))
+        )
+      )
+    )
+  )
+
+  ; Check if one string is "greater" than the other
   (method (__gt__)
     (make-py-primitive
-     '>
-     (lambda (other) (make-py-bool (string>? val (ask other 'val))))))
+      ; Primitive operator sign
+      '>
+      (lambda 
+        (other) 
+        (make-py-bool 
+          ; Check if "val" of this string is greater than "val" of the other string
+          (string>? val (ask other 'val))
+        )
+      )
+    )
+  )
+
+  ; Check if one string is "less" than or equal the other
   (method (__le__)
     (make-py-primitive
-     '<=
-     (lambda (other) (make-py-bool (string<=? val (ask other 'val))))))
+      ; Primitive operator sign
+      '<=
+      (lambda 
+        (other) 
+        ; Create python boolean
+        (make-py-bool 
+          ; Check if "val" of this string is less or equal than "val" of the other string
+          (string<=? val (ask other 'val))
+        )
+      )
+    )
+  )
+
+  ; Check if one string is "greater" than or equal the other
   (method (__ge__)
     (make-py-primitive
-     '>=
-     (lambda (other) (make-py-bool (string>=? val (ask other 'val))))))
+      ; Primitive operator sign
+      '>=
+      (lambda 
+        (other) 
+        ; Create python boolean
+        (make-py-bool 
+          ; Check if "val" of this string is greater or equal than "val" of the other string
+          (string>=? val (ask other 'val))
+        )
+      )
+    )
+  )
+
+  ; Check if the string ends with a given string
   (method (endswith)
     (make-py-primitive
-     'endswith
-     (lambda (other)
-       (let ((len1 (string-length val))
-	     (suffix (ask other 'val)))
-	 (let ((len2 (string-length (ask other 'val))))
-	   (if (> len2 len1)
-	       (make-py-bool #f)
-	       (let ((tail (substring val (- len1 len2) len1)))
-		 (make-py-bool (string=? tail suffix)))))))))
+      ; Primitive operator name
+      'endswith
+      (lambda 
+        ; Given string
+        (other)
+        (let 
+          (
+            ; Obtain length of this string
+            (len1 (string-length val))
+            ; Obtain given string
+	          (suffix (ask other 'val))
+          )
+	        (let 
+            ; Obtain length of given string
+            ((len2 (string-length (ask other 'val))))
+            ; If the given string is bigger
+	          (if (> len2 len1)
+              ; This string cannot end with a bigger string
+	            (make-py-bool #f)
+              ; Else
+	            (let 
+                ; Obtain the last n characters of this string, where
+                ; n equals the number of characters of the given string
+                ((tail (substring val (- len1 len2) len1)))
+                ; Check if the string made up of the n last character of this string
+                ; and the given string are equal
+	      	      (make-py-bool (string=? tail suffix))
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+
+  ; Check if the string is alphanumeric
   (method (isalnum)
     (make-py-primitive
-     'isalnum
-     (lambda ()
-       (make-py-bool (accumulate (lambda (a b) (and a b))
-				 #t
-				 (map (lambda (char) (or (char-alphabetic? char)
-							 (char-numeric? char)))
-				      (string->list val)))))))
+      'isalnum
+      (lambda ()
+        (make-py-bool 
+          ; Check that every char in this string is alphanumeric 
+          (accumulate 
+            (lambda 
+              ; a: element of first list #t
+              ; b: element of second list -> map
+              (a b) 
+              (and a b)
+            )
+            ; First list
+		  	    #t
+            ; Second list: map every character to the boolean value result
+            ; of the check of: is the character alphabetic or numeric?
+		  	    (map 
+              (lambda 
+                (char) 
+                (or 
+                  (char-alphabetic? char)
+		  	 			    (char-numeric? char)
+                )
+              )
+              ; Make a list from the characters in the string
+		  	      (string->list val)
+            )
+          )
+        )
+      )
+    )
+  )
+
+  ; Check if the string is alphabetic
   (method (isalpha)
     (make-py-primitive
-     'isalpha
-     (lambda ()
-       (make-py-bool (accumulate (lambda (a b) (and a b))
-				 #t
-				 (map char-alphabetic? (string->list val)))))))
+      'isalpha
+      (lambda 
+        ()
+        (make-py-bool 
+          ; accumulate returns true if every element of the 
+          ; string is alphabetic
+          (accumulate 
+            (lambda 
+              ; a: element of first list #t
+              ; b: element of second list -> map
+              (a b) 
+              (and a b)
+            )
+		  		#t
+		  		(map 
+            ; Check if every character is alphabetic
+            char-alphabetic? 
+            ; Make list out of this string's characters
+            (string->list val))
+          )
+        )
+      )
+    )
+  )
+
+  ; Check if the string is numeric 
   (method (isdigit)
     (make-py-primitive
-     'isdigit
-     (lambda ()
-       (make-py-bool (accumulate (lambda (a b) (and a b))
-				 #t
-				 (map char-numeric? (string->list val)))))))
+      'isdigit
+      (lambda 
+        ()
+        (make-py-bool 
+          ; accumulate returns true if every element in the string is a digit
+          (accumulate 
+            (lambda 
+              ; a: element of first list #t
+              ; b: element of second list -> map
+              (a b) 
+              (and a b)
+            )
+		  		  #t
+		  		  (map 
+              ; Check if every character is a digit
+              char-numeric? 
+              ; Make list out of this string's characters
+              (string->list val)
+            )
+          )
+        )
+      )
+    )
+  )
+
+  ; Check if this string is lowercase 
   (method (islower)
     (make-py-primitive
-     'islower
-     (lambda ()
-       (make-py-bool (accumulate (lambda (a b) (and a b))
-				 #t
-				 (map char-lower-case? (string->list val)))))))
+      'islower
+      (lambda ()
+        (make-py-bool 
+          ; Accumulate returns true if every character is lowercase
+          (accumulate 
+            (lambda 
+              ; a: element of first list #t
+              ; b: element of second list -> map
+              (a b) 
+              (and a b)
+            )
+		  		  #t
+		  		  (map 
+              ; Check if every character is lowercase
+              char-lower-case? 
+              ; Make up a list of this string's elements
+              (string->list val)
+            )
+          )
+        )
+      )
+    )
+  )
+
+  ; Check if this string is only spaces
   (method (isspace)
     (make-py-primitive
-     'isspace
-     (lambda ()
-       (make-py-bool (accumulate (lambda (a b) (and a b))
-				 #t
-				 (map char-whitespace? (string->list val)))))))
+      'isspace
+      (lambda ()
+        (make-py-bool 
+          ; accumulate returns true if every character in the string is a space
+          (accumulate 
+            (lambda 
+              ; a: element of first list #t
+              ; b: element of second list -> map
+              (a b) 
+              (and a b)
+            )
+			  	  #t
+			  	  (map 
+              ; Map to true if the given element is a space
+              char-whitespace? 
+              ; Make up a list of this string's characters
+              (string->list val)
+            )
+          )
+        )
+      )
+    )
+  )
+
+  ; Check if this string is in uppercase
   (method (isupper)
     (make-py-primitive
      'isupper
-     (lambda () (make-py-bool (accumulate (lambda (a b) (and a b))
-					  #t
-					  (map char-upper-case?
-					       (string->list val)))))))
+     (lambda 
+        () 
+        (make-py-bool 
+          ; accumulate returns true if every element in the string is uppercase
+          (accumulate 
+            (lambda 
+              ; a: element of first list #t
+              ; b: element of second list -> map
+              (a b) 
+              (and a b)
+            )
+			   	  #t
+			   	  (map 
+              ; Map to true if the given char is uppercase
+              char-upper-case?
+              ; Make up a list from the string's characters
+			   	    (string->list val)
+            )
+          )
+        )
+      )
+    )
+  )
+
+  ; Method to make the string lowercase
   (method (lower)
     (make-py-primitive
-     'lower
-     (lambda ()
-       (make-py-string (list->string (map (lambda (char) (char-downcase char))
-					  (string->list val)))))))
+      'lower
+      (lambda ()
+        ; Create a new python string
+        (make-py-string 
+          ; Convert the list to a string
+          (list->string 
+            (map 
+              (lambda 
+                ; For each character
+                (char) 
+                ; Make it lowercase
+                (char-downcase char)
+              )
+              ; Make up a list of this string's characters
+	            (string->list val)
+            )
+          )
+        )
+      )
+    )
+  )
+
+  ; Check if this string starts with a given string
   (method (startswith)
     (make-py-primitive
-     'startswith
-     (lambda (other)
-       (let ((len1 (string-length val))
-	     (suffix (ask other 'val)))
-	 (let ((len2 (string-length (ask other 'val))))
-	   (if (> len2 len1)
-	       (make-py-bool #f)
-	       (let ((tail (substring val 0 len2)))
-		 (make-py-bool (string=? tail suffix)))))))))
+      'startswith
+      (lambda 
+        ; Given string
+        (other)
+        (let 
+          (
+            ; Length of this string
+            (len1 (string-length val))
+            ; Given string literal value
+	          (suffix (ask other 'val))
+          )
+	        (let 
+            ; Given string length
+            ((len2 (string-length (ask other 'val))))
+            ; If the length of the given string is greater,
+            ; this string cannot start with the given string
+	          (if (> len2 len1)
+              ; Return false
+	            (make-py-bool #f)
+              ; Else
+	            (let 
+                ; Obtain the first n characters (=len2)
+                ((tail (substring val 0 len2)))
+                ; Check if the first n characters equal the given string
+	  	          (make-py-bool (string=? tail suffix))
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+
+  ; Method to make this string uppercase
   (method (upper)
     (make-py-primitive
-     'upper
-     (lambda ()
-       (make-py-string (list->string (map (lambda (char) (char-upcase char))
-					  (string->list val)))))))
+      'upper
+      (lambda 
+        ()
+        ; Create python string
+        (make-py-string 
+          ; Convert the list of uppercase characters to string
+          (list->string 
+            (map 
+              (lambda 
+                ; For each character
+                (char) 
+                ; Make it uppercase
+                (char-upcase char)
+              )
+              ; Make list out of the characters in this string
+              (string->list val)
+            )
+          )
+        )
+      )
+    )
   )
+)
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+; PYTHON NUMBER OBJECT
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;; Parent class for py-int and py-float.  Never constructed, only exists to
+ ;; provide wrappers for Scheme number functions to avoid duplicate code.
 (define-class (py-num val)
-  ;; Parent class for py-int and py-float.  Never constructed, only exists to
-  ;; provide wrappers for Scheme number functions to avoid duplicate code.
+  ;;; Parent class is python object 
   (parent (py-obj))
   (method (true?) (not (zero? val)))
+  ; Make string out of a number
   (method (__str__) (make-py-string (number->string val)))
+  ; Add two numbers
   (method (__add__)
     (make-py-primitive
-     '+
-     (lambda (other) (make-py-num (+ val (ask other 'val))))))
+      '+
+      (lambda 
+        ; The other number 
+        (other) 
+        (make-py-num 
+          ; Sum the value of this number and the value of the 
+          ; other number
+          (+ val (ask other 'val))
+        )
+      )
+    )
+  )
+  ; Substract two numbers
   (method (__sub__)
     (make-py-primitive
-     '-
-     (lambda (other) (make-py-num (- val (ask other 'val))))))
+      '-
+      (lambda 
+        ; The other number
+        (other) 
+        (make-py-num 
+          ; Substract the value of the other number to this number
+          (- val (ask other 'val))
+        )
+      )
+    )
+  )
+  ; Multiply two numbers
   (method (__mul__)
     (make-py-primitive
-     '*
-     (lambda (other) (make-py-num (* val (ask other 'val))))))
+      '*
+      (lambda 
+        ; The other number
+        (other) 
+        (make-py-num 
+          ; Multiply the value of this number by the value of the other number
+          (* val (ask other 'val))
+        )
+      )
+    )
+  )
+  ; Divide two numbers
   (method (__div__)
     (make-py-primitive
-     '/
-     (lambda (other) (make-py-num (/ val (ask other 'val))))))
+      '/
+      (lambda 
+        ; The other number
+        (other) 
+        (make-py-num 
+          ; Divide the value of this number by the value of the other number
+          (/ val (ask other 'val))
+        )
+      )
+    )
+  )
+  ; Raise this number to the power of other number
   (method (__pow__)
     (make-py-primitive
-     '**
-     (lambda (other) (make-py-num (expt val (ask other 'val))))))
+      '**
+      (lambda 
+        ; The other number
+        (other) 
+        ; Raise the value of this number to the value of the other number
+        (make-py-num (expt val (ask other 'val)))
+      )
+    )
+  )
+  ; Check if two numbers are equal
   (method (__eq__)
     (make-py-primitive
-     '==
-     (lambda (other) (make-py-bool (= val (ask other 'val))))))
+      '==
+      (lambda 
+        ; The other number
+        (other) 
+        (make-py-bool 
+          ; Check if the value of this number equals the value of the other number
+          (= val (ask other 'val))
+          )
+        )
+      )
+  )
+  ; Check if two numbers are different
   (method (__ne__)
     (make-py-primitive
-     '!=
-     (lambda (other) (make-py-bool (not (= val (ask other 'val)))))))
+      '!=
+      (lambda 
+        ; The other number
+        (other) 
+        (make-py-bool 
+          ; Check if the value of this number is not equal to the value of the other number
+          (not (= val (ask other 'val)))
+        )
+      )
+    )
+  )
+  ; Check if this number is greater than another number
   (method (__gt__)
     (make-py-primitive
-     '>
-     (lambda (other) (make-py-bool (> val (ask other 'val))))))
+      '>
+      (lambda 
+        ; The other number
+        (other) 
+        (make-py-bool 
+          ; Check if the value of this number is greater than the value of the other number
+          (> val (ask other 'val))
+        )
+      )
+    )
+  )
+  ; Check if this number is less than another number
   (method (__lt__)
     (make-py-primitive
-     '<
-     (lambda (other) (make-py-bool (< val (ask other 'val))))))
+      '<
+      (lambda 
+        ; The other number
+        (other) 
+        (make-py-bool 
+          ; Check if the value of this number is less than the value of the other number
+          (< val (ask other 'val))
+        )
+      )
+    )
+  )
+  ; Check if this number is greater than or equal to another number
   (method (__ge__)
     (make-py-primitive
-     '>=
-     (lambda (other) (make-py-bool (>= val (ask other 'val))))))
+      '>=
+      (lambda 
+        ; The other number
+        (other) 
+        (make-py-bool 
+          ; Check if the value of this number is greater than or equal to 
+          ; the value of the other number
+          (>= val (ask other 'val))
+        )
+      )
+    )
+  )
+  ; Check if this number is less than or equal to another number
   (method (__le__)
     (make-py-primitive
-     '<=
-     (lambda (other) (make-py-bool (<= val (ask other 'val))))))
+      '<=
+      (lambda 
+        ; The other number
+        (other) 
+        (make-py-bool 
+          ; Check if the value of this number is less than or equal to the 
+          ; value of the other number
+          (<= val (ask other 'val))
+        )
+      )
+    )
   )
+)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+; PYTHON INTEGER OBJECT
+;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define-class (py-int val)
+  ; Parent: python number
   (parent (py-num val))
+  ; Override integer check
   (method (int?) #t)
+  ; Set type of object
   (method (type) 'py-int)
   (method (__int__) self)
+  ; Convert integer to float
   (method (__float__)
-    (instantiate py-float (exact->inexact val)))
+    ; Create python float object
+    (instantiate py-float (exact->inexact val))
+  )
+  ; Divide two numbers
   (method (__div__)
     (make-py-primitive
-     '/
-     (lambda (other)
-       (if (ask other 'int?)
-	   (make-py-num (quotient val (ask other 'val)))
-	   (make-py-num (/ val (ask other 'val)))))))
+      '/
+      (lambda 
+        ; The other number
+        (other)
+        ; If the other number is an integer
+        (if (ask other 'int?)
+          ; Obtain only the integer part of the result of the division
+	        (make-py-num (quotient val (ask other 'val)))
+          ; Divide normally
+	        (make-py-num (/ val (ask other 'val)))
+        )
+      )
+    )
+  )
+  ; Obtain this number modulo another number
   (method (__mod__)
     (make-py-primitive
-     '%
-     (lambda (other)
-       (make-py-num (modulo val (ask other 'val))))))
+      '%
+      (lambda 
+        ; The other number
+        (other)
+        (make-py-num 
+          ; Obtain the value of this number modulo de value of the other number
+          (modulo val (ask other 'val))
+        )
+      )
+    )
+  )
+  ; Obtain the integer part of an integer = the integer itself
   (method (__trunc__) self)
-  )
+)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+; PYTHON FLOAT OBJECT
+;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define-class (py-float val)
+  ; Parent python number
   (parent (py-num val))
+  ; Override the float check
   (method (float?) #t)
+  ; Set the type of the object
   (method (type) 'py-float)
-  (method (__int__) (make-py-num (truncate val)))
+  ; Convert float to int
+  (method (__int__) 
+    ; Create python integer object
+    ; from the integer part of the float
+    (make-py-num (truncate val))
+  )
+  ; Convert to float
   (method (__float__) self)
+  ; Obtain this number modulo another number
   (method (__mod__)
     (make-py-primitive
-     '%
-     (lambda (other) (make-py-num (modulo val (ask other 'val))))))
-  (method (__trunc__) (make-py-num (truncate val)))
+      '%
+      (lambda 
+        ; The other number
+        (other) 
+        (make-py-num 
+          ; Obtain the value of this number modulo the value of the other number
+          (modulo val (ask other 'val))
+        )
+      )
+    )
   )
+  ; Obtain the integer part of this number
+  (method (__trunc__) (make-py-num (truncate val)))
+)
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+; PYTHON BOOLEAN OBJECT
+;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define-class (py-bool val)
+  ; Parent: python object
   (parent (py-obj))
+  ; Override boolean check
   (method (bool?) #t)
+  ; Set type of object
   (method (type) 'py-bool)
   (method (true?) val)
+  ; Check if two boolean objects are equal
   (method (__eq__)
     (make-py-primitive
-     '==
-     (lambda (other) (make-py-bool (and (eq? (ask other 'type) 'py-bool)
-					(eq? val (ask other 'val)))))))
+      '==
+      (lambda 
+        ; The other object
+        (other) 
+        (make-py-bool 
+          (and 
+            ; Is the other object a python boolean object?
+            (eq? (ask other 'type) 'py-bool)
+            ; is the value of this boolean the same as the value of the 
+            ; other boolean
+	          (eq? val (ask other 'val))
+          )
+        )
+      )
+    )
+  )
+  ; Obtain string value
   (method (__str__)
-    (make-py-string (if val "True" "False"))))
+    ; Return "True" of "False" based on the value of the boolean
+    (make-py-string (if val "True" "False"))
+  )
+)
 
+; Definition of boolean constants
 (define *PY-TRUE* (instantiate py-bool #t))
 (define *PY-FALSE* (instantiate py-bool #f))
-(define (make-py-bool val) (if (memq val '(|True| #t)) *PY-TRUE* *PY-FALSE*))
-(define (negate-bool bool) (py-error "TodoError: Person B, Question 4"))
 
-(define (make-py-list val)
-  (instantiate py-list val))
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+; PYTHON LIST OBJECT
+;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define-class (py-list val)
+  ; Parent: python object
   (parent (py-obj))
+  ; Set the type of the object
   (method (type) 'py-list)
+  ; Override the list check
   (method (list?) #t)
+  ; Override the mutable check
   (method (mutable?) #t)
   (method (true?) (not (zero? (length val))))
+  ; Convert to string
   (method (__str__)
     (make-py-string
      (string-append "["
 		    (accumulate
-		     (lambda (left right)
-		       (if (equal? right "]")
-			   (string-append left right)
-			   (string-append left ", " right)))
+		      (lambda 
+            ; left: "]"
+            ; right: element in the list of strings
+            (left right)
+            ; If the element is "]"
+		        (if (equal? right "]")
+              ; Then append another closing bracket (=left)
+			        (string-append left right)
+              ; Else keep separating by commas
+			        (string-append left ", " right)
+            )
+          )
 		     "]"
-		     (map (lambda (item)
-			    (if (eq? (ask item 'type) 'py-string)
-				(string-append (string #\")
-					       (ask item 'val)
-					       (string #\"))
-				(ask (ask item '__str__) 'val)))
-			  val)))))
+          ; This is the list of the converted values
+		      (map 
+            (lambda 
+              ; For each element of the list
+              (item)
+              ; If it is a string
+			        (if (eq? (ask item 'type) 'py-string)
+                ; Enclose it between two special symbols
+				        (string-append 
+                  (string #\")
+					        (ask item 'val)
+					        (string #\")
+                )
+                ; Else obtain the string value of the object
+				        (ask (ask item '__str__) 'val)
+              )
+            )
+            ; Value in the list
+			      val
+          )
+        )
+      )
+    )
+  )
   (method (__len__) (make-py-num (length val)))
   (method (reverse)
     (make-py-primitive 'reverse
@@ -588,7 +1137,27 @@
 	     (set! val (cdr val))
 	     head)))))
   )
-;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; CONSTRUCTORS 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;; BOOLEAN
+;;;;;;;;;;;;;;;;;;;;;;;;
+(define (make-py-bool val) (if (memq val '(|True| #t)) *PY-TRUE* *PY-FALSE*))
+(define (negate-bool bool) (py-error "TodoError: Person B, Question 4"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;; LIST
+;;;;;;;;;;;;;;;;;;;;;;;;
+(define (make-py-list val)
+  (instantiate py-list val))
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;; TABLE
+;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;table datatype. python dictionaries use this implementaiton of tables
 (define (table-make keys values)
   (define (iter keys values)
@@ -634,6 +1203,9 @@
   (if (not pred)
     (py-error description)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;
+;; DICTIONARY
+;;;;;;;;;;;;;;;;;;;;;;;;
 (define (make-py-dictionary pairs)
   (instantiate py-dictionary pairs))
 
@@ -690,6 +1262,9 @@
     (make-py-list (table-get-vals table)))
   )
 
+;;;;;;;;;;;;;;;;;;;;;;;;
+;; PROCEDURE
+;;;;;;;;;;;;;;;;;;;;;;;;
 (define (make-py-proc name params body env)
   (instantiate py-proc name params body env))
 (define-class (py-proc name params body env)
@@ -722,6 +1297,9 @@
 	    (else (execute body (extend-environment params args env))))))
   )
 
+;;;;;;;;;;;;;;;;;;;;;;;;
+;; PRIMITIVE
+;;;;;;;;;;;;;;;;;;;;;;;;
 (define (make-py-primitive name proc)
   (instantiate py-primitive name proc))
 (define-class (py-primitive name proc)
