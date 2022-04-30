@@ -1016,6 +1016,7 @@
 			        (string-append left ", " right)
             )
           )
+          ; Starting value
 		     "]"
           ; This is the list of the converted values
 		      (map 
@@ -1034,146 +1035,452 @@
 				        (ask (ask item '__str__) 'val)
               )
             )
-            ; Value in the list
+            ; Elements in the list
 			      val
           )
         )
       )
     )
   )
+  ; Obtain length of list: returns a python number object
   (method (__len__) (make-py-num (length val)))
+  ; Reverse list
   (method (reverse)
-    (make-py-primitive 'reverse
-		       (lambda () (set! val (reverse val)) *NONE*)))
+    (make-py-primitive 
+      ; name of operation
+      'reverse
+      ; procedure
+		  (lambda 
+        () 
+        ; Use scheme's reverse to reverse the list
+        (set! val (reverse val)) 
+        ; Return nothing
+        *NONE*
+      )
+    )
+  )
+  ; Return a copy of the list but reversed 
   (method (__reversed__)
-    (make-py-primitive 'reversed (lambda () (make-py-list (reverse val)))))
+    (make-py-primitive 
+      ; name of operation
+      'reversed 
+      ; procedure
+      (lambda 
+        () 
+        ; Create a new list object
+        (make-py-list 
+          ; Whose value is this reversed list
+          (reverse val)
+        )
+      )
+    )
+  )
+  ; Order the list
   (method (sort)
     (make-py-primitive
-     'sort
-     (lambda ()
-       (set! val (sort val (lambda (a b) (ask (py-apply (ask a '__lt__)
-							(list b))
-					      'true?))))
-       *NONE*)))
+      ; Operation name
+      'sort
+      ; Procedure
+      (lambda ()
+        (set! val 
+          ; Use scheme's sort procedure
+          (sort 
+            ; List to sort
+            val 
+            ; Rule to sort by
+            (lambda 
+              ; Given two values a and b
+              (a b) 
+              (ask 
+                ; Get a's procedure to check if a is less than another object
+                ; Will return a python boolean object
+                (py-apply (ask a '__lt__) (list b)) 
+                ; Check if a __lt__ is tru
+                'true?
+              )
+            )
+          )
+        )
+        ; Return nothing
+        *NONE*
+      )
+    )
+  )
+  ; Create a copy of the list that is sorted
   (method (__sorted__)
     (make-py-primitive
-     'sorted
-     (lambda () (make-py-list (sort val (lambda (a b)
-					  (ask (py-apply (ask a '__lt__)
-							 (list b))
-					       'true?)))))))
+      ; operation name
+      'sorted
+      ; procedure
+      (lambda 
+        () 
+        ; Create python list object
+        (make-py-list 
+          ; Sort the list abiding by each object's __lt__ procedure 
+          (sort 
+            ; List to sort
+            val 
+            ; Predicate to sort by
+            (lambda 
+              (a b)
+              (ask 
+                (py-apply (ask a '__lt__) (list b))
+               'true?
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+  ; Create iterator for the list
+  ; var-name: name for the variable that holds the value of the current element when we call next
+  ; block: sequence of expression executed when we initialize iterator
   (method (__iter__ var-name block env)
     (define (iter seq)
+      ; If the list is empty
       (if (null? seq)
-	  *NONE*
-	  (begin (define-variable! var-name (car seq) env)
-		 (let ((result (eval-sequence block env)))
-		   (cond ((eq? result '*BREAK*) '*BREAK*)
-			 ((and (pair? result) (eq? (car result) '*RETURN*))
-			  result)
-			 (else (iter (cdr seq))))))))
-    (let ((result (iter val)))
-      (cond ((and (pair? result) (eq? (car result) '*RETURN*)) result)
-	    ((eq? result '*BREAK*) result)
-	    (else *NONE*))))
+        ; No iterator: just none object
+	      *NONE*
+        ; Else
+	      (begin 
+          ; Create a variable with the current name of the list
+          ; in the current environment
+          (define-variable! var-name (car seq) env)
+		      (let 
+            ; Evaluate the code block inside the __iter__ method
+            ((result (eval-sequence block env)))
+		        (cond 
+              ; If the result is break, stop and return break object
+              ((eq? result '*BREAK*) '*BREAK*)
+              ; If the result is a list, and one element in the list
+              ; is a return then return the result
+		    	    ((and 
+                 (pair? result) 
+                 (eq? (car result) '*RETURN*)
+                )
+		    	      result
+              )
+              ; Else keep iterating
+		    	    (else (iter (cdr seq)))
+            )
+          )
+        )
+      )
+    )
+    (let 
+      ; Obtain result of the iterator
+      ((result (iter val)))
+      (cond 
+        ; If the result is a pair of objects, and the first one is return, then return result
+        ((and (pair? result) (eq? (car result) '*RETURN*)) result)
+        ; If it is a break, return result
+	      ((eq? result '*BREAK*) result)
+        ; Else, return nothing
+	      (else *NONE*))
+    )
+  )
   (method (__getitem__ index)
+    ; Create a sublist
     (define (sublist seq start end)
-      (cond ((> start 0) (sublist (cdr seq) (- start 1) end))
-	    ((= end 0) '())
-	    (else (cons (car seq) (sublist (cdr seq) start (- end 1))))))
-    (let ((n (ask (car index) 'val)))
+      (cond 
+        ; If the start index is bigger than 0
+        ((> start 0) 
+          (sublist 
+            ; The we remove the first element of the list
+            (cdr seq) 
+            ; Update the start index
+            (- start 1) 
+            end
+          )
+        )
+        ; If the end index equals 0, then the sublist to generate is empty
+	      ((= end 0) '())
+        ; Else 
+	      (else 
+          ; Create list recursively
+          (cons 
+            ; First element of current list
+            (car seq) 
+            (sublist 
+              ; Rest of list
+              (cdr seq) 
+              start 
+              ; Update end
+              (- end 1)
+            )
+          )
+        )
+      )
+    )
+    (let 
+      ; Obtain first index of slice [i, j]
+      ((n (ask (car index) 'val)))
+      ; If it is not an integer throw error
       (if (not (integer? n))
-	  (py-error "TypeError: string indices must be integers, not "
-		    (objtype (car index))))
-      (if (not (and (>= n (- (length val))) (< n (length val))))
-	  (py-error "IndexError: string index out of range: " n))
-      (if (< n 0) (set! n (+ n (length val))))
+	      (py-error 
+          "TypeError: list indices must be integers, not "
+		      (objtype (car index))
+        )
+      )
+      ; If n is not in [-len(val), len(val)], throw error
+      ; note python allows for reverse indexing with negative indexes
+      (if (not 
+            (and 
+              (>= n (- (length val))) 
+              (< n (length val))
+            )
+          )
+	      (py-error "IndexError: list index out of range: " n)
+      )
+      ; If n is negative, update its value to select the corresponding
+      ; value but in reverse
+      (if (< n 0) 
+        (set! n (+ n (length val)))
+      )
+      ; If there is not second index
       (if (null? (cdr index))
-	  (list-ref val n)
-	  (let ((m (ask (cadr index) 'val)))
-	    (if (not (integer? m))
-		(py-error "TypeError: string indices must be integers, not "
-			  (objtype (cadr index))))
-	    (if (not (and (>= m (- (length val))) (< m (length val))))
-		(py-error "IndexError: string index out of range: " m))
-	    (if (< m 0) (set! m (+ m (length val))))
-	    (if (not (null? (cddr index)))
-		(py-error "only one- and two- element slices implemented"))
-	    (make-py-list (sublist val n m))))))
+        ; Simply return the value in index n
+	      (list-ref val n)
+        ; Else, apply the same logic than for the index n, onto index m
+	      (let 
+          ((m (ask (cadr index) 'val)))
+	        (if (not (integer? m))
+		        (py-error 
+              "TypeError: list indices must be integers, not "
+		        	(objtype (cadr index))
+            )
+          )
+	        (if (not 
+                (and 
+                  (>= m (- (length val))) 
+                  (< m (length val))
+                )
+              )
+		          (py-error "IndexError: list index out of range: " m)
+          )
+	        (if (< m 0) 
+            (set! m (+ m (length val)))
+          )
+          ; Three indexes not implemented
+	        (if (not (null? (cddr index)))
+		        (py-error "only one- and two- element slices implemented")
+          )
+          ; Create a list from the sublist between indexes n and m
+	        (make-py-list (sublist val n m))
+        )
+      )
+    )
+  )
   (method (__setitem__ index item)
-    (if (not (null? (cdr index))) (py-error "Slice-assignment not implemented"))
+    ; Two indexes not supported
+    (if (not (null? (cdr index))) 
+      (py-error "Slice-assignment not implemented")
+    )
+    ; Obtain the index = first element of pair (index)
     (set! index (car index))
+
     (define (replace-item i seq)
-      (cond ((null? seq)
-	     (py-error "IndexError: list assignment out of range: "
-		       (ask index 'val)))
-	    ((zero? i) (set-car! seq item) *NONE*)
-	    (else (replace-item (- i 1) (cdr seq)))))
-    (let ((n (ask index 'val)))
-      (if (not (integer? n)) (py-error "TypeError: list indices must be integers"))
-      (if (not (and (>= n (- (length val))) (< n (length val))))
-	  (py-error "IndexError: list index out of range: " n))
+      (cond 
+        ; If the list is empty, return error, because any 
+        ; integer is bigger than the max possible index 
+        ((null? seq)
+	        (py-error 
+            "IndexError: list assignment out of range: "
+		        (ask index 'val))
+        )
+        ; If the index equals zero
+	      ((zero? i) 
+          ; Replace value in current position in list to
+          ; item
+          (set-car! seq item) 
+          ; Return none object
+          *NONE*
+        )
+        ; Else keep going through the list until i = 0
+	      (else 
+          (replace-item 
+            ; Update index
+            (- i 1) 
+            ; Rest of list
+            (cdr seq)
+          )
+        )
+      )
+    )
+    (let 
+      ; Obtain the value of the index
+      ((n (ask index 'val)))
+      ; If the value of the index is not and integer -> error
+      (if (not (integer? n)) 
+        (py-error "TypeError: list indices must be integers")
+      )
+      ; If the value of the index is not in [-len(val), len(val)], then throw error
+      ; note python supports negative index for reverse indexing
+      (if (not 
+            (and 
+              (>= n (- (length val))) 
+              (< n (length val))
+            )
+          )
+	      (py-error "IndexError: list index out of range: " n)
+      )
+      ; If the value of the index is negative, set it to the corresponding
+      ; positive value according to inverse indexing
       (if (< n 0) (set! n (+ n (length val))))
-      (replace-item n val)))
+      ; Replace the item in the n index by the value given by item in the list "val"
+      (replace-item n val))
+  )
+  ; Check if the list contains an object given by other
   (method (__contains__ other)
-    (py-error "TodoError: Person A, Question 4"))
+    (py-error "TodoError: Person A, Question 4")
+  )
+  ; Append two lists
   (method (append)
-    (make-py-primitive 'append
-		       (lambda (item)
-             (if (null? val)
-                 (set! val (list item))
-                 (append! val (list item)))
-             *NONE*)))
+    (make-py-primitive 
+      ; operation name
+      'append
+		  (lambda 
+        (item)
+        ; If the list is null
+        (if (null? val)
+          ; Simply return this item as a list
+          (set! val (list item))
+          ; Else use scheme's append! method to append two lists
+          (append! val (list item))
+        )
+        ; Return none object
+        *NONE*
+      )
+    )
+  )
+  ; Insert item into list
   (method (insert) ;; only setup to add to the front, for efficiency
-    (make-py-primitive 'insert
-		       (lambda (item) (set! val (cons item val)) *NONE*)))
+    (make-py-primitive 
+      ; operation name
+      'insert
+		  (lambda 
+        ; given item to insert
+        (item) 
+        ; udpate the list to be a new list made up by 
+        ; the item and the old list
+        (set! val (cons item val)) 
+        ; Return none object
+        *NONE*
+      )
+    )
+  )
+  ; Pop an element from the left
   (method (popleft)
     (make-py-primitive
-     'popfront
-     (lambda ()
-       (if (null? val)
-	   (py-error "IndexError: pop from empty list")
-	   (let ((head (car val)))
-	     (set! val (cdr val))
-	     head)))))
+      ; operation name
+      'popfront
+      (lambda ()
+        ; If the list is empty: error
+        (if (null? val)
+	        (py-error "IndexError: pop from empty list")
+          ; Else 
+	        (let 
+            ; Get first element
+            ((head (car val)))
+            ; Delete first element from the list
+	          (set! val (cdr val))
+            ; Return the value we popped
+	          head
+          )
+        )
+      )
+    )
   )
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; CONSTRUCTORS 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; BOOLEAN
-;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define (make-py-bool val) (if (memq val '(|True| #t)) *PY-TRUE* *PY-FALSE*))
 (define (negate-bool bool) (py-error "TodoError: Person B, Question 4"))
 
-;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; LIST
-;;;;;;;;;;;;;;;;;;;;;;;;
-(define (make-py-list val)
-  (instantiate py-list val))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;;;;;;;;;;;;;;;;;;;;;
+(define (make-py-list val)
+  (instantiate py-list val)
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; TABLE
-;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;table datatype. python dictionaries use this implementaiton of tables
+
+;;;;;;;;;;;;;;;;;;;
+;;; CONSTRUCTORS
+;;;;;;;;;;;;;;;;;;;
+
+; Create single table entry from a givenkey and value
+(define (table-make-entry key val)
+  (cons key val)
+)
+
+; Create a table from a list of keys and values
 (define (table-make keys values)
   (define (iter keys values)
+    ; If there are no keys return empty list
     (if (null? keys)
       '()
-      (cons (table-make-entry (car keys) (car values))
-            (iter (cdr keys) (cdr values)))))
+      ; Else
+      (cons 
+        ; Create a entry from the current key and value
+        (table-make-entry (car keys) (car values))
+        ; Keep generating entries from the rest of keys and values
+        (iter (cdr keys) (cdr values))
+      )
+    )
+  )
+  ; If there are not the same number of keys and values: error
   (if (not (= (length keys) (length values)))
     (py-error "Dictionary error: Not same number of keys as values in dictionary")
-    (iter keys values)))
-(define (table-make-entry key val)
-  (cons key val))
+    ; Else start creating entries
+    (iter keys values)
+  )
+)
+
+;;;;;;;;;;;;;;;;;;;
+;;; SELECTORS
+;;;;;;;;;;;;;;;;;;;
+
+; First registry in table = first element in list=table
 (define (table-first-entry table)
-  (car table))
+  (car table)
+)
+
+; First key of first registry in table
 (define (table-first-entry-key table)
-  (car (table-first-entry table)))
+  ; Obtain first element (=key) of the first registry 
+  ; in the table
+  (car (table-first-entry table))
+)
+
+; Obtain list of keys in the table
+(define (table-get-keys t)
+  ; First element of every pair in the table is the key
+  (map car t)
+)
+(define (table-get-vals t)
+  ; Second element of every pair in the table is the value
+  (map cdr t)
+)
+
+;;;;;;;;;;;;;;;;;;;
+;;; PROCEDURES
+;;;;;;;;;;;;;;;;;;;
+
 ;;return the entry (a pair) or #f if not in table
 (define (table-contains-key? table key compare-proc)
   (cond
@@ -1194,18 +1501,15 @@
   (for-each (lambda (n)
               (proc (car n) (cdr n)))
             table))
-(define (table-get-keys t)
-  (map car t))
-(define (table-get-vals t)
-  (map cdr t))
 
 (define (assert-or-error pred description)
   (if (not pred)
     (py-error description)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DICTIONARY
-;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define (make-py-dictionary pairs)
   (instantiate py-dictionary pairs))
 
