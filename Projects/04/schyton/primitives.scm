@@ -26,6 +26,8 @@
   )
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; PYTHON NONE OBJECT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -41,6 +43,8 @@
 )
 ; Create global none object
 (define *NONE* (instantiate none))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; PYTHON STRING OBJECT
@@ -689,6 +693,8 @@
   )
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; PYTHON NUMBER OBJECT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -857,6 +863,8 @@
   )
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; PYTHON INTEGER OBJECT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -908,6 +916,8 @@
   (method (__trunc__) self)
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; PYTHON FLOAT OBJECT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -944,6 +954,7 @@
   (method (__trunc__) (make-py-num (truncate val)))
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; PYTHON BOOLEAN OBJECT
@@ -985,6 +996,12 @@
 ; Definition of boolean constants
 (define *PY-TRUE* (instantiate py-bool #t))
 (define *PY-FALSE* (instantiate py-bool #f))
+
+; Constructors
+(define (make-py-bool val) (if (memq val '(|True| #t)) *PY-TRUE* *PY-FALSE*))
+(define (negate-bool bool) (py-error "TodoError: Person B, Question 4"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; PYTHON LIST OBJECT
@@ -1394,24 +1411,12 @@
   )
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; CONSTRUCTORS 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; BOOLEAN
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define (make-py-bool val) (if (memq val '(|True| #t)) *PY-TRUE* *PY-FALSE*))
-(define (negate-bool bool) (py-error "TodoError: Person B, Question 4"))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; LIST
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+; Constructors
 (define (make-py-list val)
   (instantiate py-list val)
 )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; TABLE
@@ -1484,444 +1489,1104 @@
 ;;return the entry (a pair) or #f if not in table
 (define (table-contains-key? table key compare-proc)
   (cond
-    ((null? table)
-     #f)
+    ; If the table is empty, it contains no element
+    ((null? table) #f)
+    ; Check if the key we are searching and the current key of the table we are analysing are equal
     ((compare-proc (table-first-entry-key table) key)
-     (table-first-entry table))
-    (else (table-contains-key? (cdr table) key compare-proc))))
+      ; If so, return entry
+      (table-first-entry table)
+    )
+    ; Else, keep searching
+    (else 
+      (table-contains-key? 
+        ; Rest of table
+        (cdr table) 
+        key 
+        ; Comparing procedure
+        compare-proc)
+    )
+  )
+)
+
 (define (table-add-key-val-pair table key val compare-proc)
   (cond
-    ((null? table)
-      (cons (table-make-entry key val) table))
+    ; If the table is empty, simply add entry to table and return it
+    ((null? table) 
+      (cons (table-make-entry key val) table)
+    )
+    ; Check if the key we are inserting and the current key of the table we are analysing are equal
     ((compare-proc (table-first-entry-key table) key)
-      (cons (table-make-entry key val) (cdr table)))
-    (else (cons (car table)
-                (table-add-key-val-pair (cdr table) key val compare-proc)))))
+      (cons 
+        ; Override the current linked to the key
+        (table-make-entry key val) 
+        ; Concatenate the rest of the table
+        (cdr table)
+      )
+    )
+    ; Else keep going through the table, until it is emtpy or the key is found
+    (else 
+      ; Re-construct table
+      (cons 
+        ; Current entry
+        (car table)
+        ; Rest of entries
+        (table-add-key-val-pair (cdr table) key val compare-proc)
+      )
+    )
+  )
+)
+
+; Apply procedure to every entry of the table
 (define (table-for-each table proc)
-  (for-each (lambda (n)
-              (proc (car n) (cdr n)))
-            table))
+  (for-each 
+    ; n: entry of table
+    (lambda (n)
+      ; Apply procedure to key and value
+      (proc (car n) (cdr n))
+    )
+    ; Go through table
+    table
+  )
+)
 
 (define (assert-or-error pred description)
+  ; Check if predicate is satisfied
   (if (not pred)
-    (py-error description)))
+    ; If not throw error
+    (py-error description)
+  )
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; DICTIONARY
+;; DICTIONARY PYTHON OBJECT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define (make-py-dictionary pairs)
-  (instantiate py-dictionary pairs))
 
 (define-class (py-dictionary table)
+  ; Parent: python object
   (parent (py-obj))
-  (instance-vars (comp-proc (lambda (x y)
-                             (and (eq? (ask x 'type) (ask y 'type))
-                                  (eq? (py-apply (ask x '__eq__) (list y)) *PY-TRUE*)))))
+  (instance-vars 
+    ; Define procedure to compare two entries of a dictionary 
+    (comp-proc 
+      (lambda (x y)
+        (and 
+          ; The entries have the same type
+          (eq? (ask x 'type) (ask y 'type))
+          ; The entries have the same value
+          (eq? (py-apply (ask x '__eq__) (list y)) *PY-TRUE*)
+        )
+      )
+    )
+  )
+  ; When creating dictionary, check if every key is valid
   (initialize
-    (for-each (lambda (x) (ask self 'isValidKey (car x)))
-              table))
+    (for-each 
+      ; Pair: key - value
+      (lambda (x) 
+        ; Check if the current key is value
+        (ask self 'isValidKey (car x))
+      )
+      ; List of pairs: key-value
+      table
+    )
+  )
+  ; Override the type
   (method (type) 'py-dictionary)
+  ; Override dictionary check
   (method (dictionary?) #t)
+  ; Override mutable check
   (method (mutable?) #t)
+  ; Override true check
   (method (true?) (not (null? table)))
+  ; Check if a key is valid
   (method (isValidKey key)
-    (assert-or-error (not (ask key 'mutable?)) "Dictionary Error: All keys to the dictionary must be IMMUTABLE objects"))
+    (assert-or-error 
+      ; If key is mutable, throw error
+      (not (ask key 'mutable?)) 
+      "Dictionary Error: All keys to the dictionary must be IMMUTABLE objects"
+    )
+  )
+  ; To string method
   (method (__str__)
     (make-py-string
-         (string-append "{\n"
-            (accumulate (lambda (left right)
-                          (if (equal? right "}")
-                            (string-append "  " left "\n" right)
-                            (string-append "  " left ",\n" right)))
-                        "}"
-                        (map (lambda (item)
-                               (let ((key (car item))
-                                     (val (cdr item)))
-                                 (if (eq? (ask key 'type) 'py-string)
-                                   (set! key (string-append (string #\") (ask key 'val) (string #\")))
-                                   (set! key (string-append (ask (ask key '__str__) 'val))))
-                                 (if (eq? (ask val 'type) 'py-string)
-                                   (set! val (string-append (string #\") (ask val 'val) (string #\")))
-                                   (set! val (string-append (ask (ask val '__str__) 'val))))
-                                 (string-append key " : " val )))
-                             table)))))
+      (string-append "{\n"
+        (accumulate 
+          (lambda 
+              (left right)
+              (if (equal? right "}")
+                (string-append "  " left "\n" right)
+                (string-append "  " left ",\n" right)
+              )
+          )
+          "}"
+          (map 
+            (lambda (item)
+              (let 
+                (
+                  (key (car item))
+                  (val (cdr item))
+                )
+                (if (eq? (ask key 'type) 'py-string)
+                  (set! key (string-append (string #\") (ask key 'val) (string #\")))
+                  (set! key (string-append (ask (ask key '__str__) 'val)))
+                )
+                (if (eq? (ask val 'type) 'py-string)
+                  (set! val (string-append (string #\") (ask val 'val) (string #\")))
+                  (set! val (string-append (ask (ask val '__str__) 'val)))
+                )
+                (string-append key " : " val ))
+            )
+            table
+          )
+        )
+      )
+    )
+  )
+  ; Update/Save pair key - value
   (method (__setitem__ py-obj-key py-obj-val)
+    ; If the key is valid
     (ask self 'isValidKey py-obj-key)
-    (set! table (table-add-key-val-pair table py-obj-key py-obj-val comp-proc))
-    *NONE*)
+    ; Update the table with the pair key - value
+    (set! 
+      table 
+      ; Add entry to dictionary
+      (table-add-key-val-pair 
+        table 
+        py-obj-key 
+        py-obj-val 
+        ; Procedure to compare if two entries in the dictionary are equal
+        comp-proc
+      )
+    )
+    ; Return none object
+    *NONE*
+  )
+  ; Obtain value in dictionary from key
   (method (__getitem__ key)
-    (let ((v (table-contains-key? table key comp-proc)))
+    (let 
+      ; Search for the key in the dictionary (table)
+      ((v (table-contains-key? table key comp-proc)))
+      ; If it exists, return value
       (if v
         (cdr v) ;return the value
-        (py-error (string-append "Dictionary doesn't contain the key: " (ask (ask key '__str__) 'val))))))
-  (method (__contains__ key)
-    (let ((v (table-contains-key? table key comp-proc)))
-      (if v
-        (make-py-bool #t)
-        (make-py-bool #f))))
-  (method (__keys__)
-    (make-py-list (table-get-keys table)))
-  (method (__vals__)
-    (make-py-list (table-get-vals table)))
+        ; Else throw error
+        (py-error 
+          (string-append 
+            "Dictionary doesn't contain the key: " (ask (ask key '__str__) 'val)
+          )
+        )
+      )
+    )
   )
+  ; Check if the dictionary contains a given key
+  (method (__contains__ key)
+    (let 
+      ; Search the key in the dictionary (table)
+      ((v (table-contains-key? table key comp-proc)))
+      ; If it exists
+      (if v
+        ; Return boolean python object with true value
+        (make-py-bool #t)
+        ; Return boolean python object with false value
+        (make-py-bool #f)
+      )
+    )
+  )
+
+  ; Obtain all keys in the dictionary
+  (method (__keys__)
+    ; Return list python object with the keys of the dictionary (table)
+    (make-py-list (table-get-keys table))
+  )
+  ; Obtain all values in the dictionary
+  (method (__vals__)
+    ; Return list python object with the values of the dictionary (table)
+    (make-py-list (table-get-vals table))
+  )
+)
+
+; Constructor
+(define (make-py-dictionary pairs)
+  (instantiate py-dictionary pairs)
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;; PROCEDURE
 ;;;;;;;;;;;;;;;;;;;;;;;;
-(define (make-py-proc name params body env)
-  (instantiate py-proc name params body env))
+
 (define-class (py-proc name params body env)
+  ; Parent: python object
   (parent (py-obj))
+  ; Create attributes: no parameters
   (instance-vars (num-params #f))
+  ; Update hte number of parameters
   (initialize (set! num-params (length params)))
+  ; Override object type
   (method (type) 'py-proc)
+  ; Override procedure check
   (method (procedure?) #t)
+  ; To String method
   (method (__str__)
     (make-py-string
-     (apply string-append (list "<function " (symbol->string name) ">"))))
+     (apply 
+      string-append 
+      (list "<function " (symbol->string name) ">")
+      )
+    )
+  )
+  ; Call method to apply procedure
   (method (__call__ args)
     (define (execute block env)
+      ; If the set of declarations is null
       (if (null? block)
-	  *NONE*
-	  (let ((line-obj (make-line-obj (car block))))
-	    (if (and (not (empty? line-obj)) ;; check for tail call
-		     (eq? (ask line-obj 'peek) 'return))
-		(begin (ask line-obj 'next) ;; discard return token
-		       (py-eval line-obj env))
-		(let ((val (py-eval line-obj env)))
-		  (if (and (pair? val) (eq? (car val) '*RETURN*))
-		      (cdr val)
-		      (execute (cdr block) env)))))))
-    (let ((num-args (length args)))
-      (cond ((> num-args num-params)
-	     (py-error "TypeError: Too many arguments to " name))
-	    ((< num-args num-params)
-	     (py-error "TypeError: Too few arguments to " name))
-	    (else (execute body (extend-environment params args env))))))
+        ; Return none object
+	      *NONE*
+        ; Else
+	      (let 
+          ; Obtain first line to execute
+          ((line-obj (make-line-obj (car block))))
+	        (if (and 
+                (not (empty? line-obj)) ;; check for tail call
+		            (eq? (ask line-obj 'peek) 'return)
+            )
+            ; If there is a return in the line
+		        (begin 
+              (ask line-obj 'next) ;; discard return token
+              ; Return the result of evaluating the line
+		          (py-eval line-obj env)
+            )
+            ; If not
+		        (let 
+              ; Obtain value after result of evaluating the line
+              ((val (py-eval line-obj env)))
+              ; If the result is a pair that contains a return
+		          (if (and 
+                    (pair? val) 
+                    (eq? (car val) '*RETURN*)
+                  )
+                ; Then return value of result
+		            (cdr val)
+                ; Else, keep executing next lines
+		            (execute (cdr block) env)
+              )
+            )
+          )
+        )
+      )
+    )
+    (let 
+      ; Obtain the number of arguments
+      ((num-args (length args)))
+      (cond 
+        ; If the number of arguments is larger than the number of parameters: error
+        ((> num-args num-params)
+	        (py-error "TypeError: Too many arguments to " name)
+        )
+        ; If the number of arguments is lower than the number of parameters: error
+	      ((< num-args num-params)
+	        (py-error "TypeError: Too few arguments to " name)
+        )
+        ; Else apply procedure
+	      (else 
+          (execute
+            ; Set of declarations to execute
+            body 
+            ; Create new frame that binds parameters and 
+            ; arguments whose enclosing environment is env
+            (extend-environment params args env)
+          )
+        )
+      )
+    )
   )
+)
+
+; Constructor
+(define (make-py-proc name params body env)
+  (instantiate py-proc name params body env)
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;; PRIMITIVE
 ;;;;;;;;;;;;;;;;;;;;;;;;
-(define (make-py-primitive name proc)
-  (instantiate py-primitive name proc))
+
 (define-class (py-primitive name proc)
+  ; Parent: python object
   (parent (py-obj))
+  ; Override object type
   (method (type) 'py-proc)
+  ; Override primitive check
   (method (primitive?) #t)
+  ; To String method
   (method (__str__)
-    (make-py-string (apply string-append
-			   (list "<method " (symbol->string name) ">"))))
-  (method (__call__ args) (apply proc args))
+    (make-py-string 
+      (apply 
+        string-append
+        (list "<method " (symbol->string name) ">")
+      )
+    )
   )
+  ; Call procedure to apply primitive procedure
+  (method (__call__ args) (apply proc args))
+)
+
+; Constructor
+(define (make-py-primitive name proc)
+  (instantiate py-primitive name proc)
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;; TYPE
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-class (py-type val)
+  ; Parent: python object
+  (parent (py-obj))
+  ; To string method
+  (method (__str__) (make-py-string val))
+)
+
+; Constructor
+(define (make-py-type type)
+  (instantiate py-type type)
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;; MATH
+;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (square x) (* x x)) ;; math helper
+
 (define-class (math)
+  ; Parent: python object
   (parent (py-obj))
   (method (__str__) (make-py-string "<built-in module 'math'>"))
   ;; Mathematical constants
-  (class-vars (pi (make-py-num (* 4 (atan 1))))
-	      (e (make-py-num (exp 1)))
-	      (phi (make-py-num (/ (+ 1 (sqrt 5)) 2))))
+  (class-vars 
+    (pi (make-py-num (* 4 (atan 1))))
+	  (e (make-py-num (exp 1)))
+	  (phi (make-py-num (/ (+ 1 (sqrt 5)) 2)))
+  )
   ;; Number-theoretic functions
   (method (ceil)
-    (make-py-primitive 'ceil
-		       (lambda (num) (make-py-num (ceiling (ask num 'val))))))
+    (make-py-primitive 
+      'ceil
+		  (lambda 
+        (num) 
+        (make-py-num (ceiling (ask num 'val)))
+      )
+    )
+  )
   (method (fabs)
-    (make-py-primitive 'fabs
-		       (lambda (num)
+    (make-py-primitive 
+      'fabs
+		  (lambda (num)
 			 (let ((val (ask num 'val)))
-			   (if (< val 0)
-			       (make-py-num (- val))
-			       num)))))
+			    (if (< val 0)
+			      (make-py-num (- val))
+			      num
+          )
+        )
+      )
+    )
+  )
   (method (factorial)
     (make-py-primitive
-     'factorial
-     (lambda (num)
-       (define (fact-iter n p)
-	 (if (= n 0)
-	     p
-	     (fact-iter (- n 1) (* p n))))
-       (if (or (not (ask num 'int?))
-	       (< (ask num 'val) 0))
-	   (py-error "ValueError: factorial() not defined for negative values")
-	   (fact-iter (ask num 'val) 1)))))
+      'factorial
+      (lambda (num)
+        (define (fact-iter n p)
+	        (if (= n 0)
+	          p
+	          (fact-iter (- n 1) (* p n)))
+        )
+        (if (or 
+              (not (ask num 'int?))
+	            (< (ask num 'val) 0)
+            )
+	          (py-error "ValueError: factorial() not defined for negative values")
+	          (fact-iter (ask num 'val) 1)
+        )
+      )
+    )
+  )
   (method (floor)
-    (make-py-primitive 'floor
-		       (lambda (num) (make-py-num (floor (ask num 'val))))))
+    (make-py-primitive 
+      'floor
+		  (lambda 
+        (num) 
+        (make-py-num (floor (ask num 'val)))
+      )
+    )
+  )
   (method (trunc)
-    (make-py-primitive 'trunc
-		       (lambda (num) (ask num '__trunc__))))
+    (make-py-primitive 
+      'trunc
+		  (lambda 
+        (num) 
+        (ask num '__trunc__)
+      )
+    )
+  )
   ;; Power and logarithmic functions
   (method (exp)
-    (make-py-primitive 'exp
-		       (lambda (num) (make-py-num (exp (ask num 'val))))))
+    (make-py-primitive 
+      'exp
+		  (lambda 
+        (num) 
+        (make-py-num (exp (ask num 'val)))
+      )
+    )
+  )
   (method (log)
     (make-py-primitive
-     'log
-     (lambda (num . base)
-       (if (null? base)
-	   (make-py-num (log (ask num 'val)))
-	   (make-py-num (/ (log (ask num 'val))
-			   (log (ask (car base) 'val))))))))
+      'log
+      (lambda 
+        (num . base)
+        (if (null? base)
+	        (make-py-num (log (ask num 'val)))
+	        (make-py-num 
+            (/ 
+              (log (ask num 'val))
+		  	      (log (ask (car base) 'val))
+            )
+          )
+        )
+      )
+    )
+  )
   (method (log10)
-    (make-py-primitive 'log10
-		       (lambda (num)
-			 (make-py-num (/ (log (ask num 'val)) (log 10))))))
+    (make-py-primitive 
+      'log10
+		  (lambda 
+        (num)
+			  (make-py-num (/ (log (ask num 'val)) (log 10)))
+      )
+    )
+  )
   (method (pow)
-    (make-py-primitive 'pow
-		       (lambda (x y)
-			 (make-py-num (expt (ask x 'val) (ask y 'val))))))
+    (make-py-primitive 
+      'pow
+		  (lambda 
+        (x y)
+			  (make-py-num (expt (ask x 'val) (ask y 'val)))
+      )
+    )
+  )
   (method (sqrt)
-    (make-py-primitive 'sqrt
-		       (lambda (num) (make-py-num (sqrt (ask num 'val))))))
+    (make-py-primitive 
+      'sqrt
+		  (lambda 
+        (num) 
+        (make-py-num (sqrt (ask num 'val)))
+      )
+    )
+  )
   ;; Trigonometric functions
   (method (acos)
-    (make-py-primitive 'acos
-		       (lambda (num) (make-py-num (acos (ask num 'val))))))
+    (make-py-primitive 
+      'acos
+		  (lambda 
+        (num) 
+        (make-py-num (acos (ask num 'val)))
+      )
+    )
+  )
   (method (asin)
-    (make-py-primitive 'asin
-		       (lambda (num) (make-py-num (asin (ask num 'val))))))
+    (make-py-primitive 
+      'asin
+		  (lambda 
+        (num) 
+        (make-py-num (asin (ask num 'val)))
+      )
+    )
+  )
   (method (atan)
-    (make-py-primitive 'atan
-		       (lambda (num) (make-py-num (atan (ask num 'val))))))
+    (make-py-primitive 
+      'atan
+		  (lambda 
+        (num) 
+        (make-py-num (atan (ask num 'val)))
+      )
+    )
+  )
   (method (atan2)
     (make-py-primitive
      'atan2
-     (lambda (x y) (make-py-num (atan (ask x 'val) (ask y 'val))))))
+     (lambda 
+       (x y) 
+       (make-py-num (atan (ask x 'val) (ask y 'val)))
+      )
+    )
+  )
   (method (cos)
     (make-py-primitive
-     'cos
-     (lambda (num) (make-py-num (cos (ask num 'val))))))
+      'cos
+      (lambda 
+        (num) 
+        (make-py-num (cos (ask num 'val)))
+      )
+    )
+  )
   (method (hypot)
     (make-py-primitive
      'hypot
-     (lambda (x y) (make-py-num (sqrt (+ (square (ask x 'val))
-					 (square (ask y 'val))))))))
+     (lambda 
+       (x y) 
+       (make-py-num 
+          (sqrt 
+            (+ 
+              (square (ask x 'val))
+					    (square (ask y 'val))
+            )
+          )
+        )
+      )
+    )
+  )
   (method (sin)
     (make-py-primitive
      'sin
-     (lambda (num) (make-py-num (sin (ask num 'val))))))
+     (lambda 
+        (num) 
+        (make-py-num (sin (ask num 'val)))
+      )
+    )
+  )
   (method (tan)
     (make-py-primitive
-     'tan
-     (lambda (num) (make-py-num (tan (ask num 'val))))))
+      'tan
+      (lambda 
+        (num) 
+        (make-py-num (tan (ask num 'val)))
+      )
+    )
+  )
   ;; Angular conversion functions
   (method (degrees)
     (make-py-primitive
-     'degrees
-     (lambda (num) (make-py-num (* 180 (/ (ask num 'val) pi))))))
+      'degrees
+      (lambda 
+        (num) 
+        (make-py-num (* 180 (/ (ask num 'val) pi)))
+      )
+    )
+  )
   (method (radians)
     (make-py-primitive
-     'radians
-     (lambda (num) (make-py-num (* pi (/ (ask num 'val) 180))))))
+      'radians
+      (lambda 
+        (num) 
+        (make-py-num (* pi (/ (ask num 'val) 180)))
+      )
+    )
+  )
   ;; Hyperbolic functions:
   (method (asinh)
     (make-py-primitive
-     'asinh
-     (lambda (num)
-       (make-py-num (log (+ (ask num 'val)
-			    (sqrt (1+ (square (ask num 'val))))))))))
+      'asinh
+      (lambda 
+        (num)
+        (make-py-num 
+          (log 
+            (+ 
+              (ask num 'val)
+		  	      (sqrt (1+ (square (ask num 'val))))
+            )
+          )
+        )
+      )
+    )
+  )
   (method (acosh)
     (make-py-primitive
-     'acosh
-     (lambda (num)
-       (make-py-num (log (+ (ask num 'val)
-			    (sqrt (- (square (ask num 'val)) 1))))))))
+      'acosh
+      (lambda 
+        (num)
+        (make-py-num 
+          (log 
+            (+ 
+              (ask num 'val)
+			        (sqrt (- (square (ask num 'val)) 1))
+            )
+          )
+        )
+      )
+    )
+  )
   (method (atanh)
     (make-py-primitive
-     'atanh
-     (lambda (num)
-       (make-py-num (* .5 (log (/ (+ 1 (ask num 'val))
-				  (- 1 (ask num 'val)))))))))
-  (method (sinh)
-    (make-py-primitive 'sinh
-		       (lambda (num)
-			 (make-py-num
-			  (* .5 (- (exp (ask num 'val))
-				   (exp (- (ask num 'val)))))))))
-  (method (cosh)
-    (make-py-primitive 'cosh
-		       (lambda (num)
-			 (make-py-num (* .5 (+ (exp (ask num 'val))
-					       (exp (- (ask num 'val)))))))))
-  (method (tanh)
-    (make-py-primitive 'tanh
-		       (lambda (num)
-			 (make-py-num
-			  (/ (- (exp (* 2 (ask num 'val))) 1)
-			     (+ (exp (* 2 (ask num 'val))) 1))))))
+      'atanh
+      (lambda 
+        (num)
+        (make-py-num 
+          (* 
+            .5 
+            (log 
+              (/ 
+                (+ 1 (ask num 'val))
+				        (- 1 (ask num 'val))
+              )
+            )
+          )
+        )
+      )
+    )
   )
+  (method (sinh)
+    (make-py-primitive 
+      'sinh
+		  (lambda (num)
+			  (make-py-num
+			    (* 
+            .5 
+            (- 
+              (exp (ask num 'val))
+				      (exp (- (ask num 'val)))
+            )
+          )
+        )
+      )
+    )
+  )
+  (method (cosh)
+    (make-py-primitive 
+      'cosh
+		  (lambda 
+        (num)
+			  (make-py-num 
+          (* 
+            .5 
+            (+ 
+              (exp (ask num 'val))
+					    (exp (- (ask num 'val)))
+            )
+          )
+        )
+      )
+    )
+  )
+  (method (tanh)
+    (make-py-primitive 
+      'tanh
+		  (lambda 
+        (num)
+			  (make-py-num
+			    (/ 
+            (- (exp (* 2 (ask num 'val))) 1)
+			      (+ (exp (* 2 (ask num 'val))) 1)
+          )
+        )
+      )
+    )
+  )
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;; RANDOM
+;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-class (py-random)
+  ; Parent: python object
   (parent (py-obj))
+  ; To string method
   (method (__str__) (make-py-string "<built-in module 'random'>"))
+  ; Draw random number from range 
   (method (randrange)
     (make-py-primitive
-     'randrange
-     (lambda args
-       (cond ((null? args)
-	      (py-error "TypeError: Too few arguments to randrange"))
-	     ((null? (cdr args)) (make-py-num (random (ask (car args) 'val))))
-	     ((null? (cddr args))
-	      (let ((start (ask (car args) 'val))
-		    (end (-1+ (ask (cdr args 'val)))))
-		(make-py-num (+ start (random (- end start))))))
-	     ((null? (cdddr args))
-	      (let ((start (ask (car args) 'val))
-		    (end (ask (cadr args) 'val))
-		    (step (ask (caddr args) 'val)))
-		(set! end (- end (quotient (- end start) step)))
-		(make-py-num (+ start (* step (random (- end start)))))))
-	     (else (py-error "TypeError: Too many arguments to randrange"))))))
+      'randrange
+      (lambda 
+        args
+        (cond 
+          ((null? args)
+	          (py-error "TypeError: Too few arguments to randrange")
+          )
+          ; One argument (start)
+	        ((null? (cdr args)) 
+            (make-py-num (random (ask (car args) 'val)))
+          )
+          ; Two arguments (start, end)
+	        ((null? (cddr args))
+	          (let 
+              (
+                ; Obtain start of range
+                (start (ask (car args) 'val))
+                ; Create end of range
+		            (end (-1+ (ask (cdr args 'val))))
+              )
+              ; Create python number object from the random number
+		          (make-py-num (+ start (random (- end start))))
+            )
+          )
+          ; Three arguments (start, end, step)
+	        ((null? (cdddr args))
+	          (let 
+              (
+                (start (ask (car args) 'val))
+		            (end (ask (cadr args) 'val))
+		            (step (ask (caddr args) 'val))
+              )
+		          (set! end (- end (quotient (- end start) step)))
+              ; Create python number object from the random number
+		          (make-py-num (+ start (* step (random (- end start)))))
+            )
+          )
+          ; More than four arguments throw error
+	        (else (py-error "TypeError: Too many arguments to randrange")))
+      )
+    )
+  )
+  ; Create random integer between numbers a and b
   (method (randint)
     (make-py-primitive
-     'randint
-     (lambda (a b)
-       (make-py-num (+ (ask a 'val) (random (1+ (ask b 'val))))))))
+      'randint
+      (lambda 
+        (a b)
+        (make-py-num 
+          (+ 
+            (ask a 'val) 
+            (random (1+ (ask b 'val)))
+          )
+        )
+      )
+    )
+  )
+  ; Method to return a random item from a list
   (method (choice)
     (make-py-primitive
-     'choice
-     (lambda (seq)
-       (let ((len (ask (ask seq '__len__) 'val)))
-	 (ask seq '__getitem__ (make-py-num (random len)))))))
+      'choice
+      (lambda 
+        ; List
+        (seq)
+        (let 
+          ; Obtain length of list
+          ((len (ask (ask seq '__len__) 'val)))
+          ; Obtain the item in the random idex generated
+	        (ask seq '__getitem__ (make-py-num (random len)))
+        )
+      )
+    )
+  )
+  ; Return random number between 0 and 1
   (method (random)
-    (make-py-primitive 'random
-		       (lambda () (make-py-num (/ (random 4000000000))))))
+    (make-py-primitive 
+      'random
+		  (lambda 
+        () 
+        (make-py-num (/ (random 4000000000)))
+      )
+    )
+  )
   )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;; ADD LIST OF PRIMITIVES
+;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (define-primitives!)
   (define (add-prim name proc)
-    (define-variable! name (make-py-primitive name proc) the-global-environment))
+    (define-variable! 
+      ; Name of primitive
+      name 
+      ; Create primitive python object
+      (make-py-primitive name proc) 
+      ; Create in global environment
+      the-global-environment
+    )
+  )
+  ; Define math and random library
   (define-variable! 'math (instantiate math) the-global-environment)
   (define-variable! 'random (instantiate py-random) the-global-environment)
+  ; Define primitive procedures
   (add-prim 'abs
-	    (lambda (num)
-	      (if (< (ask num 'val) 0) (make-py-num (- (ask num 'val))) val)))
+	  (lambda 
+      (num)
+	    (if (< (ask num 'val) 0) 
+        (make-py-num (- (ask num 'val))) 
+        val
+      )
+    )
+  )
   (add-prim 'bin
-	    (lambda (int)
-	      (let ((n (ask int 'val)))
-		(let ((str (number->string n 2)))
-		  (make-py-string
-		   (if (< n 0)
-		       (string-append "-0b"
-				      (substring str 1 (string-length str)))
-		       (string-append "0b" str)))))))
-  (add-prim 'bool (lambda arg (if (null? arg)
-				  (make-py-bool #f)
-				  (make-py-bool (ask (car arg) 'true?)))))
-  (add-prim 'chr (lambda (num)
-		   (make-py-string (string (integer->char (ask num 'val))))))
-  (add-prim 'cmp (lambda (x y)
-		   (cond ((py-apply (ask x '__lt__) (list y)) -1)
-			 ((py-apply (ask x '__gt__) (list y)) 1)
-			 (else 0))))
-  (add-prim 'divmod
-	    (lambda (a b)
-	      (make-py-list (list (py-apply (ask a '__div__) (list b))
-				  (py-apply (ask b '__mod__) (list b))))))
-  (add-prim 'float (lambda (num) (ask num '__float__)))
-  (add-prim 'hex
-            (lambda (int)
-              (let ((n (ask int 'val)))
-                (let ((str (number->string n 16)))
-                  (make-py-string
-                   (if (< n 0)
-                       (string-append "-0x"
-                                      (substring str 1 (string-length str)))
-                       (string-append "0x" str)))))))
+	  (lambda 
+      (int)
+	    (let 
+        ((n (ask int 'val)))
+		    (let 
+          ((str (number->string n 2)))
+		      (make-py-string
+		        (if (< n 0)
+		          (string-append 
+                "-0b"
+				        (substring str 1 (string-length str))
+              )
+		          (string-append "0b" str)
+            )
+          )
+        )
+      )
+    )
+  )
+  (add-prim 
+    'bool 
+    (lambda 
+      arg 
+      (if (null? arg)
+				(make-py-bool #f)
+				(make-py-bool (ask (car arg) 'true?))
+      )
+    )
+  )
+  (add-prim 
+    'chr 
+    (lambda 
+      (num)
+		  (make-py-string 
+        (string (integer->char (ask num 'val)))
+      )
+    )
+  )
+  (add-prim 
+    'cmp 
+    (lambda 
+      (x y)
+		  (cond 
+        ((py-apply (ask x '__lt__) (list y)) -1)
+			  ((py-apply (ask x '__gt__) (list y)) 1)
+			  (else 0)
+      )
+    )
+  )
+  (add-prim 
+    'divmod
+	  (lambda 
+      (a b)
+	    (make-py-list 
+        (list 
+          (py-apply (ask a '__div__) (list b))
+				  (py-apply (ask b '__mod__) (list b))
+        )
+      )
+    )
+  )
+  (add-prim 
+    'float 
+    (lambda 
+      (num) 
+      (ask num '__float__)
+    )
+  )
+  (add-prim 
+    'hex
+    (lambda (int)
+      (let 
+        ((n (ask int 'val)))
+        (let 
+          ((str (number->string n 16)))
+          (make-py-string
+            (if (< n 0)
+              (string-append 
+                "-0x"
+                (substring str 1 (string-length str))
+              )
+              (string-append "0x" str)
+            )
+          )
+        )
+      )
+    )
+  )
   (add-prim 'int (lambda (num) (ask num '__int__)))
   (add-prim 'len (lambda (seq) (ask seq '__len__)))
-  (add-prim 'oct
-	    (lambda (int)
-              (let ((n (ask int 'val)))
-                (let ((str (number->string n 8)))
-                  (make-py-string
-                   (if (< n 0)
-                       (string-append "-0"
-                                      (substring str 1 (string-length str)))
-                       (string-append "0" str)))))))
+  (add-prim 
+    'oct
+	  (lambda 
+      (int)
+      (let 
+        ((n (ask int 'val)))
+        (let 
+          ((str (number->string n 8)))
+          (make-py-string
+            (if (< n 0)
+              (string-append 
+                "-0"
+                (substring str 1 (string-length str))
+              )
+              (string-append "0" str)
+            )
+          )
+        )
+      )
+    )
+  )
   (add-prim
-   'ord
-   (lambda (char)
-     (if (not (= (ask (ask char '__len__) 'val) 1))
-	 (py-error "TypeError: Expected string of length 1")
-	 (make-py-num (char->integer (string-ref (ask char 'val) 0))))))
+    'ord
+    (lambda 
+      (char)
+      (if (not (= (ask (ask char '__len__) 'val) 1))
+	      (py-error "TypeError: Expected string of length 1")
+	      (make-py-num 
+          (char->integer 
+            (string-ref (ask char 'val) 0)
+          )
+        )
+      )
+    )
+  )
   (add-prim
-   'pow
-   (lambda (base pow . mod)
-     (define (mexpt b n m)
-       (cond ((= n 0) 1)
-             ((even? n) (modulo (mexpt (modulo (* b b) m) (/ n 2) m) m))
-             (else (modulo (* b (modulo (mexpt (modulo (* b b) m)
-                                               (quotient n 2) m)
-                                        m))
-                           m))))
-     (if (null? mod)
-         (py-apply (ask base '__pow__) (list pow))
-         (make-py-num (mexpt (ask base 'val)
-                             (ask pow 'val)
-                             (ask (car mod) 'val))))))
+    'pow
+    (lambda 
+      (base pow . mod)
+      (define (mexpt b n m)
+        (cond 
+          ((= n 0) 1)
+          ((even? n) (modulo (mexpt (modulo (* b b) m) (/ n 2) m) m))
+          (else 
+            (modulo 
+              (* 
+                b 
+                (modulo 
+                  (mexpt 
+                    (modulo (* b b) m)
+                    (quotient n 2) 
+                    m
+                  )
+                  m
+                )
+              )
+              m
+            )
+          )
+        )
+      )
+      (if (null? mod)
+        (py-apply (ask base '__pow__) (list pow))
+        (make-py-num 
+          (mexpt 
+            (ask base 'val)
+            (ask pow 'val)
+            (ask (car mod) 'val)
+          )
+        )
+      )
+    )
+  )
   (add-prim
-   'range
-   (lambda (num . other-args)
-     (define (make-range low cur step so-far)
-       (if (< cur low)
-           (make-py-list so-far)
-           (make-range low (- cur step) step (cons (make-py-num cur) so-far))))
-     (cond ((null? other-args) (make-range 0 (-1+ (ask num 'val)) 1 '()))
-           ((null? (cdr other-args))
-            (make-range (ask num 'val) (-1+ (ask (car other-args) 'val)) 1 '()))
-           (else
-            (let ((start (ask num 'val))
-                  (end (ask (car other-args) 'val))
-                  (step (ask (cadr other-args) 'val)))
-              (cond ((= step 0)
-                     (py-error "ValueError: range() step argument cannot be zero"))
-                    ((> step 0)
-		     (let ((last-value (- end (modulo (- end start) step))))
-		       (make-range start last-value step '())))
-                    (else
-                     (let ((result (make-range (1+ end) start (- step) '())))
-		       (py-apply (ask result 'reverse) '())
-                       result))))))))
-  (add-prim 'raw_input
-	    (lambda arg
-	      (define (read-line so-far)
-		(let ((char (read-char)))
-		  (if (or (eof-object? char)
-			  (eq? char #\newline))
-		      so-far
-		      (read-line (string-append so-far (string char))))))
-	      (if (not (null? arg))
-		  (begin (display (ask (ask (car arg) '__str__) 'val)) (flush)))
-	      (make-py-string (read-line ""))))
-  (add-prim 'reversed
-	    (lambda (obj) (ask (ask obj '__reversed__) '__call__ '())))
-  (add-prim 'sorted
-	    (lambda (obj) (ask (ask obj '__sorted__) '__call__ '())))
+    'range
+    (lambda 
+      (num . other-args)
+      (define (make-range low cur step so-far)
+        (if (< cur low)
+          (make-py-list so-far)
+          (make-range low (- cur step) step (cons (make-py-num cur) so-far))
+        )
+      )
+      (cond 
+        ((null? other-args) (make-range 0 (-1+ (ask num 'val)) 1 '()))
+        ((null? (cdr other-args))
+          (make-range (ask num 'val) (-1+ (ask (car other-args) 'val)) 1 '())
+        )
+        (else
+          (let 
+            ((start (ask num 'val))
+            (end (ask (car other-args) 'val))
+            (step (ask (cadr other-args) 'val)))
+            (cond 
+              ((= step 0)
+                (py-error "ValueError: range() step argument cannot be zero")
+              )
+              ((> step 0)
+	              (let 
+                  ((last-value (- end (modulo (- end start) step))))
+	                (make-range start last-value step '()))
+              )
+              (else
+                (let 
+                  ((result (make-range (1+ end) start (- step) '())))
+	                (py-apply (ask result 'reverse) '())
+                  result
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+  (add-prim 
+    'raw_input
+	  (lambda 
+      arg
+	    (define (read-line so-far)
+		    (let ((char (read-char)))
+		      (if (or 
+                (eof-object? char)
+		    	      (eq? char #\newline)
+              )
+		          so-far
+		          (read-line (string-append so-far (string char)))
+          )
+        )
+      )
+	    (if (not (null? arg))
+		    (begin 
+          (display (ask (ask (car arg) '__str__) 'val)) 
+          (flush)
+        )
+      )
+	    (make-py-string (read-line ""))
+    )
+  )
+  (add-prim 
+    'reversed
+	  (lambda 
+      (obj) 
+      (ask (ask obj '__reversed__) '__call__ '())
+    )
+  )
+  (add-prim 
+    'sorted
+	  (lambda 
+      (obj) 
+      (ask (ask obj '__sorted__) '__call__ '())
+    )
+  )
   (add-prim 'str (lambda (obj) (ask obj '__str__)))
   (add-prim 'type (lambda (obj) (make-py-type (objtype obj))))
-  )
+)
 
-(define (make-py-type type)
-  (instantiate py-type type))
-(define-class (py-type val)
-  (parent (py-obj))
-  (method (__str__) (make-py-string val)))
+; Define python objects
 
 (define (objtype obj)
-  (cdr (assq (ask obj 'type)
-	     '((*NONE* . "<type 'NoneType'>")
-	       (py-int . "<type 'int'>")
-	       (py-float . "<type 'float'>")
-	       (py-bool . "<type 'bool'>")
-	       (py-list . "<type 'list'>")
-         (py-dictionary . "<type 'dictionary'>")
-	       (py-string . "<type 'str'>")
-	       (py-proc . "<type 'function'>")))))
+  (cdr 
+    (assq 
+      (ask obj 'type)
+	    '(
+        (*NONE* . "<type 'NoneType'>")
+	      (py-int . "<type 'int'>")
+	      (py-float . "<type 'float'>")
+	      (py-bool . "<type 'bool'>")
+	      (py-list . "<type 'list'>")
+        (py-dictionary . "<type 'dictionary'>")
+	      (py-string . "<type 'str'>")
+	      (py-proc . "<type 'function'>")
+      )
+    )
+  )
+)
 
+; Define helper procedure to determina if object is a list or dictionary
 (define (py-list? val) (equal? (ask val 'type) 'py-list))
 (define (py-dict? val) (equal? (ask val 'type) 'py-dictionary))
