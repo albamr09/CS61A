@@ -8,29 +8,6 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-;; Selectors for the list returned by py-read.
-(define indentation car)
-(define tokens cdr)
-
-(define (make-line-obj line)
-  (instantiate line-obj (indentation line) (tokens line)))
-
-;; A class to represent a sequence of tokens to be used by the evaluator.
-(define-class (line-obj indentation tokens)
-  (method (empty?)
-	  (null? tokens))
-  (method (exit?)
-	  (member tokens '((exit |(| |)|) (quit |(| |)|))))
-  (method (peek)
-	  (car tokens))
-  (method (push token)
-	  (set! tokens (cons token tokens)))
-  (method (next)
-	  (let ((token (car tokens)))
-	    (set! tokens (cdr tokens))
-	    token)))
-
 ;; Parser utility functions
 (define (char->symbol ch) (string->symbol (make-string 1 ch)))
 (define operators '(#\+ #\- #\* #\/ #\% #\< #\> #\! #\=))
@@ -42,6 +19,8 @@
 (define close-paren-symbol (char->symbol #\)))
 (define open-bracket-symbol (char->symbol #\[))
 (define close-bracket-symbol (char->symbol #\]))
+;; Unary operators
+(define unary-operators '(- not))
 (define (char-newline? char)
   (or (eq? char #\newline) ;; you're in
       (and (eq? char #\return)
@@ -175,13 +154,25 @@
     (read-error "TodoError: Both Partners, Question 1"))
   (get-indent-and-tokens))
 
+;; Selectors for the list returned by py-read.
+(define indentation car)
+(define tokens cdr)
+
 ;; Error handler for py-read.  Needs to eat remaining tokens on the line from
 ;; user input before throwing the error.
 
 (define (read-error . args)
   (define (loop)
     (let ((char (read-char)))
-      (if (or (char-newline? char) (eof-object? char))
-	  (apply py-error args)
-	  (loop))))
-  (loop))
+      (if 
+        (or 
+          (char-newline? char) 
+          (eof-object? char)
+        )
+	      (apply py-error args)
+	      (loop)
+      )
+    )
+  )
+  (loop)
+)

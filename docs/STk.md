@@ -68,6 +68,28 @@ The rest you can figure out with `stklos -h`
 
 Just is case we have not tried all flavours, you can look into the original [STk](http://kaolin.unice.fr/STk/Binary/), and try to install it.
 
+## Docker
+
+I have created a Dockerfile to install `stk` on a docker container running ubuntu. Thus, you will need to have docker installed. Once you have it installed, simply run:
+
+```bash
+$ ./runDocker
+```
+
+This will lead into the container's terminal:
+
+```bash
+root@85594f04062e:/#
+```
+
+If you type `stk` inside the terminal, you will enter the `stk` interpreter. Inside this container all my source files will be installed.
+
+Note that each time you run `./runDocker`, you are creating a new image. To remove them all execute:
+
+```bash
+./removeImages.sh
+```
+
 **Update**
 
 Well, I have installed it. Inside the `resources` folder, there is the `STk` folder, where the `.deb` package is (this was converted from `.rpm` to `.deb` with alien)
@@ -112,6 +134,7 @@ sudo make install
 ```
 
 It gives me an error when compiling. Might try again with the library `libsm6:i386` installed.
+
 
 ## Basic instructions
 
