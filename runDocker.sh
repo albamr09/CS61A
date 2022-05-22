@@ -1,2 +1,2 @@
 TAG="ubuntu/stk"
-sudo docker run --rm -it $(sudo docker build -t $TAG -q .)
+docker run --rm -it $(docker build -t $TAG -q .)
