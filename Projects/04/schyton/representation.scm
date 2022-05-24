@@ -128,60 +128,6 @@
   )
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Constructors
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-; Boolean
-(define (make-py-bool val) 
-  (if (memq val '(|True| #t)) *PY-TRUE* *PY-FALSE*))
-
-; List
-(define (make-py-list val)
-  (instantiate py-list val)
-)
-
-; Dictionary
-(define (make-py-dictionary pairs)
-  (instantiate py-dictionary pairs)
-)
-
-; Procedure
-(define (make-py-proc name params body env)
-  (instantiate py-proc name params body env)
-)
-
-; Type
-(define (make-py-type type)
-  (instantiate py-type type)
-)
-
-; Primitives
-(define (make-py-primitive name proc)
-  (instantiate py-primitive name proc)
-)
-
-; Strings
-(define (make-py-string str)
-  (instantiate py-string str)
-)
-
-; Numeric object
-(define (make-py-num num)
-  (if (exact? num)
-      (instantiate py-int num)
-      (instantiate py-float num)))
-
-; Line object
-(define (make-line-obj line)
-  (instantiate line-obj (indentation line) (tokens line))
-)
-
-; Definition of boolean constants
-(define *PY-TRUE* (instantiate py-bool #t))
-(define *PY-FALSE* (instantiate py-bool #f))
-
-(define (negate-bool bool) (py-error "TodoError: Person B, Question 4"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; PROCEDURES
