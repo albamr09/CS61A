@@ -320,6 +320,8 @@
     )
   )
   
+  ;; Determine type of operator made up from double characters
+
   (define (get-operator)
     (let 
       (
@@ -327,38 +329,61 @@
 	      (next (peek-char))
       )
       (cond 
+        ; Current char -> +, next char -> =
         ((eq? char #\+) (if (eq? next #\=) (begin (read-char) '+=) '+))
+        ; Current char -> -, next char -> =
 	      ((eq? char #\-) (if (eq? next #\=) (begin (read-char) '-=) '-))
+        ; Current char -> %, next char -> =
 	      ((eq? char #\%) (if (eq? next #\=) (begin (read-char) '%=) '%))
+        ; Current char -> <, next char -> =
 	      ((eq? char #\<) (if (eq? next #\=) (begin (read-char) '<=) '<))
+        ; Current char -> >, next char -> =
 	      ((eq? char #\>) (if (eq? next #\=) (begin (read-char) '>=) '>))
+        ; Current char -> =, next char -> =
 	      ((eq? char #\=) (if (eq? next #\=) (begin (read-char) '==) '=))
+        ; Current char -> /, next char -> =
 	      ((eq? char #\/) (if (eq? next #\=) (begin (read-char) '/=) '/))
+        ; Current char -> !, next char -> =
 	      ((eq? char #\!)
 	        (if (eq? next #\=)
 		      (begin (read-char) '!=)
+          ; If not followed by =, standalone ! is not an operator
 		      (read-error "Unknown operator: !"))
         )
+        ; Current char -> *, next char -> 
 	      ((eq? char #\*)
-	       (cond ((eq? next #\*)
-		      (read-char)
-		      (if (eq? (peek-char) #\=)
-			  (begin (read-char) '**=)
-			  '**))
-		     ((eq? next #\=) (read-char) '*=)
-		     (else '*)))
+	        (cond 
+            ; Next char -> *
+            ((eq? next #\*)
+		         (read-char)
+		         (if (eq? (peek-char) #\=)
+			         (begin 
+                 (read-char) '**=) '**)
+            )
+            ; Next char -> =
+		        ((eq? next #\=) (read-char) '*=)
+            ; Else return normal *
+		        (else '*)
+          )
+        )
       )
     )
   )
 
+  ;; Reads in a string and returns a list of Scheme characters, up to, but not
+  ;; including the closing quote.  Type is the Scheme character that opened
+  ;; the string.  The first character returned by (read-char) when this
+  ;; function is executed will be the first character of the desired string.
+
   (define (get-string type)
-    ;; Reads in a string and returns a list of Scheme characters, up to, but not
-    ;; including the closing quote.  Type is the Scheme character that opened
-    ;; the string.  The first character returned by (read-char) when this
-    ;; function is executed will be the first character of the desired string.
-    (read-error "TodoError: Person A, Question 3"))
+    (read-error "TodoError: Person A, Question 3")
+  )
+
   (define (ignore-comment)
-    (read-error "TodoError: Both Partners, Question 1"))
+    (read-error "TodoError: Both Partners, Question 1")
+  )
+  
+  ; Start reading tokens
   (get-indent-and-tokens)
 )
 

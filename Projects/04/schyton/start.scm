@@ -4,6 +4,7 @@
 (load "eval.scm")
 (load "env.scm")
 (load "parser.scm")
+(load "lib.scm")
 (load "utils.scm")
 
 (initialize-python)
