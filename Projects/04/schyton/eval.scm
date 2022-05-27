@@ -434,39 +434,54 @@
 	)
 
   (define (get-lambda-body braces)
+		; Define control variables
     (define stop-tokens '(: |,| |]| |)| |}|))
     (define brace-alist '((|{| . |}|) (|[| . |]|) (|(| . |)|)))
     (define open-braces (map car brace-alist))
     (define close-braces (map cdr brace-alist))
-
     (define (reverse-brace token)
       (cdr (assq token brace-alist))
 		)
+		; If the line is emtpy: finish
     (if (ask line-obj 'empty?)
 			'()
+			; Else obtain next token
 			(let ((token (ask line-obj 'next)))
 			  (cond 
-					(
-						(and 
+					((and 
+							; If there are no ), ] or }
 							(null? braces) 
-							(memq token stop-tokens)
-						)
-						(ask line-obj 'push token) ;; so the caller can see the brace
+							; and this token is an stop token
+							(memq token stop-tokens))
+						;; so the caller can see the brace
+						(ask line-obj 'push token) 
+						; Finish
 						'()
 					)
+					; If the token is opened ( [ {
 					((memq token open-braces)
+						; Add token to list
 						(cons 
 							token
-					    (get-lambda-body (cons (reverse-brace token) braces))
+							; Continue analyzing body
+					    (get-lambda-body
+								; Obain the closing equivalent
+								(cons (reverse-brace token) braces)
+							)
 						)
 					)
+					; If the token is closed: ), ], }
 					((memq token close-braces)
 						(if 
 							(and 
+								; If there are closed braces pending
 								(not (null? braces)) ;; null case handled above
+								; This closed brace equals the first in the pending list
 								(eq? token (car braces))
 							)
+							; Continue analyzing and remove this brace from pending closed braces list
 					    (cons token (get-lambda-body (cdr braces)))
+							; Else throw error
 					    (py-error "SyntaxError: unexpected token " token))
 					)
 					(else (cons token (get-lambda-body braces)))
@@ -475,119 +490,263 @@
 		)
 	)
 
-  (let ((name (string->symbol "<lambda>"))
-	(params (collect-lambda-params))
-	(body (list (cons '*DUMMY-INDENT*
-			  (cons 'return (get-lambda-body '()))))))
-    (make-py-proc name params body env))
+  (let 
+		(
+			; Create procedures name
+			(name (string->symbol "<lambda>"))
+			; Obtain lambda procedure parameters
+			(params (collect-lambda-params))
+			; Create body (note we are going to create a procedure from this lambda expession so:
+			;		- we add an indentation
+			;		- we add a return before the body
+			;	)
+			(body 
+				(list 
+					(cons 
+						'*DUMMY-INDENT*
+						(cons 
+							'return (get-lambda-body '())
+						)
+					)
+				)
+			)
+		)
+  	(make-py-proc name params body env)
+	)
 )
 
 ;; File Importation
 (define (eval-import line-obj)
   (define (gather-tokens)
-    (cond ((ask line-obj 'empty?) '())
+    (cond 
+			; If the line is empty, finish
+			((ask line-obj 'empty?) '())
+			; If the current token is a comma, simply read it and continues 
       ((comma? (ask line-obj 'peek)) (ask line-obj 'next) (gather-tokens))
+			; Else, obtain the next token and save it
       (else
         (let ((n (ask line-obj 'next)))
-          (cons n (gather-tokens))))))
+					; Save the token and keep analyzing
+          (cons n (gather-tokens))
+				)
+			)
+		)
+	)
+
+	; Obtain all modules to import and load them
   (let ((fnames (gather-tokens)))
-    (for-each meta-load fnames))
-  *NONE*)
+    (for-each meta-load fnames)
+	)
+  *NONE*
+)
 
 ;; Errors: bump to Scheme
 (define (eval-raise line-obj env)
+	; Obtain error
   (let ((err (py-eval line-obj env)))
-    (py-error "Error: " (ask err 'val))))
+		; Create and print error
+    (py-error "Error: " (ask err 'val))
+	)
+)
+
 (define (py-error . args)
+	; Print arguments (error message)
   (for-each display args)
   (newline)
-  (error "PythonError"))
+	; Throw error
+  (error "PythonError")
+)
 
 (define (eval-list-comp line-obj env)
-  (py-error "ExpertError: List Comprehensions"))
+  (py-error "ExpertError: List Comprehensions")
+)
 
 ;; Blocks, Loops, Procedures
 
 (define unindented-line #f)
+
+;; Read-block is a procedure of two arguments.  Old-indent is the indentation
+;; (as a Scheme number) to check against for dedents (mostly for else and elif
+;; blocks).  Env is the current environment, used for evaluating define
+;; blocks.  It returns a list of lines (Scheme list of lists, NOT line-objs!).
+
 (define read-block
-  ;; Read-block is a procedure of two arguments.  Old-indent is the indentation
-  ;; (as a Scheme number) to check against for dedents (mostly for else and elif
-  ;; blocks).  Env is the current environment, used for evaluating define
-  ;; blocks.  It returns a list of lines (Scheme list of lists, NOT line-objs!).
   (let ((unindented-line #f))
     (lambda (old-indent env)
       (let ((new-indent #f))
-	(define (read-loop)
-	  (prompt "... ")
-	  (let ((line (py-read)))
-	    (define (helper)
-	      (if (not new-indent) (set! new-indent (indentation line)))
-	      (cond ((null? (tokens line)) (set! unindented-line #f) '())
-		    ((> (indentation line) new-indent)
-		     (py-error "SyntaxError: Unexpected indent"))
-		    ((< (indentation line) new-indent)
-		     (if (and (= (indentation line) old-indent)
-			      (not (null? (tokens line)))
-			      (memq (car (tokens line)) '(elif else)))
-			 (let ((trailing-block (make-block (make-line-obj line)
-							   env)))
-			   (if (not unindented-line)
-			       (list trailing-block)
-			       (begin (set! line unindented-line)
-				      (set! unindented-line #f)
-				      (cons trailing-block (helper)))))
-			 (begin (set! unindented-line line)
-				'())))
-		    ((memq (car (tokens line)) '(def if for while))
-		     (let ((nested-block (make-block (make-line-obj line) env)))
-		       (if (not unindented-line)
-			   (list nested-block)
-			   (begin (set! line unindented-line)
-				  (set! unindented-line #f)
-				  (cons nested-block (helper))))))
-		    (else (cons line (read-loop)))))
-	    (helper)))
-	(read-loop)))))
+				(define (read-loop)
+				  (prompt "... ")
+					; Read line of block
+				  (let ((line (py-read)))
+				    (define (helper)
+							; If there is no indentation level set
+				      (if (not new-indent) 
+								; Obtain the indendation of the line
+								(set! new-indent (indentation line))
+							)
+							(cond 
+								; If there are no more tokens in the line
+								((null? (tokens line)) 
+									; Reset control variable
+									(set! unindented-line #f) 
+									'()
+								)
+								; If the indentation in the current line is bigger than the current
+								; indent, throw error
+								((> (indentation line) new-indent)
+									(py-error "SyntaxError: Unexpected indent")
+								)
+								; If indentation is less than the new indent (less anidated)
+								((< (indentation line) new-indent)
+									(if 
+										(and 
+											; If the indentation level is the same as the old indent
+											(= (indentation line) old-indent)
+											; If there are tokens in the line
+											(not (null? (tokens line)))
+											; the first token are: elif or else
+											(memq (car (tokens line)) '(elif else))
+										)
+										; Create a block from the current read line
+										(let ((trailing-block (make-block (make-line-obj line) env)))
+											; If there is not an unindented-line saved
+											(if (not unindented-line)
+												; Simply return block as list
+						    			  (list trailing-block)
+						    			  (begin 
+													; If not retrieve line
+													(set! line unindented-line)
+													; Reset
+							  			   	(set! unindented-line #f)
+													; Continue reading
+							  			   	(cons trailing-block (helper))
+												)
+											)
+										)
+										; Else
+										(begin 
+											; Set this line as unindented-line
+											(set! unindented-line line)
+											'()
+										)
+									)
+								)
+								; If the first token is def, if, for or while
+								((memq (car (tokens line)) '(def if for while))
+									; Obtain block under expression
+									(let ((nested-block (make-block (make-line-obj line) env)))
+										; If there is not an unindented-line saved
+										(if (not unindented-line)
+											(list nested-block)
+											(begin 
+												; If not retrieve line
+												(set! line unindented-line)
+												; Reset
+												(set! unindented-line #f)
+												; Continue reading
+								 			 	(cons nested-block (helper))
+											)
+										)
+									)
+								)
+								; Else simply return line
+					    	(else 
+									(cons line (read-loop))
+								)
+							)
+						)
+						(helper)
+					)
+				)
+				(read-loop)
+			)
+		)
+	)
+)
 
 ;; Prints a python object.
 (define (py-print obj)
   (if (not (none? obj))
-      (if (ask obj 'string?)
-	  (print (ask obj 'val))
-	  (begin (display (ask (ask obj '__str__) 'val)) (newline))))
-  *NONE*)
+    (if (ask obj 'string?)
+			(print (ask obj 'val))
+	  	(begin 
+				(display (ask (ask obj '__str__) 'val)) 
+				(newline)
+			)
+		)
+	)
+  *NONE*
+)
 
 ;; Takes the last value returned from py-eval and applies the next infix
 ;; operator, if there is one.  Also checks for list slices and procedure calls
+
 (define (handle-infix val line-obj env)
+	; If the line is empty
   (if (ask line-obj 'empty?)
+			; Return the value
       val
+			; Obtain next token
       (let ((token (ask line-obj 'next)))
-	(cond ((infix-op? token) ;; arithmetic infix operators
-	       (let ((rhs (eval-item line-obj env)))
-		 (handle-infix (py-apply (ask val (lookup-op token))
-					 (list rhs))
-			       line-obj
-			       env)))
+				(cond 
+					;; arithmetic infix operators
+					((infix-op? token) 
+						; Obtain first element of line
+						(let ((rhs (eval-item line-obj env)))
+							(handle-infix 
+								; Apply operation to obtain value
+								(py-apply 
+									(ask val (lookup-op token))
+									(list rhs)
+								)
+								line-obj
+								env
+							)
+						)
+					)
 	      ;; logical infix operators
 	      ((and? token)
-	       (py-error "TodoError: Person A, Question 5"))
+					(py-error "TodoError: Person A, Question 5")
+				)
 	      ((or? token)
-	       (py-error "TodoError: Person A, Question 5"))
+					(py-error "TodoError: Person A, Question 5")
+				)
 	      ;; test for membership
 	      ((in? token)
-	       (py-error "TodoError: Person B, Question 5"))
+					(py-error "TodoError: Person B, Question 5")
+				)
 	      ((not? token)
-	       (py-error "TodoError: Person B, Question 5"))
+					(py-error "TodoError: Person B, Question 5")
+				)
 	      ;; dot syntax message: val.msg
         ((dotted? token)
+					; Obtain function after dot
           (let ((func (ask val (remove-dot token))))      ;gets the py-function
-            (if (and (not (ask line-obj 'empty?))
-                     (open-paren? (ask line-obj 'peek))) ;IF IT IS ACTUALLY A FUNCTION CALL, EVALUATE IT
-                (handle-infix (eval-func func line-obj env) line-obj env) ; make sure to continue handling infix: i.e -> if list.length() > 10: -> evaluate the `> 10` portion
-                (handle-infix func line-obj env)))) ;OTHERWISE RETURN THE FUNCTION ITSELF
-	      (else (begin (ask line-obj 'push token)
-			   val))))))
+            (if (and 
+									; If the line object is not emtpy
+									(not (ask line-obj 'empty?))
+									;IF IT IS ACTUALLY A FUNCTION CALL, EVALUATE IT
+                  (open-paren? (ask line-obj 'peek))
+								) 
+								; Call function
+								; make sure to continue handling infix: i.e -> if list.length() > 10: -> evaluate the `> 10` portion
+                (handle-infix (eval-func func line-obj env) line-obj env) 
+								;OTHERWISE RETURN THE FUNCTION ITSELF
+                (handle-infix func line-obj env)
+						)
+					)
+				)
+	      (else 
+					(begin 
+						(ask line-obj 'push token)
+						val
+					)
+				)
+			)
+		)
+	)
+)
+
 
 ;; Logical operators
 (define (eat-tokens line-obj) ;; eats until a comma, newline or close-paren
@@ -596,18 +755,36 @@
   (define close-braces '(|]| |)|))
   (define (helper line-obj braces)
     (if (ask line-obj 'empty?)
-        *NONE*
-        (let ((token (ask line-obj 'peek)))
-          (cond
-            ((and (memq token stop-tokens) (null? braces))
-              *NONE*)
-            ((and (memq token close-braces) (not (null? braces)))
-              (begin (ask line-obj 'next) (helper line-obj (cdr braces))))
-            ((memq token open-braces)
-              (begin (ask line-obj 'next) (helper line-obj (cons token braces))))
-            (else
-              (begin (ask line-obj 'next) (helper line-obj braces)))))))
-  (helper line-obj '()))
+      *NONE*
+      (let ((token (ask line-obj 'peek)))
+        (cond
+          ((and (memq token stop-tokens) (null? braces))
+            *NONE*
+					)
+          ((and (memq token close-braces) (not (null? braces)))
+            (begin 
+							(ask line-obj 'next) 
+							(helper line-obj (cdr braces))
+						)
+					)
+          ((memq token open-braces)
+            (begin 
+							(ask line-obj 'next) 
+							(helper line-obj (cons token braces))
+						)
+					)
+          (else
+            (begin 
+							(ask line-obj 'next) 
+							(helper line-obj braces)
+						)
+					)
+				)
+			)
+		)
+	)
+  (helper line-obj '())
+)
 
 (define (meta-load fname)
   (define (loader)
