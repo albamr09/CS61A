@@ -47,6 +47,14 @@
 ;; 'def foo(a,b):' into (def foo |(| a |,| b |)| :).
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; RETURN VALUE
+;; For example, if PY-READ reads "if a == 3:" at the Schython prompt, it will return
+;; the *Scheme* list "(0 if a == 3 :)",
+
+;; NOTE
+;; special Scheme characters such as parentheses and commas are distinguished using
+;; pipes, so "(a + b) * 3" becomes the Scheme list "(0 |(| a + b |)| * 3)".
+
 (define (py-read)
 
   (define (get-indent-and-tokens)
@@ -74,12 +82,21 @@
   )
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; MAIN IDEA: reads characters and groups them into tokens
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Reads in until the end of the line and breaks the stream of input into a
   ;; list of tokens.  Braces is a list of characters representing open brace
   ;; ([, (, and {) tokens, so it can throw an error if braces are mismatched.
   ;; If it reaches the endof a line while inside braces, it keeps reading
   ;; until the braces are closed.
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  ;; NOTE
+  ;; It uses the PEEK-CHAR procedure to look at the next character typed at
+  ;; the Schython prompt *without processing (or "eating") it*, so that the
+  ;; character can be used again; this is different from the READ-CHAR
+  ;; procedure, which reads the next character and processes (or "eats")
+  ;; it.
 
   (define (get-tokens braces)
     (let 
@@ -103,7 +120,7 @@
             )
           )
         )
-        ; If it is end of line
+        ; If it is end of file
         ((eof-object? char)
           ; But there are more tokens/elements on this line
 	        (if (not (null? braces))
