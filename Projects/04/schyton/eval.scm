@@ -39,6 +39,75 @@
 	)
 )
 
+;; Takes the last value returned from py-eval and applies the next infix
+;; operator, if there is one.  Also checks for list slices and procedure calls
+
+(define (handle-infix val line-obj env)
+	; If the line is empty
+  (if (ask line-obj 'empty?)
+			; Return the value
+      val
+			; Obtain next token
+      (let ((token (ask line-obj 'next)))
+				(cond 
+					;; arithmetic infix operators
+					((infix-op? token) 
+						; Obtain first element of line
+						(let ((rhs (eval-item line-obj env)))
+							(handle-infix 
+								; Apply operation to obtain value
+								(py-apply 
+									(ask val (lookup-op token))
+									(list rhs)
+								)
+								line-obj
+								env
+							)
+						)
+					)
+	      ;; logical infix operators
+	      ((and? token)
+					(py-error "TodoError: Person A, Question 5")
+				)
+	      ((or? token)
+					(py-error "TodoError: Person A, Question 5")
+				)
+	      ;; test for membership
+	      ((in? token)
+					(py-error "TodoError: Person B, Question 5")
+				)
+	      ((not? token)
+					(py-error "TodoError: Person B, Question 5")
+				)
+	      ;; dot syntax message: val.msg
+        ((dotted? token)
+					; Obtain function after dot
+          (let ((func (ask val (remove-dot token))))      ;gets the py-function
+            (if (and 
+									; If the line object is not emtpy
+									(not (ask line-obj 'empty?))
+									;IF IT IS ACTUALLY A FUNCTION CALL, EVALUATE IT
+                  (open-paren? (ask line-obj 'peek))
+								) 
+								; Call function
+								; make sure to continue handling infix: i.e -> if list.length() > 10: -> evaluate the `> 10` portion
+                (handle-infix (eval-func func line-obj env) line-obj env) 
+								;OTHERWISE RETURN THE FUNCTION ITSELF
+                (handle-infix func line-obj env)
+						)
+					)
+				)
+	      (else 
+					(begin 
+						(ask line-obj 'push token)
+						val
+					)
+				)
+			)
+		)
+	)
+)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Calculates the first python object on the line-obj.
 
@@ -225,6 +294,9 @@
 	)
 )
 
+(define (collect-key-value line-obj env close-token)
+  (py-error "TodoError: Both Partners. Question 8")
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; accepts a line-obj with opening delimiter removed
@@ -282,6 +354,32 @@
 		func 
 		; Get arguments
 		(collect-sequence line-obj env close-paren-symbol)
+	)
+)
+
+(define (collect-sequence line-obj env close-token)
+	; Obtain next token
+  (let ((token (ask line-obj 'next)))
+    (cond
+			; If it is the closed symbol, finish
+      ((eq? token close-token) '())
+			; If it is a comma, ignore and continue collecting tokens (parameters)
+      ((comma? token) (collect-sequence line-obj env close-token))
+			; If any other token
+      (else
+				; add to start of line object (what is remaining of after reading some tokens)
+				(ask line-obj 'push token)
+				; Evalute the argument to obtain its value
+				(let ((obj (py-eval line-obj env)))
+					; Add obtained value to list of arguments
+					(cons 
+						obj
+						; Continue getting arguments
+						(collect-sequence line-obj env close-token)
+					)
+				)
+			)
+		)
 	)
 )
 
@@ -515,6 +613,9 @@
 	)
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Evaluates imports
+
 ;; File Importation
 (define (eval-import line-obj)
   (define (gather-tokens)
@@ -540,6 +641,52 @@
   *NONE*
 )
 
+(define (meta-load fname)
+	; Read file contents
+  (define (loader)
+		; Read a line
+    (let ((exp (py-read)))
+      (if 
+				; If end of file
+				(and 
+					(null? (cdr exp))
+					(eof-object? (peek-char))
+				)
+				; Return nothing
+				*NONE*
+				; Else
+				(begin 
+					; Evaluate the line made up from the expression read
+					(py-eval 
+						(make-line-obj exp)
+						the-global-environment
+					)
+					; Continue evaluating next line of file
+					(loader)
+				)
+			)
+		)
+	)
+	; Obtain file name
+  (let ((file (symbol->string (word fname ".py"))))
+		; Make this file the "main" ??
+    (set-variable-value! '__name__ (make-py-string file) the-global-environment)
+		; Read and evaluate file contents
+    (with-input-from-file file loader)
+		; Reset the "main" to its former value ??
+    (set-variable-value! 
+			'__name__
+			(make-py-string "__main__")
+			the-global-environment
+		)
+		; Finish
+    *NONE*
+	)
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Evaluates raise expressions
+
 ;; Errors: bump to Scheme
 (define (eval-raise line-obj env)
 	; Obtain error
@@ -561,6 +708,9 @@
   (py-error "ExpertError: List Comprehensions")
 )
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Blocks, Loops, Procedures
 
 (define unindented-line #f)
@@ -664,7 +814,9 @@
 	)
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Prints a python object.
+
 (define (py-print obj)
   (if (not (none? obj))
     (if (ask obj 'string?)
@@ -678,104 +830,51 @@
   *NONE*
 )
 
-;; Takes the last value returned from py-eval and applies the next infix
-;; operator, if there is one.  Also checks for list slices and procedure calls
 
-(define (handle-infix val line-obj env)
-	; If the line is empty
-  (if (ask line-obj 'empty?)
-			; Return the value
-      val
-			; Obtain next token
-      (let ((token (ask line-obj 'next)))
-				(cond 
-					;; arithmetic infix operators
-					((infix-op? token) 
-						; Obtain first element of line
-						(let ((rhs (eval-item line-obj env)))
-							(handle-infix 
-								; Apply operation to obtain value
-								(py-apply 
-									(ask val (lookup-op token))
-									(list rhs)
-								)
-								line-obj
-								env
-							)
-						)
-					)
-	      ;; logical infix operators
-	      ((and? token)
-					(py-error "TodoError: Person A, Question 5")
-				)
-	      ((or? token)
-					(py-error "TodoError: Person A, Question 5")
-				)
-	      ;; test for membership
-	      ((in? token)
-					(py-error "TodoError: Person B, Question 5")
-				)
-	      ((not? token)
-					(py-error "TodoError: Person B, Question 5")
-				)
-	      ;; dot syntax message: val.msg
-        ((dotted? token)
-					; Obtain function after dot
-          (let ((func (ask val (remove-dot token))))      ;gets the py-function
-            (if (and 
-									; If the line object is not emtpy
-									(not (ask line-obj 'empty?))
-									;IF IT IS ACTUALLY A FUNCTION CALL, EVALUATE IT
-                  (open-paren? (ask line-obj 'peek))
-								) 
-								; Call function
-								; make sure to continue handling infix: i.e -> if list.length() > 10: -> evaluate the `> 10` portion
-                (handle-infix (eval-func func line-obj env) line-obj env) 
-								;OTHERWISE RETURN THE FUNCTION ITSELF
-                (handle-infix func line-obj env)
-						)
-					)
-				)
-	      (else 
-					(begin 
-						(ask line-obj 'push token)
-						val
-					)
-				)
-			)
-		)
-	)
-)
-
-
-;; Logical operators
 (define (eat-tokens line-obj) ;; eats until a comma, newline or close-paren
+	; When to stop reading
   (define stop-tokens '(: |,| |]| |)|))
+	; Control variables
   (define open-braces '(|[| |(|))
   (define close-braces '(|]| |)|))
+	; Iterative method that reads untils stopped
   (define (helper line-obj braces)
+		; If there are no more tokens in the line, finish
     (if (ask line-obj 'empty?)
+			; Return nothing
       *NONE*
+			; Else, obtain next token
       (let ((token (ask line-obj 'peek)))
         (cond
+					; Member of the stop symbols and there are no open braces not closed
           ((and (memq token stop-tokens) (null? braces))
+						; Finish
             *NONE*
 					)
+					; Member of the closed braces and there are open braces pending to be closed
           ((and (memq token close-braces) (not (null? braces)))
             (begin 
+							; Read the closed brace (do nothing with it)
 							(ask line-obj 'next) 
+							; Remove the corresponding open brace
 							(helper line-obj (cdr braces))
 						)
 					)
+					; Member of the open braces
           ((memq token open-braces)
             (begin 
+							; Read the open brace (do nothing with it)
 							(ask line-obj 'next) 
+							; Add an open brace to the list of pending open braces
 							(helper line-obj (cons token braces))
 						)
 					)
           (else
+						; If any other token
             (begin 
+							; Read (do nothing with it)
 							(ask line-obj 'next) 
+							; Continue analyzing line
 							(helper line-obj braces)
 						)
 					)
@@ -783,37 +882,6 @@
 			)
 		)
 	)
+	; Start analyzing line
   (helper line-obj '())
 )
-
-(define (meta-load fname)
-  (define (loader)
-    (let ((exp (py-read)))
-      (if (and (null? (cdr exp))
-	       (eof-object? (peek-char)))
-	  *NONE*
-	  (begin (py-eval (make-line-obj exp)
-			  the-global-environment)
-		 (loader)))))
-  (let ((file (symbol->string (word fname ".py"))))
-    (set-variable-value! '__name__ (make-py-string file) the-global-environment)
-    (with-input-from-file file loader)
-    (set-variable-value! '__name__
-			 (make-py-string "__main__")
-			 the-global-environment)
-    *NONE*))
-
-(define (collect-sequence line-obj env close-token)
-  (let ((token (ask line-obj 'next)))
-    (cond
-      ((eq? token close-token) '())
-      ((comma? token) (collect-sequence line-obj env close-token))
-      (else
-       (ask line-obj 'push token)
-       (let ((obj (py-eval line-obj env)))
-			(cons obj
-			   (collect-sequence line-obj env close-token)))))))
-
-(define (collect-key-value line-obj env close-token)
-  (py-error "TodoError: Both Partners. Question 8"))
-
