@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Remove images with no container associated
 docker image prune -a
 # Get stopped containers

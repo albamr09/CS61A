@@ -1,0 +1,24 @@
+# version=1.1
+
+#######################  
+# v1.1 - 01/06/2022
+# 
+### 
+# For Question 2.
+# - Modified parser.scm
+#		- Implemented get-indent-and-tokens to count indentations properly
+#		- Added helper method get-indentation to count the spaces(=indentations) of a line
+#		- Added char-space? to detect spaces
+# For Question A3.
+# - Modified parser.scm
+#		- Modified helper method get-string to collect all of the characters that constitute the string 
+#			(*excluding* the delimiting quotes!) into a list
+#
+#######################  
+# v1.0 - 31/05/2022
+# 
+### 
+# For Question 1.
+# - Modified parser.scm
+#		- Added implementation to ignore-comment local function inside get-tokens function
+#		- Added helper procedure read-and-ignore-tokens

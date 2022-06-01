@@ -25,6 +25,7 @@
     )
   )
 )  
+(define (char-space? char) (eq? char #\space))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CONSTANTS
@@ -57,9 +58,35 @@
 
 (define (py-read)
 
+  (define (get-indentation)
+    ; Iterative method
+    (define (loop curr-intentation)
+      ; Do not fully read character
+      (let 
+        ((char (peek-char)))
+        ; If it is a space
+        (if (char-space? char)
+          (begin
+            ; Read it
+            (read-char)
+            ; Continue and augment indentation
+            (loop (+ curr-intentation 1))
+          )
+          ; Else finish and return indentation
+          curr-intentation
+        )
+      )
+    )
+    ; Start reading line with indentation to zero
+    (loop 0)
+  )
+
   (define (get-indent-and-tokens)
-    ;; TODO: Both Partners, Question 2
-    (cons 0 (get-tokens '()))
+    ;; Both Partners, Question 2
+    (let
+      ((indentation (get-indentation)))
+      (cons indentation (get-tokens '()))
+    )
   )
 
   (define (reverse-brace char)
@@ -372,10 +399,14 @@
 	        (cond 
             ; Next char -> *
             ((eq? next #\*)
-		         (read-char)
-		         (if (eq? (peek-char) #\=)
-			         (begin 
-                 (read-char) '**=) '**)
+		          (read-char)
+		          (if (eq? (peek-char) #\=)
+			          (begin 
+                  (read-char) 
+                  '**=
+                ) 
+                '**
+              )
             )
             ; Next char -> =
 		        ((eq? next #\=) (read-char) '*=)
@@ -393,15 +424,69 @@
   ;; function is executed will be the first character of the desired string.
 
   (define (get-string type)
-    (read-error "TodoError: Person A, Question 3")
+    (let
+      ; See what is the next character
+      ((next (peek-char)))
+      (cond
+        ; If eof: error
+        ((eof-object? next) (py-error "SyntaxError: Unexpected end of string"))
+        ; If equal to the opening type of the string (" or ')
+        ((eq? next type) 
+          ; Discard last " or '
+          (read-char)
+          ; Finish collecting characters
+         '()
+        )
+        ; Else
+        (else
+          (let
+            ; Obtain character
+            ((char (read-char)))
+            ; Append to list of characters
+            (cons 
+              char
+              (get-string type)
+            )
+          )
+        )
+      )
+    )
   )
 
+  ;; Fill in the body for the IGNORE-COMMENT procedure, so that it keeps
+  ;; reading characters at the Schython prompt
   (define (ignore-comment)
-    (read-error "TodoError: Both Partners, Question 1")
+    ;(read-error "TodoError: Both Partners, Question 1")
+    (read-until char-newline? (lambda () '*COMMENT-IGNORED*))
   )
   
   ; Start reading tokens
   (get-indent-and-tokens)
+)
+
+;; Helper procedure that reads a character and decides whether to stop reading 
+;; characters, or whether to call itself recursively; 
+
+;; - predicate: conditional to stop reading
+;; - callback: procedure called when finished
+
+(define (read-until predicate callback) 
+  (define (loop)
+	  ; Obtain next character
+    (let ((char (read-char)))
+      ; If char satisfies predicate or we reached the end of the file
+      (if (or 
+            (predicate char)
+            (eof-object? char)
+          )
+          ; Finish callback
+          (callback)
+          ; Else continue reading
+          (loop)
+      )
+	  )
+  )
+  (loop)
 )
 
 ;; Selectors for the list returned by py-read.

@@ -17,3 +17,4 @@ COPY ./resources/STk/stk_4.0.1-2_all.deb ./
 # Install stk (ignore errors)
 RUN dpkg -i stk_4.0.1-2_all.deb || true
 RUN apt -y --fix-broken install
+WORKDIR /CS61A/
