@@ -1342,7 +1342,20 @@
   )
   ; Check if the list contains an object given by other
   (method (__contains__ other)
-    (py-error "TodoError: Person A, Question 4")
+    (define (loop lst)
+      (cond
+        ((null? lst) *PY-FALSE*)
+        ((ask (py-apply (ask (car lst) '__eq__) (list other)) 'true?)
+          *PY-TRUE*
+        )
+        (else
+          (loop (cdr lst))
+        )
+      )
+    )
+    (loop (ask self 'val))
+    ; (ask (py-apply (ask obj '__eq__) (list other)) 'true?)
+    ;(py-error "TodoError: Person A, Question 4")
   )
   ; Append two lists
   (method (append)
@@ -1929,4 +1942,8 @@
 (define *PY-TRUE* (instantiate py-bool #t))
 (define *PY-FALSE* (instantiate py-bool #f))
 
-(define (negate-bool bool) (py-error "TodoError: Person B, Question 4"))
+; This procedure takes in a PY-BOOL object and returns the
+; PY-BOOL object with the opposite value.
+(define (negate-bool bool) 
+  (make-py-bool (not (ask bool 'val)))
+)

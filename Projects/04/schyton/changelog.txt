@@ -1,5 +1,21 @@
 # version=1.1
 
+
+#######################  
+# v1.2 - 02/06/2022
+# 
+### 
+# For Question B4.
+# - Modified primitives.scm
+#		- Modified negate-bool so it return a py-bool whose value is the negation of a given py-bool object.
+# For Question A4.
+# - Modified primitives.scm
+#		- Modified __contains__ method in py-list object so it checks if a given object is on the list.
+# For Question B3.
+# - Modified parser.scm
+#		- Modified get-num so it reads real numbers with a decimal part.
+#		- Added char-dot? procedure to check for dots when parsing
+#
 #######################  
 # v1.1 - 01/06/2022
 # 

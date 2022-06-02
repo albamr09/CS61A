@@ -41,6 +41,9 @@
 
 ;; Read-Eval-Print Loop
 (define (driver-loop)
+	;; We invoke the MAKE-LINE-OBJ procedure, which takes in the list of
+	;; tokens returned by PY-READ, and creates an object of the LINE-OBJ
+	;; class
   (define (repl)
     (prompt ">>> ")
     (if (eof-object? (peek-char))

@@ -15,6 +15,7 @@
 (define (char->symbol ch) (string->symbol (make-string 1 ch)))
 (define (comma? symbol) (eq? symbol '|,|))
 (define (colon? symbol) (eq? symbol '|:|))
+(define (char-dot? char) (eq? char #\.))
 (define (char-newline? char)
   (or 
     (eq? char #\newline) ;; you're in
@@ -231,7 +232,7 @@
         ; Number
         ((char-numeric? char)
           ; Obtain number
-        	(let ((num (get-num "")))
+        	(let ((num (get-num)))
             ; If it is and string
         	  (if (string? num)
               ; Convert to number add to list of tokens and keep analysing
@@ -336,32 +337,51 @@
   ;; a Scheme number in the get-tokens procedure).
   ;; TODO: Person B, Question 3
 
-  (define (get-num num-so-far)
-    ; "Read" the next character but not really
-    (let ((char (peek-char)))
-      ; If it is end of file
-      (if (eof-object? char)
-	      (begin
-          ; Truly read the character
-	        (read-char)
-          ; Return the number read
-	        num-so-far
-        )
-        ; Else, is it a numberic character
-	      (if (char-numeric? char)
-          ; If so, keep analysing the expression
-	        (get-num 
-            ; Add current character to the overall number
-            (word 
-              num-so-far 
-              (char->symbol (read-char))
+  (define (get-num)
+    (define (loop num-so-far dot-read?)
+      ; "Read" the next character but not really
+      (let 
+        ((char (peek-char)))
+        (cond
+          ; If it is end of file
+          ((eof-object? char)
+            ; Truly read the character
+	          (read-char)
+            ; Return the number read
+	          num-so-far
+          )
+          ; Else, is it a numberic character
+          ((char-numeric? char)
+            ; If so, keep analysing the expression
+	          (loop 
+              ; Add current character to the overall number
+              (word 
+                num-so-far 
+                (char->symbol (read-char))
+              )
+              dot-read?
             )
           )
-          ; If not, return the number obtained
-	        num-so-far
+          ; If it is a dot (and we have not read a dot before)
+          ((and (char-dot? char) (not dot-read?))
+            ; If so, keep analysing the expression
+	          (loop 
+              ; Add current character to the overall number
+              (word 
+                num-so-far 
+                (char->symbol (read-char))
+              )
+              #t
+            )
+          )
+          (else
+            ; If not, return the number obtained
+            num-so-far
+          )
         )
       )
     )
+    (loop "" #f)
   )
   
   ;; Determine type of operator made up from double characters
