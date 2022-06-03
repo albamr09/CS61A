@@ -293,14 +293,46 @@
 
 
 ;; While loops
+;; While block is of the form (*BLOCK* *WHILE-BLOCK* (pred body) else)
 (define (make-while-block line-obj env)
-  (py-error "TodoError: Both Partners, Question 6"))
+	(let 
+    (
+      ; Obtain pred
+    ) 
+    ; Check for : symbol
+    (let
+      ; Obtain body
+      ((body (read-block (ask line-obj 'indentation) env))))
+      ; Check for else
+      (if (else?)
+        (let
+          ((else-block (read-block (ask line-obj 'indentation) env))))
+          ; If there is else block: create block with all parts
+	        (list '*BLOCK* '*WHILE-BLOCK* (cons pred body) else-block)
+        )
+        ; If not else, return block without it
+	      (list '*BLOCK* '*WHILE-BLOCK* (cons pred body))
+      )
+    )
+  )
+)
+
 (define (while-block-pred block)
-  (py-error "TodoError: Both Partners, Question 6"))
+  ;; Attending to the shape of a while block
+  ;; Return first element inside third element in block
+  (caaddr block)
+
+)
 (define (while-block-body block)
-  (py-error "TodoError: Both Partners, Question 6"))
+  ;; Attending to the shape of a while block
+  ;; Return second element inside third element in block
+  (cdaddr block)
+)
 (define (while-block-else block)
-  (py-error "TodoError: Both Partners, Question 6"))
+  ;; Attending to the shape of a while block
+  ;; Return fourth element
+  (cadddr block)
+)
 
 ;; For loops
 (define (make-for-block line-obj env)

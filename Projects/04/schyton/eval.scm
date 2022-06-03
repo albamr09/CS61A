@@ -42,6 +42,8 @@
 ;; Takes the last value returned from py-eval and applies the next infix
 ;; operator, if there is one.  Also checks for list slices and procedure calls
 
+;; - val: stores value to the left side of the infix operator
+
 (define (handle-infix val line-obj env)
 	; If the line is empty
   (if (ask line-obj 'empty?)
@@ -50,12 +52,14 @@
 			; Obtain next token
       (let ((token (ask line-obj 'next)))
 				(cond 
-					;; arithmetic infix operators
+					;; If it is an infix operator
 					((infix-op? token) 
-						; Obtain first element of line
+						; Obtain next element of line (after infix operator)
 						(let ((rhs (eval-item line-obj env)))
 							(handle-infix 
-								; Apply operation to obtain value
+								; Apply operator given by token like:
+								; val.__op__(rhs)
+								; this is now the new val
 								(py-apply 
 									(ask val (lookup-op token))
 									(list rhs)
@@ -67,17 +71,66 @@
 					)
 	      ;; logical infix operators
 	      ((and? token)
-					(py-error "TodoError: Person A, Question 5")
+					(cond
+						; Is the left value (=val) is true we continue evaluating
+						((ask val 'true?)
+							(py-eval line-obj env)
+						)
+						; If false, we return a false python boolean
+						(else
+							; First we need to parse the rest of the expression
+							(eat-tokens line-obj)
+							; Then return true (that is the python object obtained until now = val)
+							val
+						)
+					)
 				)
 	      ((or? token)
-					(py-error "TodoError: Person A, Question 5")
+					(cond
+						; Is the left value (=val) is true we return a true python boolean
+						((ask val 'true?)
+							; First we need to parse the rest of the expression
+							(eat-tokens line-obj)
+							; Then return true (that is the python object obtained until now = val)
+							val
+						)
+						; If false, we continue evaluating
+						(else
+							(py-eval line-obj env)
+						)
+					)
 				)
 	      ;; test for membership
 	      ((in? token)
-					(py-error "TodoError: Person B, Question 5")
+					; Apply contain method of right item with left item as argument
+					(ask
+						; Evaluate the item to the right of the infix operator: in
+						(eval-item line-obj env) 
+						; Obtain the contain method on this item
+						'__contains__
+						val
+					)
 				)
 	      ((not? token)
-					(py-error "TodoError: Person B, Question 5")
+					; Obtain next token
+					(let ((next (ask line-obj 'next)))
+						; Check if it is an in
+						(if (in? next)
+							; Negate result
+							(negate-bool 
+								; Apply contain method of right item with left item as argument
+								(ask
+									; Evaluate the item to the right of the infix operator: in
+									(eval-item line-obj env) 
+									; Obtain the contain method on this item
+									'__contains__
+									val
+								)
+							)
+							; Else error
+							(py-error "SyntaxError: expected 'in' after 'not' infix operator")
+						)
+					)
 				)
 	      ;; dot syntax message: val.msg
         ((dotted? token)
@@ -108,6 +161,7 @@
 	)
 )
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Calculates the first python object on the line-obj.
 
@@ -133,6 +187,7 @@
 			  ((if? token)
 			    (let 
 						((block (make-if-block line-obj env)))
+						; Push back to front of line to evaluate block
 						(ask line-obj 'push block)
 						(py-eval line-obj env)
 					)
@@ -141,6 +196,7 @@
 			  ((for? token)
 			    (let 
 						((block (make-for-block line-obj env)))
+						; Push back to front of line to evaluate block
 						(ask line-obj 'push block)
 				 		(py-eval line-obj env)
 					)
@@ -149,6 +205,7 @@
 			  ((while? token)
 					(let 
 						((block (make-while-block line-obj env)))
+						; Push back to front of line to evaluate block
   		      (ask line-obj 'push block)
   		      (py-eval line-obj env)
 					)
@@ -157,6 +214,7 @@
 			  ((def? token)
 					(let 
 					 ((block (make-def-block line-obj env)))
+						; Push back to front of line to evaluate block
   		      (ask line-obj 'push block)
   		      (py-eval line-obj env)
 					)
