@@ -187,24 +187,24 @@
 (define (collect-params line-obj env)
   ; If there are not closing parenthesis: error
   (if (ask line-obj 'empty?)
-      (py-error "SyntaxError: Expected \")\"")
-      ; Obtain next token
-      (let ((token (ask line-obj 'next)))
-	      (cond 
-          ; If ) -> return emtpy list
-          ((eq? token close-paren-symbol) '())
-          ; If , -> call recursively to obtain next parameter
-	        ((comma? token) (collect-params line-obj env))
-          ; If =, error
-	        ((eq? (ask line-obj 'peek) '=)
-	          (py-error "ExpertError: Default Parameters")
-          )
-          ; It none of the above, keep going recursively
-	        (else 
-            (cons token (collect-params line-obj env))
-          )
+    (py-error "SyntaxError: Expected \")\"")
+    ; Obtain next token
+    (let ((token (ask line-obj 'next)))
+	    (cond 
+        ; If ) -> return emtpy list
+        ((eq? token close-paren-symbol) '())
+        ; If , -> call recursively to obtain next parameter
+	      ((comma? token) (collect-params line-obj env))
+        ; If =, error
+	      ((eq? (ask line-obj 'peek) '=)
+	        (py-error "ExpertError: Default Parameters")
+        )
+        ; It none of the above, keep going recursively
+	      (else 
+          (cons token (collect-params line-obj env))
         )
       )
+    )
   )
 )
 
@@ -297,37 +297,64 @@
 (define (make-while-block line-obj env)
 	(let 
     (
-      ; Obtain pred
+      ; Obtain predicate
+	    (predicate (collect-predicate line-obj env))
     ) 
     ; Check for : symbol
-    (let
-      ; Obtain body
-      ((body (read-block (ask line-obj 'indentation) env))))
-      ; Check for else
-      (if (else?)
-        (let
-          ((else-block (read-block (ask line-obj 'indentation) env))))
-          ; If there is else block: create block with all parts
-	        (list '*BLOCK* '*WHILE-BLOCK* (cons pred body) else-block)
-        )
-        ; If not else, return block without it
-	      (list '*BLOCK* '*WHILE-BLOCK* (cons pred body))
+    (if (not (ask line-obj 'empty?))
+      (py-error "SyntaxError: invalid syntax")
+      (let
+        ; Obtain body
+        ((body (read-block (ask line-obj 'indentation) env)))
+        (list '*BLOCK* '*WHILE-BLOCK* (cons predicate body))
+        ; Check for else
+        ; (if (else?)
+        ;   (let
+        ;     ((else-block (read-block (ask line-obj 'indentation) env))))
+        ;     ; If there is else block: create block with all parts
+	      ;     (list '*BLOCK* '*WHILE-BLOCK* (cons pred body) else-block)
+        ;   )
+        ;   ; If not else, return block without it
+	      ;   (list '*BLOCK* '*WHILE-BLOCK* (cons pred body))
+        ; )
       )
     )
   )
 )
 
+; Obtain parameters of procedure
+(define (collect-predicate line-obj env)
+  ; If there are not finish :
+  (if (ask line-obj 'empty?)
+    (py-error "SyntaxError: Expected \":\"")
+    ; Obtain next token
+    (let ((token (ask line-obj 'next)))
+      ; Is it equal to :
+      (show token)
+      (if (colon? token)
+        ; Finish
+        nil
+        ; Continue reading line recursively (save token to list)
+        (cons token (collect-predicate line-obj env))
+      )
+    )
+  )
+)
+
+(trace collect-predicate)
+
 (define (while-block-pred block)
   ;; Attending to the shape of a while block
   ;; Return first element inside third element in block
   (caaddr block)
-
 )
+
 (define (while-block-body block)
   ;; Attending to the shape of a while block
   ;; Return second element inside third element in block
   (cdaddr block)
 )
+
 (define (while-block-else block)
   ;; Attending to the shape of a while block
   ;; Return fourth element

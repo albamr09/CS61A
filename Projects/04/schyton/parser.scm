@@ -14,7 +14,7 @@
 
 (define (char->symbol ch) (string->symbol (make-string 1 ch)))
 (define (comma? symbol) (eq? symbol '|,|))
-(define (colon? symbol) (eq? symbol '|:|))
+(define (colon? symbol) (eq? symbol ':))
 (define (char-dot? char) (eq? char #\.))
 (define (char-newline? char)
   (or 
@@ -200,13 +200,24 @@
             (read-error "SyntaxError: mismatched brace: " char)
           )
         )
-        ; Commar or :
-        ((memq char (list #\, #\:))
+        ; Comma
+        ((eq? char #\,)
           ; Convert char to symbol
           (let ((t (char->symbol (read-char))))
             ; Add the token to the list and continue analysing
             (cons 
-              t 
+              t
+              (get-tokens braces)
+            )
+          )
+        )
+        ; If :
+        ((eq? char #\:)
+          ; Read token
+          (let ((t (read-char)))
+            ; Add the token to the list and continue analyzing
+            (cons 
+              ':
               (get-tokens braces)
             )
           )

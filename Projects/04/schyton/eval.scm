@@ -534,7 +534,6 @@
 				(let ((bool-value (py-eval (make-line-obj pred) env)))
 					; Is it true?
 				  (if (ask bool-value 'true?)
-						; 
 				    (let ((result (eval-sequence body env)))
 							(cond 
 								((eq? result '*BREAK*) (set! should-eval-if #f) *NONE*)
