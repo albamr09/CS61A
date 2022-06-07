@@ -61,6 +61,7 @@
 (define (break? token) (eq? token 'break))
 (define (continue? token) (eq? token 'continue))
 (define (block? token) (and (pair? token) (eq? (car token) '*BLOCK*)))
+(define (dummy-indent? token) (and (pair? token) (eq? (car token) '*DUMMY-INDENT*)))
 (define (lambda? token) (eq? token 'lambda))
 (define (import? token) (eq? token 'import))
 (define (raise? token) (eq? token 'raise))
@@ -298,39 +299,95 @@
 	(let 
     (
       ; Obtain predicate
-	    (predicate (collect-predicate line-obj env))
+	    (predicate 
+        ; Add indentation level to the predicate
+        (add-indentation
+          line-obj
+          (collect-predicate line-obj env)
+        )
+      )
     ) 
-    ; Check for : symbol
+    ; There needs to be a block after the predicate
     (if (not (ask line-obj 'empty?))
+      ; If not error
       (py-error "SyntaxError: invalid syntax")
+      ; Else read the block
       (let
-        ; Obtain body
+        ; Obtain all block after while (contains else)
         ((body (read-block (ask line-obj 'indentation) env)))
-        (list '*BLOCK* '*WHILE-BLOCK* (cons predicate body))
-        ; Check for else
-        ; (if (else?)
-        ;   (let
-        ;     ((else-block (read-block (ask line-obj 'indentation) env))))
-        ;     ; If there is else block: create block with all parts
-	      ;     (list '*BLOCK* '*WHILE-BLOCK* (cons pred body) else-block)
-        ;   )
-        ;   ; If not else, return block without it
-	      ;   (list '*BLOCK* '*WHILE-BLOCK* (cons pred body))
-        ; )
+        (let
+          ; We split the block into while and else (if it exists)
+          ((splitted-while (split-while-else-block '() body)))
+          (list '*BLOCK* 
+                '*WHILE-BLOCK* 
+                ; while block
+                (cons predicate (car splitted-while)) 
+                ; else block
+                (cdr splitted-while)
+          )
+        )
       )
     )
   )
 )
 
+;; Split a whole while block (it may contain the else block)
+;; into a while block and an else block
+
+(define (split-while-else-block while-block else-block)
+  (cond
+    ((empty? else-block) 
+      ; We also need to reverse here
+      (list (reverse while-block))
+    )
+    ; Given a line
+    ((and
+      ; If the first element of the line equals *dummy-indent*
+      (dummy-indent? (car else-block)) 
+      ; Now the second element is a block, we check if this block is 
+      ; an else block
+      (else-block? (cadar else-block))
+      )
+      (cons
+        ; We need to reverse because when we go through
+        ; it we insert the other way around, and the first line
+        ; ends up as the last line
+        (reverse while-block)
+        ; Return else block (with dummy-indent)
+        (car else-block)
+      )
+    )
+    (else
+      (split-while-else-block
+        (cons
+          (car else-block)
+          while-block
+        )
+        (cdr else-block)
+      )
+    )
+  )
+)
+
+; Add indentation to 'lines' that do not have it
+; for example the predicate in a while does not have 
+; this information
+
+(define (add-indentation line-obj line)
+  (cons
+    (ask line-obj 'indentation)
+    line
+  )
+)
+
 ; Obtain parameters of procedure
+
 (define (collect-predicate line-obj env)
   ; If there are not finish :
   (if (ask line-obj 'empty?)
     (py-error "SyntaxError: Expected \":\"")
     ; Obtain next token
     (let ((token (ask line-obj 'next)))
-      ; Is it equal to :
-      (show token)
       (if (colon? token)
         ; Finish
         nil
@@ -341,7 +398,9 @@
   )
 )
 
-(trace collect-predicate)
+
+;;;;;;;;;;;;;;;;;;;
+;; While selectors
 
 (define (while-block-pred block)
   ;; Attending to the shape of a while block
@@ -357,8 +416,13 @@
 
 (define (while-block-else block)
   ;; Attending to the shape of a while block
-  ;; Return fourth element
-  (cadddr block)
+  ;; Check if there are four elements
+  (if (not (null? (cadddr block)))
+    ;; Return fourth element
+    (cadddr block)
+    ; If not return false, to not evaluate it
+    #f
+  )
 )
 
 ;; For loops

@@ -536,6 +536,7 @@
 				  (if (ask bool-value 'true?)
 				    (let ((result (eval-sequence body env)))
 							(cond 
+								; If there is a break, do not evaluate else clause
 								((eq? result '*BREAK*) (set! should-eval-if #f) *NONE*)
 								((and (pair? result) (eq? (car result) '*RETURN*)) result)
 					      (else (loop))
