@@ -563,7 +563,41 @@
 ;; Evaluates a for block
 
 (define (eval-for-block block env)
-  (py-error "TodoError: Person A, Question 7")
+  (let 
+		(
+			; Obtain the for value
+			(value (for-block-var block))
+			; Obtain collection
+			(collection (for-block-collection block))
+			; Obtain for block
+			(body (for-block-body block))
+			; Obtain else block
+			(else-clause (for-block-else block))
+		)
+		; If there is not else, else-clause = #f
+  	(let ((should-eval-if else-clause))
+			; Evaluate collection
+			(let ((collection-obj (py-eval (make-line-obj (cons '*DUMMY-INDENT* collection)) env)))
+				; Obtain result of evaluating for block
+				(let ((result (ask collection-obj '__iter__ value body env)))
+					; If there is a break, do not evaluate else clause
+					(if (eq? result '*BREAK*) 
+						(begin
+							(set! should-eval-if #f)
+							*NONE*
+						)
+						; Else check for else clause
+				    (if should-eval-if
+							; Evaluate else clause
+							(eval-item (make-line-obj else-clause) env)
+							; If not return nothing
+							*NONE*
+						)
+					)
+				)
+			)
+		)
+	)
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

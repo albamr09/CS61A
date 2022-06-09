@@ -295,6 +295,7 @@
 
 ;; While loops
 ;; While block is of the form (*BLOCK* *WHILE-BLOCK* (pred body) else)
+
 (define (make-while-block line-obj env)
 	(let 
     (
@@ -303,7 +304,7 @@
         ; Add indentation level to the predicate
         (add-indentation
           line-obj
-          (collect-predicate line-obj env)
+          (collect-until line-obj colon? "SyntaxError: Expected \":\"" env)
         )
       )
     ) 
@@ -317,7 +318,7 @@
         ((body (read-block (ask line-obj 'indentation) env)))
         (let
           ; We split the block into while and else (if it exists)
-          ((splitted-while (split-while-else-block '() body)))
+          ((splitted-while (split-block body)))
           (list '*BLOCK* 
                 '*WHILE-BLOCK* 
                 ; while block
@@ -326,44 +327,6 @@
                 (cdr splitted-while)
           )
         )
-      )
-    )
-  )
-)
-
-;; Split a whole while block (it may contain the else block)
-;; into a while block and an else block
-
-(define (split-while-else-block while-block else-block)
-  (cond
-    ((empty? else-block) 
-      ; We also need to reverse here
-      (list (reverse while-block))
-    )
-    ; Given a line
-    ((and
-      ; If the first element of the line equals *dummy-indent*
-      (dummy-indent? (car else-block)) 
-      ; Now the second element is a block, we check if this block is 
-      ; an else block
-      (else-block? (cadar else-block))
-      )
-      (cons
-        ; We need to reverse because when we go through
-        ; it we insert the other way around, and the first line
-        ; ends up as the last line
-        (reverse while-block)
-        ; Return else block (with dummy-indent)
-        (car else-block)
-      )
-    )
-    (else
-      (split-while-else-block
-        (cons
-          (car else-block)
-          while-block
-        )
-        (cdr else-block)
       )
     )
   )
@@ -380,19 +343,19 @@
   )
 )
 
-; Obtain parameters of procedure
+; Helper procedure to collect tokens until the stop condition is met
 
-(define (collect-predicate line-obj env)
+(define (collect-until line-obj stop-condition error-msg env)
   ; If there are not finish :
   (if (ask line-obj 'empty?)
-    (py-error "SyntaxError: Expected \":\"")
+    (py-error error-msg)
     ; Obtain next token
     (let ((token (ask line-obj 'next)))
-      (if (colon? token)
+      (if (stop-condition token)
         ; Finish
         nil
         ; Continue reading line recursively (save token to list)
-        (cons token (collect-predicate line-obj env))
+        (cons token (collect-until line-obj stop-condition error-msg env))
       )
     )
   )
@@ -416,26 +379,72 @@
 
 (define (while-block-else block)
   ;; Attending to the shape of a while block
-  ;; Check if there are four elements
-  (if (not (null? (cadddr block)))
-    ;; Return fourth element
-    (cadddr block)
-    ; If not return false, to not evaluate it
-    #f
-  )
+  (cadddr block)
 )
 
 ;; For loops
 (define (make-for-block line-obj env)
-  (py-error "TodoError: Person A, Question 7"))
+	(let 
+    (
+      ; Obtain value: it is the first token after the for (and the for has already been eaten)
+      (value (ask line-obj 'next))
+      ; Obtain collection goes from the in to the : symbol
+      (collection 
+        (begin
+          ; Ignore "in"
+          (ask line-obj 'next)
+          ; Read until colon
+          (collect-until line-obj colon? "SyntaxError: Expected \":\"" env)
+        )
+      )
+    ) 
+    ; There needs to be a block after the for declaration
+    (if (not (ask line-obj 'empty?))
+      ; If not error
+      (py-error "SyntaxError: invalid syntax")
+      ; Else read the block
+      (let
+        ; Obtain all block after for (contains else)
+        ((body (read-block (ask line-obj 'indentation) env)))
+        (let
+          ; We split the block into for and else (if it exists)
+          ((splitted-for (split-block body)))
+          (list '*BLOCK* 
+                '*FOR-BLOCK* 
+                ; for block
+                (list value collection (car splitted-for)) 
+                ; else block
+                (cdr splitted-for)
+          )
+        )
+      )
+    )
+  )
+)
+
+; A for block is of the form:
+
+; (*block* *for-block* (value collection for-block) else-block)
+
 (define (for-block-var block)
-  (py-error "TodoError: Person A, Question 7"))
+  ; Select first element of first element third element (two firsts because the third 
+  ; element is a list) of block
+  (caaddr block)
+)
 (define (for-block-collection block)
-  (py-error "TodoError: Person A, Question 7"))
+  ; Select second element of first element third element (one first before second because the third 
+  ; element is a list) of block
+  (car (cdaddr block))
+)
 (define (for-block-body block)
-  (py-error "TodoError: Person A, Question 7"))
+  ; Select third element of first element third element (one first before third because the third 
+  ; element is a list) of block
+  (cdr (cdaddr block))
+)
 (define (for-block-else block)
-  (py-error "TodoError: Person A, Question 7"))
+  ; Select fourth element of block
+  (cadddr block)
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Selectors
