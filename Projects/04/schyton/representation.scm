@@ -256,21 +256,124 @@
 
 ;; Conditionals
 (define (make-if-block line-obj env)
-  (py-error "TodoError: Person B, Question 7"))
+	(let 
+    (
+      ; Obtain conditional predicate
+      (predicate 
+        ; Read from if (already read when we enter the make-if) until colon
+        (collect-until line-obj colon? "SyntaxError: Expected \":\"" env)
+      )
+    ) 
+    ; There needs to be a block after the for declaration
+    (if (not (ask line-obj 'empty?))
+      (py-error "SyntaxError: invalid syntax")
+      (let ((body (read-block (ask line-obj 'indentation) env)))
+        (let
+          ; We split the block into if and else/else-if (if it exists)
+          ((split-if (split-block body)))
+          (list
+            '*BLOCK*
+            '*IF-BLOCK*
+            (list
+              predicate
+              (car split-if)
+              (cdr split-if)
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+;; The if block has the shape:
+;; (*block* *if-block* ((x == 1) ((4 x = 2)) #f))
+;; Where the information to select is
+;; ((x == 1) ((4 x = 2)) #f) = (caddr block) = inner-if
+
+;; Then predicate = (car inner-if)
 (define (if-block-pred block)
-  (py-error "TodoError: Person B, Question 7"))
+  (car (caddr block))
+)
+
+;; Then if-body = (cadr inner-if)
 (define (if-block-body block)
-  (py-error "TodoError: Person B, Question 7"))
+  (cadr (caddr block))
+)
+
+;; Then else-body = (caddr inner-if)
 (define (if-block-else block)
-  (py-error "TodoError: Person B, Question 7"))
+  (caddr (caddr block))
+)
 
 
 ;; Elif blocks
+
+;; Block construction same as if
 (define (make-elif-block line-obj env)
-  (py-error "TodoError: Person B, Question 7"))
-(define (elif-block-pred block) (py-error "TodoError: Person B, Question 7"))
-(define (elif-block-body block) (py-error "TodoError: Person B, Question 7"))
-(define (elif-block-else block) (py-error "TodoError: Person B, Question 7"))
+	(let 
+    (
+      ; Obtain conditional predicate
+      (predicate 
+        ; Read from if (already read when we enter the make-if) until colon
+        (collect-until line-obj colon? "SyntaxError: Expected \":\"" env)
+      )
+    ) 
+    ; There needs to be a block after the for declaration
+    (if (not (ask line-obj 'empty?))
+      (py-error "SyntaxError: invalid syntax")
+      (let ((body (read-block (ask line-obj 'indentation) env)))
+        (let
+          ; We split the block into elif and elif-else (if it exists)
+          ((split-if (split-block body)))
+          (list
+            '*BLOCK*
+            '*ELIF-BLOCK*
+            (list
+              predicate
+              (car split-if)
+              (cdr split-if)
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
+;; The elif block has the shape:
+;; (*block* *elif-block* ((x == 1) ((4 x = 2)) #f))
+;; Where the information to select is
+;; ((x == 1) ((4 x = 2)) #f) = (caddr block) = inner-elif
+
+;; Then predicate = (car inner-if)
+(define (elif-block-pred block)
+  (car (caddr block))
+)
+
+;; Then elif-body = (cadr inner-if)
+(define (elif-block-body block)
+  (cadr (caddr block))
+)
+
+;; Then else-body = (caddr inner-if)
+(define (elif-block-else block)
+  (caddr (caddr block))
+)
+
+;; Convert elif block to if block to evaluate block using eval-if
+;; given an elif block is an if block nested inside another if
+(define (elif->if block)
+  (list
+    '*BLOCK*
+    '*IF-BLOCK*
+    (list
+      (elif-block-pred block)
+      (elif-block-body block)
+      (elif-block-else block)
+    )
+  )
+)
 
 ;; Else blocks
 (define (make-else-block line-obj env)
@@ -318,13 +421,13 @@
         ((body (read-block (ask line-obj 'indentation) env)))
         (let
           ; We split the block into while and else (if it exists)
-          ((splitted-while (split-block body)))
+          ((split-while (split-block body)))
           (list '*BLOCK* 
                 '*WHILE-BLOCK* 
                 ; while block
-                (cons predicate (car splitted-while)) 
+                (cons predicate (car split-while)) 
                 ; else block
-                (cdr splitted-while)
+                (cdr split-while)
           )
         )
       )
@@ -439,7 +542,7 @@
 (define (for-block-body block)
   ; Select third element of first element third element (one first before third because the third 
   ; element is a list) of block
-  (cdr (cdaddr block))
+  (cadr (cdaddr block))
 )
 (define (for-block-else block)
   ; Select fourth element of block

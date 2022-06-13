@@ -1,5 +1,5 @@
 (load "test-utils.scm")
-(print ">>> Running tests for A5")
+(print ">>> Running tests for Exercise A5")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Person A Part 1

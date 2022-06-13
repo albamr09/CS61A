@@ -1,5 +1,5 @@
 (load "test-utils.scm")
-(print ">>> Running tests Question 2")
+(print ">>> Running tests Question 1")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Common Exercise Part 1

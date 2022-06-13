@@ -476,7 +476,42 @@
 ;; Evaluates an if block
 
 (define (eval-if-block block env)
-  (py-error "TodoError: Person B, Question 7")
+  (let 
+		(
+			; Obtain if predicate
+			(predicate (if-block-pred block))
+			; Obtain if body
+			(body (if-block-body block))
+			; Obtain else body
+			(else-clause (if-block-else block))
+		)
+		; If there is not else, else-clause = #f
+  	(let ((should-eval-if else-clause))
+			; Evaluate predicate
+			(let ((bool-value (py-eval (make-line-obj (cons '*DUMMY-INDENT* predicate)) env)))
+				; Is it true?
+				(if (ask bool-value 'true?)
+					; Evaluate body inside if
+				  (let ((result (eval-sequence body env)))
+						(cond 
+							; If there is a break, do not evaluate else clause
+							((eq? result '*BREAK*) (set! should-eval-if #f) *NONE*)
+							; return result
+							((and (pair? result) (eq? (car result) '*RETURN*)) result)
+						)
+					)
+					; If the predicate is not true, and there an else clause at 
+					; the end of the while
+					(if should-eval-if
+						; Evaluate else clause
+						(eval-item (make-line-obj else-clause) env)
+						; If not return nothing
+						*NONE*
+					)
+				)
+			)
+		)
+	)
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -512,7 +547,8 @@
 ;; Evaluates an elif block
 
 (define (eval-elif-block block env)
-  (py-error "TodoError: Person B, Question 7")
+	; Works same as if evaluation
+	(eval-if-block (elif->if block) env)
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
