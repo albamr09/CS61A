@@ -353,7 +353,45 @@
 )
 
 (define (collect-key-value line-obj env close-token)
-  (py-error "TodoError: Both Partners. Question 8")
+	(define (loop)
+  	(if (ask line-obj 'empty?)
+			; Return nothig to finish
+			'()
+			; Else read new entry
+			(let
+    		(
+					; Key: read until :
+					(key (collect-until line-obj colon? "SyntaxError: Expected \":\"" env))
+					; Value: read until a comma or }
+					(value (collect-until line-obj (lambda (char) (or (comma? char) (eq? char close-token))) "SyntaxError: Expected \"}\"" env))
+				)
+				; Add new entry
+				(cons
+					(cons
+						; Evaluate key
+						(py-eval (make-line-obj (cons '*DUMMY-INDENT* key)) env)
+						; Evaluate value
+						(py-eval (make-line-obj (cons '*DUMMY-INDENT* value)) env)
+					)
+					; Keep adding entries
+					(loop)
+				)
+			)
+		)
+	)
+	; Check for empty dictionary
+	(let ((token (ask line-obj 'peek)))
+		(if (eq? token close-token)
+			(begin
+				(ask line-obj 'next)
+				'()
+			)
+			; Else loop
+			(begin
+				(loop)
+			)
+		)
+	)
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -388,7 +426,7 @@
 			)
 		)
 	)
-
+	; Start executing
   (let* 
 		(
 			; Obtain tokens inside delimiters

@@ -86,3 +86,16 @@
     *NONE*
 	)
 )
+
+;; Define modified accumulate (for printing dictionaries)
+(define accumulate
+  (lambda (accumulator base lst)
+    (if (null? lst)
+      base
+      (accumulator 
+				(car lst)
+        (accumulate accumulator base (cdr lst))
+			)
+		)
+	)
+)
