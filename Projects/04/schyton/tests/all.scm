@@ -26,5 +26,7 @@
 (newline)
 (load "q8.scm")
 (newline)
+(load "q9.scm")
+(newline)
 (print-test-results)
 (exit)

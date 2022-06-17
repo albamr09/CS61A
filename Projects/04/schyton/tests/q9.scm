@@ -17,8 +17,11 @@ def __fib(x, memo):
         return x
     else:
         return memo(x-1) + memo(x-2)
-fib_memo = memoize(__fib)
-"))
+" 
+"
+fib_memo=memoize(__fib)
+"
+))
 
 (run-test "fib-memo-base"
 	  (run-python-string (string-append fib_memo
