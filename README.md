@@ -14,7 +14,7 @@ Repository for the labs assignments, and projects for the [Computer Science 61A 
 - [Twenty One | GUI](./Projects/01/GUI) (working on it)
 - [Picture Language](./Projects/02)
 - [Adventure Game](./Projects/03)
-- [Python Interpreter](./Projects/04/schython)
+- [Python Interpreter](./Projects/04/schyton)
 
 ## Notes
 
