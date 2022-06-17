@@ -7,4 +7,4 @@
 (load "lib.scm")
 (load "utils.scm")
 
-; (initialize-python)
+(initialize-python)
