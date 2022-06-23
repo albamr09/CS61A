@@ -22,13 +22,14 @@
     (list 'car car)
     (list 'cdr cdr)
     (list 'cons cons)
+    (list 'list list)
     (list 'exit exit)
     (list 'null? null?)
-    (list '= =)
-    (list '/ /)
-    (list '- -)
     (list '+ +)
+    (list '- -)
+    (list '/ /)
     (list '* *)
+    (list '= =)
   )
 )
 
@@ -92,8 +93,8 @@
 ;;;; RUNNING THE INTERPRETER
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define input-prompt ";;; L-Eval input:")
-(define output-prompt ";;; L-Eval value:")
+(define input-prompt ";;; M-Eval input:")
+(define output-prompt ";;; M-Eval value:")
 
 (define (driver-loop)
   ; Enter input
@@ -103,8 +104,7 @@
     ((input (read)))
     (let 
       ; Evaluate expression
-      ; Force evaluation of expression to print
-      ((output (actual-value input the-global-environment)))
+      ((output (eval input the-global-environment)))
       ; Print output
       (announce-output output-prompt)
       (user-print output)

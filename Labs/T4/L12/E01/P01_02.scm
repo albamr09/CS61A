@@ -261,123 +261,31 @@
   )
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; LAZY EVALUATION
+;;;;;;;;;;;;;;;;;;;;;
+; Let expressions are lists that begin with the symbol let
 
-; Is it a thunk (=delayed object)?
-(define (thunk? obj)
-  (tagged-list? obj 'thunk)
-)
-
-; Selectors
-(define (thunk-exp thunk) (cadr thunk))
-(define (thunk-env thunk) (caddr thunk))
-
-(define (evaluated-thunk? obj)
-  (tagged-list? obj 'evaluated-thunk)
-)
-
-(define (thunk-value evaluated-thunk)
-  (cadr evaluated-thunk)
-)
-
-; Non-memoized
-; (define (force-it obj)
-;   (if (thunk? obj)
-;     (actual-value 
-;       (thunk-exp obj) 
-;       (thunk-env obj)
-;     )
-;     obj
-;   )
-; )
-
-; With Memoization
-(define (force-it obj)
-  (cond 
-    ; Is it a delayed object
-    ((thunk? obj)
-      (let 
-        (
-          ; Evaluate object
-          (result 
-            (actual-value 
-              (thunk-exp obj)
-              (thunk-env obj)
-            )
-          )
-        )
-        ; Modify list to indicate this object should be memoized
-        (set-car! obj 'evaluated-thunk)
-        ; Add also the result of the evauation
-        (set-car! 
-          (cdr obj)
-          result
-        )
-        ; Rest of thunk
-        (set-cdr! 
-          (cdr obj)
-          ; forget unneeded env
-          '()
-        ) 
-        result
-      )
+; Check if the first symbol is "let"
+(define (let? exp) (tagged-list? exp 'let))
+; The parameters are the second element of the expression
+(define (let-parameters exp) 
+  (map 
+    (lambda
+      (arg)
+      (car arg)
     )
-    ; Else is it memoized (we have already evaluated this object before)
-    ((evaluated-thunk? obj) 
-      (thunk-value obj)
-    )
-    ; Else is just an expression
-    (else obj)
+    (cadr exp)
   )
 )
-
-(define (delay-it exp env)
-  ; Delay the evaluation by creating a structure to allow for later evaluation:
-  ;; ('thunk declaration evironment)
-  (list 'thunk exp env)
-)
-
-; Evaluate expression instead of lazy evaluation
-(define (actual-value exp env)
-  ; Force evaluation
-  (force-it (eval exp env))
-)
-
-; Force argument evaluation
-(define (list-of-arg-values exps env)
-  (if (no-operands? exps)
-    '()
-    (cons 
-      ; Force evaluation of current argument
-      (actual-value 
-        (first-operand exps)
-        env
-      )
-      ; Keep going through the next arguments
-      (list-of-arg-values 
-        (rest-operands exps)
-        env
-      )
+; The parameters are the second element of the expression
+(define (let-arguments exp) 
+  (map 
+    (lambda
+      (arg)
+      (cadr arg)
     )
+    (cadr exp)
   )
 )
+; The body is the third element of the expression
+(define (let-body exp) (cddr exp))
 
-; Obtain list of arguments as delayed objects
-(define (list-of-delayed-args exps env)
-  (if (no-operands? exps)
-    '()
-    (cons 
-      ; Delay first argument
-      (delay-it 
-        (first-operand exps)
-        env
-      )
-      ; Keep going through rest of argument list
-      (list-of-delayed-args 
-        (rest-operands exps)
-        env
-      )
-    )
-  )
-)
