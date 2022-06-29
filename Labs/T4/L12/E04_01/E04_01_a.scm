@@ -40,7 +40,7 @@
 ;;; TEST IN INTERACTIVE MODE
 ;; $ stk -l ../../../../lib/simply.scm 
 
-;; STk> (load "E04_01.scm")
+;; STk> (load "E04_01_a.scm")
 
 ;;; L-Eval input:
 

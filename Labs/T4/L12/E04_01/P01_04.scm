@@ -27,6 +27,7 @@
     (list 'display display)
     (list 'exit exit)
     (list 'null? null?)
+    (list 'set! set!)
     (list '= =)
     (list '/ /)
     (list '- -)

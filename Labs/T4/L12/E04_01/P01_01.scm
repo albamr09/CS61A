@@ -168,18 +168,42 @@
 ; It takes as arguments a sequence of expressions and an environment, and evaluates 
 ; the expressions in the order in which they occur.
 
+; (define (eval-sequence exps env)
+;   (cond 
+;     ; If it is the last expression, do not call recursively to evaluate
+;     ; the next expression
+;     ((last-exp? exps)
+;       (eval (first-exp exps) env)
+;     )
+;     (else
+;       ; Evaluate the first expression
+;       (eval (first-exp exps) env)
+;       ; Keep evaluating expressions
+;       (eval-sequence (rest-exps exps) env)
+;     )
+;   )
+; )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Cy's proposed change
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define (eval-sequence exps env)
   (cond 
     ; If it is the last expression, do not call recursively to evaluate
     ; the next expression
-    ((last-exp? exps)
-      (eval (first-exp exps) env)
-    )
-    (else
+    ((last-exp? exps) (eval (first-exp exps) env))
+    (else 
       ; Evaluate the first expression
-      (eval (first-exp exps) env)
+      (actual-value 
+        (first-exp exps) 
+        env
+      )
       ; Keep evaluating expressions
-      (eval-sequence (rest-exps exps) env)
+      (eval-sequence 
+        (rest-exps exps) 
+        env
+      )
     )
   )
 )
