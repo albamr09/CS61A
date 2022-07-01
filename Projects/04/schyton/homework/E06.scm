@@ -17,8 +17,36 @@ cat_dog('catdog')
 	)
 )
 
+(define false_catdog
+	(string-append
+		(file->string "E06.py")
+"
+cat_dog('catcat')
+"
+	)
+)
+
+(define complex_true_catdog
+	(string-append
+		(file->string "E06.py")
+"
+cat_dog('1cat1cadodog')
+"
+	)
+)
+
 (run-test "Same number of cat and dog"
 	  (run-python-string true_catdog)
+		"True"
+)
+
+(run-test "Different number of cat and dog"
+	  (run-python-string false_catdog)
+		"False"
+)
+
+(run-test "Same number of cat and dog on string with gibberish"
+	  (run-python-string complex_true_catdog)
 		"True"
 )
 
