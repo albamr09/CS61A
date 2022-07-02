@@ -17,5 +17,7 @@
 (load "E08_01.scm")
 (newline)
 (load "E08_02.scm")
+(newline)
+(load "E09.scm")
 (print-test-results)
 (exit)
