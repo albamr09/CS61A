@@ -106,14 +106,14 @@
 ; Rules
 
 ;;; Query Input
-(rule (same ?x ?x))
-(rule (lives-near ?person-1 ?person-2)
+(assert! (rule (same ?x ?x)))
+(assert! (rule (lives-near ?person-1 ?person-2)
   (and 
     (address ?person-1 (?town . ?rest-1))
     (address ?person-2 (?town . ?rest-2))
     (not (same ?person-1 ?person-2))
   )
-)
+))
 
 ;;; Query Input
 (lives-near ?x (Bitdiddle Ben))
@@ -122,15 +122,15 @@
 (lives-near (Aull DeWitt) (Bitdiddle Ben))
 
 ;;; Query Input
-(rule (wheel ?person)
+(assert! (rule (wheel ?person)
   (and 
     (supervisor ?middle-manager ?person)
     (supervisor ?x ?middle-manager)
   )
-)
+))
 
 ;;; Query Input 
-(rule (outranked-by ?staff-person ?boss)
+(assert! (rule (outranked-by ?staff-person ?boss)
   (or 
     (supervisor ?staff-person ?boss)
     (and 
@@ -138,17 +138,17 @@
       (outranked-by ?middle-manager ?boss)
     )
   )
-)
+))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Logic
 
 ;;; Query Input 
-(rule (append-to-form () ?y ?y))
-(rule 
+(assert! (rule (append-to-form () ?y ?y)))
+(assert! (rule 
   (append-to-form (?u . ?v) ?y (?u . ?z))
   (append-to-form ?v ?y ?z)
-)
+))
 
 ;;; Query Input 
 (append-to-form (a b) (c d) ?z)
