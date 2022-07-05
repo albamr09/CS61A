@@ -4,6 +4,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DATABASE
 
+(initialize-data-base microshaft-data-base)
+; Same as running all of this
 (assert! (address (Bitdiddle Ben) (Slumerville (Ridge Road) 10)))
 (assert! (job (Bitdiddle Ben) (computer wizard)))
 (assert! (salary (Bitdiddle Ben) 60000))
