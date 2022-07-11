@@ -1,3 +1,6 @@
+; Load mapreduce definitions
+(load "../../../lib/mapreduce.scm")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; MAPREDUCE
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -19,7 +22,7 @@
 (define song2   
   '( 
     ((with the beatles) it wont be long)
-    ((with the beatles) all ive got to do)
+    ((with the beatles) all i have got to do)
     ((with the beatles) all my loving)
   )
 )
@@ -99,7 +102,7 @@
 ;;;;; Note how the keys and values are organized here. The result is a list of buckets, 
 ;;;;; where a bucket is a list of kv-pair with the same keys.
 
-; (sort-into-buckets (map mapper all-songs))
+(print (sort-into-buckets (map mapper all-songs)))
 
 ; '( 
 ;   ((i . 1) (i . 1) (i . 1) (i . 1))
@@ -184,7 +187,7 @@
 
 ; Example of result
 
-; (groupreduce reducer 0 (sort-into-buckets (map mapper all-songs)))
+(print (groupreduce reducer 0 (sort-into-buckets (map mapper all-songs))))
 ; ( 
 ;   (i . 4) 
 ;   (saw . 1) 
