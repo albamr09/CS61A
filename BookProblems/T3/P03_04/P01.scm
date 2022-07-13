@@ -41,7 +41,7 @@
 ;; Once a mutex has been acquired, no other acquire operations on that mutex may proceed until the mutex is released.
 
 (define (make-mutex)
-  (let ((cell (list false)))
+  (let ((cell (list #f)))
     ; Handle mutex-state with message passing
     (define (the-mutex m)
       (cond 
@@ -51,9 +51,10 @@
           ; 1. Is the cell true=locked?
           ; 1.1. If so, return true
           ; 1.2. If not, set the cell to be true and return false
-          (if (test-and-set! cell)) 
+          (if (test-and-set! cell)
             ; If the test returned true, tray acquiring again
             (the-mutex 'acquire)
+          )
         )
         ; If we want to unlock
         ((eq? m 'release) 
@@ -69,7 +70,7 @@
 ; Manage mutex state
 (define (test-and-set! cell)
   (if (car cell) 
-    true 
+    #t 
     (begin (set-car! cell true) false)
   )
 )

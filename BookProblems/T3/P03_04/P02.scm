@@ -57,9 +57,9 @@
 (define kv-key car)
 (define kv-value cdr)
 
-(print (kv-key '((please please me) i saw her standing there)))
+; (print (kv-key '((please please me) i saw her standing there)))
 ; (please please me)
-(print (kv-value '((please please me) i saw her standing there)))
+; (print (kv-value '((please please me) i saw her standing there)))
 ; (i saw her standing there)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -79,30 +79,30 @@
   )
 )
 
-(print
-  (mapper '((please please me) i saw her standing there))
-)
+; (print
+;   (mapper '((please please me) i saw her standing there))
+; )
 ; ((i . 1) (saw . 1) (her . 1) (standing . 1) (there . 1))
 
-(print
-  (mapper '((please please me) please please me))
-)
+; (print
+;   (mapper '((please please me) please please me))
+; )
 ; ((please . 1) (please . 1) (me . 1))
 
 ; Call mapper on all songs
-(print 
-  (map 
-    ; Select value, not key and create list of pairs: (word, frequency=1)
-    mapper 
-    ; For each song
-    all-songs
-  )
-)
+; (print 
+;   (map 
+;     ; Select value, not key and create list of pairs: (word, frequency=1)
+;     mapper 
+;     ; For each song
+;     all-songs
+;   )
+; )
 
 ;;;;; Note how the keys and values are organized here. The result is a list of buckets, 
 ;;;;; where a bucket is a list of kv-pair with the same keys.
 
-(print (sort-into-buckets (map mapper all-songs)))
+; (print (sort-into-buckets (map mapper all-songs)))
 
 ; '( 
 ;   ((i . 1) (i . 1) (i . 1) (i . 1))
@@ -168,6 +168,10 @@
 ;   ...
 ; )
 
+(define (reducer num other-num)
+	(+ num other-num)
+)
+
 (define (groupreduce reducer base-case buckets) 
   (map 
     ; For each bucket
@@ -187,7 +191,7 @@
 
 ; Example of result
 
-(print (groupreduce reducer 0 (sort-into-buckets (map mapper all-songs))))
+; (print (groupreduce reducer 0 (sort-into-buckets (map mapper all-songs))))
 ; ( 
 ;   (i . 4) 
 ;   (saw . 1) 
