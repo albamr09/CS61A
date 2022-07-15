@@ -103,6 +103,7 @@
 ;;;;; where a bucket is a list of kv-pair with the same keys.
 
 ; (print (sort-into-buckets (map mapper all-songs)))
+(print (list-ref (map mapper all-songs) 0))
 
 ; '( 
 ;   ((i . 1) (i . 1) (i . 1) (i . 1))
